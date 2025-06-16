@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install qt@5 boost
+          export PATH="/usr/local/opt/qt@5/bin:$PATH"
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install qt-sdk boost --version=1.72.0 -y
+          echo "C:\Qt\5.15.2\msvc2019_64\bin" >> $GITHUB_PATH
+          echo "C:\Program Files\Boost\lib64-msvc-14.2" >> $GITHUB_PATH
+
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        id: build_linux
+        run: |
+          export PATH="/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH"
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-ubuntu-22.04-v"$xfg_version"
+          make -j$(nproc) build-release
+          mkdir $release_name
+          mkdir -p $release_name/icon
+          mv build/release/Fuego-Wallet $release_name
+          cp fuego-desktop.desktop $release_name
+          cp src/images/fuego.png $release_name/icon
+          tar -czf "$release_name".tar.gz "$release_name"
+          echo "release_name=${release_name}.tar.gz" >> $GITHUB_OUTPUT
+          echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        id: build_macos
+        run: |
+          export PATH="/usr/local/opt/qt@5/bin:$PATH"
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-macOS-v"$xfg_version"
+          qmake Fuego-GUI.pro
+          make -j$(sysctl -n hw.ncpu)
+          mkdir $release_name
+          mv Fuego-Wallet.app $release_name
+          tar -czf "$release_name".tar.gz "$release_name"
+          echo "release_name=${release_name}.tar.gz" >> $GITHUB_OUTPUT
+          echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        id: build_windows
+        shell: msys2 {0}
+        run: |
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-windows-v"$xfg_version"
+          qmake Fuego-GUI.pro "CONFIG+=release"
+          make -j$(nproc) -f Makefile.Release
+          mkdir $release_name
+          mv release/Fuego-Wallet.exe $release_name
+          7z a "$release_name".zip "$release_name"
+          echo "release_name=${release_name}.zip" >> $GITHUB_OUTPUT
+          echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-artifact
+          path: ${{ steps.build_linux.outputs.release_name || steps.build_macos.outputs.release_name || steps.build_windows.outputs.release_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/*/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
