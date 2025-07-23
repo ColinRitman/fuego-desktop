@@ -1,0 +1,9 @@
+[package]
+name = "net-p2p"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libp2p = { version = "0.53", features = ["tcp-async", "dns", "identify", "gossipsub", "mdns"] }
+tokio = { version = "1", features = ["rt-multi-thread","macros"] }
+async-trait = "0.1"

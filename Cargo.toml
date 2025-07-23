@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "crates/net-p2p",
+    "crates/chain",
+    "crates/cli"
+]
+
+[workspace.package]
+edition = "2021"
+name = "coldl3-node"
+version = "0.1.0" 
