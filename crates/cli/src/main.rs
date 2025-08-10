@@ -1,6 +1,7 @@
 use clap::Parser;
 use net_p2p::start_network;
 use libp2p::Multiaddr;
+use std::future;
 
 #[derive(Parser)]
 #[command(name = "coldl3d", version = "0.1.0", about = "COLD L3 Node Daemon")]
@@ -19,5 +20,5 @@ async fn main() {
     println!("Node started with PeerId: {peer_id}");
 
     // Block forever (placeholder)
-    futures::future::pending::<()>().await;
+    future::pending::<()>().await;
 } 

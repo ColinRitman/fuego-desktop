@@ -1,7 +1,7 @@
 [package]
-name = "coldl3-node"
+name = "node"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 chain = { path = "../chain" }
@@ -14,18 +14,8 @@ rpc = { path = "../rpc" }
 state-db = { path = "../state-db" }
 txpool = { path = "../txpool" }
 bridge = { path = "../bridge" }
+tokio = { version = "1", features = ["full"] }
 
-[workspace]
-members = [
-    "chain",
-    "cli",
-    "commitments",
-    "consensus",
-    "encryption",
-    "net-p2p",
-    "rpc",
-    "state-db",
-    "txpool",
-    "bridge",
-    "coldl3-node"
-]
+[[bin]]
+name = "node"
+path = "src/main.rs"
