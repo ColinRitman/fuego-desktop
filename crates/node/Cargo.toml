@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chain = { path = "../chain" }
+block-sync = { path = "../block-sync" }
 cli = { path = "../cli" }
 commitments = { path = "../commitments" }
 consensus = { path = "../consensus" }
