@@ -1,31 +1,31 @@
-[package]
-name = "coldl3-node"
-version = "0.1.0"
-edition = "2018"
-
-[dependencies]
-chain = { path = "../chain" }
-cli = { path = "../cli" }
-commitments = { path = "../commitments" }
-consensus = { path = "../consensus" }
-encryption = { path = "../encryption" }
-net-p2p = { path = "../net-p2p" }
-rpc = { path = "../rpc" }
-state-db = { path = "../state-db" }
-txpool = { path = "../txpool" }
-bridge = { path = "../bridge" }
-
 [workspace]
+resolver = "2"
 members = [
-    "chain",
-    "cli",
-    "commitments",
-    "consensus",
-    "encryption",
-    "net-p2p",
-    "rpc",
-    "state-db",
-    "txpool",
-    "bridge",
-    "coldl3-node"
+    "crates/block-sync",
+    "crates/cli",
+    "crates/commitments",
+    "crates/consensus",
+    "crates/encryption",
+    "crates/net-p2p",
+    "crates/rpc",
+    "crates/state-db",
+    "crates/txpool",
+    "crates/bridge",
+    "crates/node"
 ]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+rocksdb = "0.21"
+blake2 = "0.10"
+dashmap = "5.0"
+priority-queue = "1.0"
+cxx = "1.0"
