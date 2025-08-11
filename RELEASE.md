@@ -125,7 +125,7 @@ fuego-wallet/
 ## Dependencies
 
 ### Submodules
-- `cryptonote`: Fuego blockchain core from https://github.com/ColinRitman/fuego.git
+- `cryptonote`: Fuego blockchain core from https://github.com/usexfg/fuego.git
 - `libqrencode`: QR code generation library
 
 ### External Dependencies
@@ -172,5 +172,5 @@ fuego-wallet/
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/ColinRitman/fuego-wallet-desktop/issues
-- Community: https://github.com/ColinRitman/
+- GitHub Issues: https://github.com/usexfg/fuego-wallet/issues
+- Community: https://github.com/usexfg/

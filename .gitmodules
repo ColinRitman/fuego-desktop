@@ -1,6 +1,6 @@
 [submodule "cryptonote"]
 	path = cryptonote
-	url = https://github.com/ColinRitman/fuego.git
+	url = https://github.com/usexfg/fuego.git
 	branch = master
 [submodule "libqrencode"]
 	path = libqrencode

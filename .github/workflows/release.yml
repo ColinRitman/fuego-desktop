@@ -22,7 +22,7 @@ jobs:
       - name: Setup cryptonote submodule
         run: |
           rm -rf cryptonote
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
 
       - name: Build
         run: |
@@ -59,7 +59,7 @@ jobs:
       - name: Setup cryptonote submodule
         run: |
           rm -rf cryptonote
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
 
       - name: Build
         run: |
@@ -95,7 +95,7 @@ jobs:
       - name: Setup cryptonote submodule
         run: |
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
 
       - name: Build
         run: |
