@@ -2338,6 +2338,8 @@ dependencies = [
  "bridge",
  "commitments",
  "consensus",
+ "encryption",
+ "rpc",
  "serde",
  "serde_json",
  "state-db",

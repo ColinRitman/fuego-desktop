@@ -15,6 +15,12 @@ state-db = { path = "../state-db" }
 txpool = { path = "../txpool" }
 commitments = { path = "../commitments" }
 bridge = { path = "../bridge" }
+encryption = { path = "../encryption" }
+rpc = { path = "../rpc" }
+
+[lib]
+name = "node"
+path = "src/lib.rs"
 
 [[bin]]
 name = "node"
