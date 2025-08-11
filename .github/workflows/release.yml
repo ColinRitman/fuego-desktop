@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev build-essential cmake
+
+      - name: Setup cryptonote submodule
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
+
+      - name: Build
+        run: |
+          export PATH="/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH"
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-ubuntu-22.04-v"$xfg_version"
+          make -j$(nproc) build-release
+          mkdir $release_name
+          mkdir -p $release_name/icon
+          mv build/release/Fuego-Wallet $release_name
+          cp fuego-desktop.desktop $release_name
+          cp src/images/fuego.png $release_name/icon
+          tar -czf "$release_name".tar.gz "$release_name"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: fuego-desktop-ubuntu-22.04-v*.tar.gz
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install qt@5 boost cmake
+          export PATH="/usr/local/opt/qt@5/bin:$PATH"
+
+      - name: Setup cryptonote submodule
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
+
+      - name: Build
+        run: |
+          export PATH="/usr/local/opt/qt@5/bin:$PATH"
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-macOS-v"$xfg_version"
+          qmake Fuego-GUI.pro
+          make -j$(sysctl -n hw.ncpu)
+          mkdir $release_name
+          mv Fuego-Wallet.app $release_name
+          tar -czf "$release_name".tar.gz "$release_name"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: fuego-desktop-macOS-v*.tar.gz
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          choco install qt-sdk boost --version=1.72.0 cmake -y
+          echo "C:\Qt\5.15.2\msvc2019_64\bin" >> $GITHUB_PATH
+          echo "C:\Program Files\Boost\lib64-msvc-14.2" >> $GITHUB_PATH
+
+      - name: Setup cryptonote submodule
+        run: |
+          Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
+          git clone https://github.com/usexfg/fuego.git cryptonote
+
+      - name: Build
+        run: |
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
+          release_name=fuego-desktop-windows-v"$xfg_version"
+          qmake Fuego-GUI.pro "CONFIG+=release"
+          nmake -f Makefile.Release
+          mkdir $release_name
+          mv release/Fuego-Wallet.exe $release_name
+          powershell Compress-Archive -Path "$release_name" -DestinationPath "$release_name.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: fuego-desktop-windows-v*.zip
+
+  create-release:
+    name: Create Release
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/*/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
