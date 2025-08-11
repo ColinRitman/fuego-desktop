@@ -570,10 +570,17 @@ dependencies = [
 name = "consensus"
 version = "0.1.0"
 dependencies = [
- "libp2p",
+ "anyhow",
+ "blake2",
+ "block-sync",
+ "commitments",
+ "cxx",
  "serde",
  "serde_json",
+ "state-db",
+ "thiserror 1.0.69",
  "tokio",
+ "txpool",
 ]
 
 [[package]]
