@@ -1,6 +1,7 @@
 // node/src/main.rs
 
 use block_sync::BlockSync;
+use bridge::{Bridge, BridgeConfig};
 use commitments::CommitmentEngine;
 use consensus::{Consensus, ConsensusConfig};
 use state_db::RocksStateDB;
@@ -35,9 +36,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut consensus = Consensus::new(consensus_config)?;
     println!("✓ Consensus initialized");
 
+    // Initialize bridge
+    let bridge_config = BridgeConfig::default();
+    let mut bridge = Bridge::new(bridge_config)?;
+    println!("✓ Bridge initialized");
+
     // Start consensus
     consensus.start_consensus().await?;
     println!("✓ Consensus started");
+
+    // Start bridge
+    bridge.start().await?;
+    println!("✓ Bridge started");
 
     // Spawn tasks for each subsystem
     task::spawn(async move {
@@ -70,12 +80,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // TODO: Implement consensus coordination
     });
 
+    task::spawn(async move {
+        // Bridge task
+        println!("Bridge task started");
+        // TODO: Implement bridge coordination
+    });
+
     println!("✓ COLD L3 Node started successfully");
     println!("Node is running. Press Ctrl+C to stop.");
 
     // Keep the main thread alive
     tokio::signal::ctrl_c().await?;
     println!("Shutting down COLD L3 Node...");
+
+    // Stop bridge
+    bridge.stop().await?;
+    println!("✓ Bridge stopped");
 
     // Stop consensus
     consensus.stop_consensus().await?;
