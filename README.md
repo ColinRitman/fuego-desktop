@@ -1,2 +1,2 @@
-# COLDL3
-COLD L3 is a privacy modular rollup powering Fuego's web3 community assets, DAO, and treasury.
+# CODL3
+CODL (**C**ertificates **O**f **D**eposit **L**edger) is the zk-privacy modular layer 3 rollup powering Fuego's web3 community assets, DAO, and treasury.
