@@ -1,4 +1,4 @@
-<img height="500px" width="800px" src="https://raw.githubusercontent.com/usexfg/fuego-wallet/master/src/images/splash.png"><img/>
+<img height="800px" width="800px" src="https://github.com/usexfg/fuego-data/blob/90b6ca4eda30018eeb053eccea330e2117b4396d/fuego-images/fuegovlyria.png"><img/>
 # 🔥 Fuego Wallet
 
 ## Privacy Desktop Banking App 
