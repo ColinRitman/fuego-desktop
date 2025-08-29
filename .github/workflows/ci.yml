@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          choco install qt5 boost --version=1.72.0 cmake -y
+          choco install qt5 boost cmake -y
           echo "C:\Qt\5.15.2\msvc2019_64\bin" >> $GITHUB_PATH
           echo "C:\Program Files\Boost\lib64-msvc-14.2" >> $GITHUB_PATH
 
