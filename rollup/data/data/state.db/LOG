@@ -1,0 +1,52 @@
+=============== Jul 8, 2025 (EDT) ===============
+05:04:50.304295 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+05:04:50.318977 db@open opening
+05:04:50.319172 version@stat F·[] S·0B[] Sc·[]
+05:04:50.321985 db@janitor F·2 G·0
+05:04:50.322001 db@open done T·3.010125ms
+05:04:50.322238 db@close closing
+05:04:50.322283 db@close done T·43.75µs
+=============== Jul 8, 2025 (EDT) ===============
+05:05:53.574612 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+05:05:53.574901 version@stat F·[] S·0B[] Sc·[]
+05:05:53.574915 db@open opening
+05:05:53.574952 journal@recovery F·1
+05:05:53.575315 journal@recovery recovering @1
+05:05:53.575682 version@stat F·[] S·0B[] Sc·[]
+05:05:53.588395 db@janitor F·2 G·0
+05:05:53.588417 db@open done T·13.493875ms
+05:05:53.588535 db@close closing
+05:05:53.588560 db@close done T·25µs
+=============== Jul 8, 2025 (EDT) ===============
+05:06:58.203425 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+05:06:58.203856 version@stat F·[] S·0B[] Sc·[]
+05:06:58.203869 db@open opening
+05:06:58.203909 journal@recovery F·1
+05:06:58.204252 journal@recovery recovering @2
+05:06:58.204665 version@stat F·[] S·0B[] Sc·[]
+05:06:58.218059 db@janitor F·2 G·0
+05:06:58.218074 db@open done T·14.200041ms
+05:06:58.218162 db@close closing
+05:06:58.218284 db@close done T·121.875µs
+=============== Jul 8, 2025 (EDT) ===============
+05:25:14.295750 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+05:25:14.296177 version@stat F·[] S·0B[] Sc·[]
+05:25:14.296187 db@open opening
+05:25:14.296223 journal@recovery F·1
+05:25:14.296606 journal@recovery recovering @4
+05:25:14.296990 version@stat F·[] S·0B[] Sc·[]
+05:25:14.308570 db@janitor F·2 G·0
+05:25:14.308590 db@open done T·12.397042ms
+05:25:14.308725 db@close closing
+05:25:14.308751 db@close done T·26µs
+=============== Jul 8, 2025 (EDT) ===============
+05:36:40.223903 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+05:36:40.224300 version@stat F·[] S·0B[] Sc·[]
+05:36:40.224315 db@open opening
+05:36:40.224354 journal@recovery F·1
+05:36:40.224764 journal@recovery recovering @6
+05:36:40.225167 version@stat F·[] S·0B[] Sc·[]
+05:36:40.241921 db@janitor F·2 G·0
+05:36:40.241943 db@open done T·17.621459ms
+05:36:40.242108 db@close closing
+05:36:40.242184 db@close done T·74.666µs

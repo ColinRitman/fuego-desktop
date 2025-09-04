@@ -1,0 +1,84 @@
+# Fuego Source Code Index Configuration
+# This file defines which files should be indexed for constant AI context
+
+# High-level design and configuration files
+design_docs:
+  - "cryptonote/README.md"
+  - "cryptonote/src/CryptoNoteConfig.h"
+  - "cryptonote/docs/"
+
+# Core data structures and interfaces
+core_headers:
+  - "cryptonote/include/CryptoNote.h"
+  - "cryptonote/include/CryptoTypes.h"
+  - "cryptonote/include/BlockchainExplorerData.h"
+  - "cryptonote/include/BinaryArray.hpp"
+  - "cryptonote/include/ITransaction.h"
+  - "cryptonote/include/INode.h"
+  - "cryptonote/include/IWallet.h"
+  - "cryptonote/include/IBlockchainExplorer.h"
+
+# Core blockchain and consensus logic
+consensus_core:
+  - "cryptonote/src/CryptoNoteCore/"
+  - "cryptonote/src/crypto/"
+  - "cryptonote/src/CryptoNoteProtocol/"
+
+# Transaction and wallet logic
+transaction_logic:
+  - "cryptonote/src/Wallet/"
+  - "cryptonote/src/WalletLegacy/"
+  - "cryptonote/src/Transfers/"
+
+# Mining and proof-of-work
+mining:
+  - "cryptonote/src/Miner/"
+
+# Serialization and data formats
+serialization:
+  - "cryptonote/src/Serialization/"
+
+# Network and P2P
+networking:
+  - "cryptonote/src/P2p/"
+  - "cryptonote/src/Rpc/"
+
+# File patterns to exclude
+exclude_patterns:
+  - "*.o"
+  - "*.so"
+  - "*.dll" 
+  - "*.exe"
+  - "*.bin"
+  - "*.dat"
+  - "*.log"
+  - "*.tmp"
+  - "*Test*"
+  - "*test*"
+  - "*/build/*"
+  - "*/target/*"
+  - "*/node_modules/*"
+
+# Maximum file size to index (in KB)
+max_file_size_kb: 500
+
+# Chunk size for large files (in lines)
+chunk_size_lines: 100
+
+# Priority files (always indexed first)
+priority_files:
+  - "cryptonote/src/CryptoNoteConfig.h"
+  - "cryptonote/include/CryptoNote.h"
+  - "cryptonote/include/CryptoTypes.h"
+  - "cryptonote/src/CryptoNoteCore/Currency.h"
+  - "cryptonote/src/CryptoNoteCore/Currency.cpp"
+  - "cryptonote/src/CryptoNoteCore/CryptoNoteBasic.h"
+  - "cryptonote/src/CryptoNoteCore/CryptoNoteBasic.cpp"
+  - "cryptonote/src/CryptoNoteCore/CryptoNoteFormatUtils.h"
+  - "cryptonote/src/CryptoNoteCore/CryptoNoteFormatUtils.cpp"
+  - "cryptonote/src/CryptoNoteCore/TransactionExtra.h"
+  - "cryptonote/src/CryptoNoteCore/TransactionExtra.cpp"
+  - "cryptonote/src/crypto/crypto.h"
+  - "cryptonote/src/crypto/crypto.cpp"
+  - "cryptonote/src/crypto/hash.h"
+  - "cryptonote/src/crypto/hash.c" 

@@ -1,0 +1,34 @@
+# COLD L3 Application Configuration
+
+# Gas configuration
+[gas]
+token = "HEAT"
+price = "1000000000"
+limit = "10000000"
+
+# Celestia DA configuration
+[celestia]
+namespace = "000000000000000000000000000000000000000000000000434f4c44"
+rpc = "https://rpc-mocha.pops.one"
+rest = "https://api-mocha.pops.one"
+
+# Settlement configuration
+[settlement]
+layer = "arbitrum"
+rpc = "https://sepolia-rollup.arbitrum.io/rpc"
+
+# API configuration
+[api]
+enable = true
+swagger = true
+address = "tcp://0.0.0.0:1317"
+
+# gRPC configuration
+[grpc]
+enable = true
+address = "0.0.0.0:9090"
+
+# State sync configuration
+[state-sync]
+snapshot-interval = 1000
+snapshot-keep-recent = 2

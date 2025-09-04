@@ -1,0 +1,33 @@
+{
+  "name": "@cold/celestia-client",
+  "version": "0.1.0",
+  "description": "Celestia DA integration for COLD L3",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node -r tsconfig-paths/register src/test-celestia-basic.ts",
+    "dev": "ts-node -r tsconfig-paths/register src/index.ts"
+  },
+  "dependencies": {
+    "@noble/ciphers": "^0.4.0",
+    "ethers": "^6.8.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.19.4",
+    "axios": "^1.10.0",
+    "jest": "^29.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "celestia",
+    "data-availability",
+    "privacy",
+    "cold-l3"
+  ],
+  "author": "COLD L3 Team",
+  "license": "MIT"
+}

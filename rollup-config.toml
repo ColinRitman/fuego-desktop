@@ -1,0 +1,168 @@
+[rollup]
+name = "COLD L3"
+chain_id = "cold-l3-1"
+# Using HEAT token as native gas token
+gas_token = "HEAT"
+da_layer = "celestia"
+settlement_layer = "arbitrum"
+
+[celestia]
+# Celestia Mocha testnet configuration
+rpc = "https://rpc-mocha.pops.one"
+rest = "https://api-mocha.pops.one"
+gateway = "https://gateway-mocha.pops.one"
+namespace = "000000000000000000000000000000000000000000000000434f4c44"  # "COLD" in hex
+
+[arbitrum]
+# Arbitrum Sepolia for testing
+rpc = "https://sepolia-rollup.arbitrum.io/rpc"
+settlement_contract = "0x0000000000000000000000000000000000000000"  # To be deployed
+
+[gas]
+# HEAT token configuration
+token_name = "HEAT"
+token_symbol = "HEAT"
+initial_supply = "1000000000000000000000000000"  # 1B HEAT
+gas_price_oracle = "heat_oracle"
+
+[consensus]
+# Consensus mechanism options: tendermint, proof_of_authority, proof_of_history, practical_bft
+engine = "proof_of_authority"  # Fast launch, evolve to proof_of_history
+block_time = "30s"
+max_block_size = "2MB"
+finality_type = "instant"  # instant, probabilistic, absolute
+
+# Hybrid Proof-of-Authority: Democratic + HNWI Guardian model
+[consensus.poa]
+total_validators = 21            # Odd number for consensus
+democratic_validators = 15       # Community-selected merit-based validators  
+guardian_validators = 6          # HNWI staked validators for stability
+
+# Democratic Validators (Merit-based, no staking required)
+[consensus.poa.democratic]
+selection_criteria = ["uptime", "performance", "community_reputation", "technical_expertise"]
+community_voting = true
+rotation_period = "monthly"         # Regular rotation to prevent centralization
+min_performance_bond = "50000000"   # 50M HEAT deposit (returnable, 5 XFG equivalent)
+max_performance_bond = "500000000"  # 500M HEAT max (prevent wealth advantages, 50 XFG equivalent)
+
+# Guardian Validators (HNWI with significant HEAT stakes)
+[consensus.poa.guardians]
+min_stake_requirement = "80000000000"   # 80B HEAT minimum stake (8,000 XFG equivalent)
+recommended_stake = "160000000000"      # 160B HEAT recommended (16,000 XFG equivalent)
+max_guardians = 6                       # Limited number to prevent oligarchy
+stake_slashing = true                   # Can lose stake for malicious behavior
+rotation_period = "quarterly"           # Less frequent rotation for stability
+emergency_powers = true                 # Can halt network in extreme situations
+
+# Spam Prevention with HEAT fees
+[consensus.poa.spam_prevention]
+base_transaction_fee = "0.001"   # HEAT per transaction
+priority_fee_multiplier = 2.0    # Higher fees = faster processing
+fee_burning_rate = 0.1          # 10% of fees burned (deflationary pressure)
+
+# Future: Proof-of-History settings (disabled for now)
+[consensus.poh]
+enabled = false
+vdf_iterations = 1000000
+hash_function = "sha256"
+leader_schedule_epochs = 432000  # ~1 day worth of slots
+
+[execution]
+# EVM compatibility
+engine = "erigon"  # Upgraded Rust-based Erigon v2 for archive performance
+eip_support = ["1559", "2718", "2930", "4844"]
+# Built-in precompiles
+precompiles = [
+  "standard",          # default EVM set
+  "cold_verifier",     # Halo2 IPA verifier
+  "poseidon_hash",     # 0x09 PoseidonHash
+  "bulletproof_verify",# 0x0A Bulletproof batch verifier
+  "note_commit"        # 0x0B Pedersen commitment helper
+]
+
+[cold_protocol]
+# COLD-specific configuration
+proof_verification = true
+deposit_contract = "0x0000000000000000000000000000000000000000"  # To be deployed
+withdrawal_contract = "0x0000000000000000000000000000000000000000"  # To be deployed
+zkproof_timeout = "10m"
+
+[privacy]
+# Privacy features configuration
+enabled = true
+
+[privacy.confidential_transactions]
+enabled = true
+precompile_address = "0x0000000000000000000000000000000000000100"
+commitment_scheme = "pedersen"
+range_proof_type = "bulletproofs"
+default_blinding_factor_bits = 64
+
+[privacy.private_staking]
+enabled = false  # Future feature
+delegation_token_shielding = false
+anonymous_validator_selection = false
+private_rewards_distribution = false
+
+[privacy.anonymous_governance]
+enabled = false  # Future feature
+threshold_encryption = false
+anonymous_proposals = false
+vote_privacy = "none"  # none, partial, full
+
+[privacy.private_dex]
+enabled = false  # Future feature
+batch_auction_privacy = false
+liquidity_pool_anonymity = false
+mev_protection = true
+
+[privacy.celestia_integration]
+namespace_blinding = false  # Future feature
+data_encryption = "none"  # none, chacha20-poly1305
+encrypted_namespace = "434f4c445052495641544500000000000000000000000000"  # "COLDPRIVATE"
+
+[privacy.arbitrum_settlement]
+confidential_state_roots = false  # Future feature
+private_withdrawal_proofs = false
+anonymous_messaging = false
+
+[privacy.heat_gas]
+confidential_gas_fees = false  # Future feature
+private_fee_distribution = false
+gas_price_privacy = false
+
+# Validator Rewards - NO BLOCK REWARDS (HEAT supply constrained by XFG deposits)
+[rewards]
+block_rewards = "0"               # NO block rewards - HEAT only minted from XFG burns
+transaction_fees = "100%"         # All transaction fees go to validators
+privacy_processing_fees = "variable"  # Paid in HEAT by users for confidential txs
+da_submission_rewards = "0"       # No new HEAT minted for DA submissions
+performance_bonuses = "0"         # No inflationary rewards
+
+# HEAT can only be minted when XFG is burned on native Fuego chain
+[heat_minting]
+source = "xfg_deposits_only"      # Only source of new HEAT
+burn_verification_required = true  # Must prove XFG burn on Fuego chain
+mint_ratio = "1:1"               # 1 HEAT per 1 XFG burned (configurable)
+
+# HEAT Economics - Constrained Supply Model
+[economics]
+# NO inflationary mechanisms - HEAT only from XFG burns
+inflation_rate = 0.0             # Zero inflation by design
+fee_burn_rate = 0.05             # 5% of transaction fees burned (deflationary pressure)
+privacy_burn_rate = 0.02         # 2% of privacy fees burned (sustainability focused)
+automatic_burn_triggers = false   # No automatic burning (preserve scarce HEAT)
+
+# Validator compensation comes from transaction fees only
+[economics.validator_compensation]
+democratic_validator_share = 0.6  # 60% of fees to democratic validators (split equally)
+guardian_validator_share = 0.35   # 35% of fees to guardian validators (stake-weighted)
+protocol_treasury_share = 0.05   # 5% to protocol development fund
+
+# HEAT scarcity creates natural fee market
+[economics.fee_market]
+dynamic_pricing = true           # Fees adjust based on HEAT scarcity
+min_fee_heat = "0.001"          # Minimum fee to prevent spam
+max_fee_multiplier = 100        # Maximum fee spike during high demand
+fee_prediction_enabled = true    # Help users estimate optimal fees 

@@ -1,0 +1,89 @@
+{
+  "name": "cold-l3-fuego-rollup",
+  "version": "1.0.0",
+  "description": "COLD L3 rollup with HEAT gas token on Celestia DA + Arbitrum settlement",
+  "main": "scripts/start-rollup.js",
+  "scripts": {
+    "start": "cd frontend && python3 -m http.server 9009",
+    "dev": "cd frontend && python3 -m http.server 9009",
+    "build-program": "cd backend/solana-program && anchor build",
+    "test-program": "cd backend/solana-program && anchor test",
+    "deploy-program": "cd backend/solana-program && anchor deploy",
+    "serve": "python3 -m http.server 9009",
+    "lint": "echo 'No linting configured for pure HTML/CSS/JS project'",
+    "format": "echo 'No formatting configured for pure HTML/CSS/JS project'",
+    "heat:deploy": "npx hardhat run scripts/deploy-heat-mainnet.js --network arbitrumOne",
+    "heat:deploy-testnet": "npx hardhat run scripts/deploy-heat-mainnet.js --network arbitrumSepolia",
+    "o:deploy": "npx hardhat run scripts/deploy-o-token.js --network arbitrumOne",
+    "rollup:init": "node scripts/init-rollup.js",
+    "rollup:start": "node scripts/start-rollup.js",
+    "rollup:deploy": "npx hardhat run scripts/deploy-l3-contracts.js --network coldL3",
+    "celestia:fund": "node scripts/fund-celestia.js",
+    "celestia:test": "node scripts/test-celestia-da.js",
+    "contracts:deploy": "npx hardhat run scripts/deploy-l3-contracts.js --network arbitrumSepolia",
+    "contracts:verify": "npx hardhat verify --network arbitrumOne",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "compile": "npx hardhat compile",
+    "deploy:heat:mainnet": "hardhat run scripts/deploy-heat-mainnet.js --network arbitrumOne",
+    "deploy:heat:testnet": "hardhat run scripts/deploy-heat-mainnet.js --network arbitrumGoerli",
+    "fuego:index": "node scripts/build-fuego-index.js",
+    "fuego:search": "node scripts/search-fuego.js",
+    "fuego:stats": "node scripts/search-fuego.js stats",
+    "fuego:categories": "node scripts/search-fuego.js categories",
+    "fuego:fresh-index": "node scripts/build-fuego-index-fresh.js",
+    "fuego:fresh-search": "node scripts/search-fuego-fresh.js",
+    "fuego:fresh-facts": "node -e \"console.log(JSON.stringify(require('./docs/fuego_index_fresh/ai_context_fresh.json').fuego.facts, null, 2));\""
+  },
+  "keywords": [
+    "solana",
+    "dapp",
+    "prediction-market",
+    "fallout",
+    "terminal",
+    "retro",
+    "blockchain",
+    "defi",
+    "gaming",
+    "l3",
+    "rollup",
+    "arbitrum",
+    "celestia",
+    "heat",
+    "cold"
+  ],
+  "author": "COLD L3 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/cold-l3-rollup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/cold-l3-rollup/issues"
+  },
+  "homepage": "https://github.com/your-username/cold-l3-rollup#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.7.0"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "@solana/web3.js": "^1.87.6",
+    "axios": "^1.10.0",
+    "dotenv": "^16.6.1",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2",
+    "express": "^5.1.0",
+    "tsconfig-paths": "^4.2.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
