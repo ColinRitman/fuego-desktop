@@ -61,7 +61,10 @@ jobs:
     - name: Setup Qt (macOS)
       if: matrix.os == 'macos-latest'
       run: |
+        # Handle cmake conflict - uninstall existing cmake first
+        brew list cmake && brew uninstall cmake || true
         brew install qt@5 boost cmake
+        export PATH="/usr/local/opt/qt@5/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
 
     - name: Setup Qt (Windows)
       if: matrix.os == 'windows-latest'
