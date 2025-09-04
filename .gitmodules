@@ -9,4 +9,4 @@
 [submodule "xfgwin"]
 	path = xfgwin
 	url = https://github.com/colinritman/xfgwin.git
-	branch = main
+	branch = complete-xfgwin-system
