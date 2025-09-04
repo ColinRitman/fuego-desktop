@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 
 include(CryptoNoteWallet.cmake)
 include(QREncode.cmake)
@@ -304,12 +304,29 @@ set(CPACK_STRIP_FILES ON)
 if (APPLE)
     set(CPACK_GENERATOR DragNDrop)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
+    
+    # Install STARK CLI and scripts
+    install(FILES ${STARK_CLI_PATH} DESTINATION .)
+    install(FILES scripts/auto_stark_proof.sh DESTINATION .)
+    install(FILES scripts/stark_proof_generator.py DESTINATION .)
+    install(FILES scripts/progress_logger.py DESTINATION .)
+    
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.-${VERSION_RELEASE}")
 elseif (UNIX)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
     install(FILES src/fuegowallet.desktop DESTINATION share/applications)
     install(FILES src/images/fuego.png DESTINATION share/pixmaps)
     install(FILES COPYRIGHT DESTINATION share/doc/fuegowallet)
+    
+    # Install STARK CLI and scripts
+    install(FILES ${STARK_CLI_PATH} DESTINATION bin)
+    install(FILES scripts/auto_stark_proof.sh DESTINATION bin)
+    install(FILES scripts/stark_proof_generator.py DESTINATION bin)
+    install(FILES scripts/progress_logger.py DESTINATION bin)
+    # Make scripts executable
+    install(CODE "execute_process(COMMAND chmod +x \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/auto_stark_proof.sh)")
+    install(CODE "execute_process(COMMAND chmod +x \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/stark_proof_generator.py)")
+    install(CODE "execute_process(COMMAND chmod +x \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/progress_logger.py)")
 
 	SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 	SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -345,7 +362,50 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${VE
     endif ()
 elseif (WIN32)
   install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+  
+  # Install STARK CLI and scripts
+  install(FILES ${STARK_CLI_PATH} DESTINATION .)
+  install(FILES scripts/auto_stark_proof.sh DESTINATION .)
+  install(FILES scripts/stark_proof_generator.py DESTINATION .)
+  install(FILES scripts/progress_logger.py DESTINATION .)
+  
   set(CPACK_GENERATOR ZIP)
 endif (APPLE)
 
 include(CPack)
+
+# Build XFG STARK CLI (Required Component)
+message(STATUS "Building XFG STARK CLI...")
+
+# Set up Rust build for STARK CLI
+set(STARK_CLI_DIR "${CMAKE_SOURCE_DIR}/../xfgwin")
+set(STARK_CLI_BUILD_DIR "${CMAKE_BINARY_DIR}/stark-cli-build")
+
+# Verify STARK CLI source exists
+if(NOT EXISTS "${STARK_CLI_DIR}")
+    message(FATAL_ERROR "XFG STARK CLI source not found at: ${STARK_CLI_DIR}")
+endif()
+
+# Create build directory
+file(MAKE_DIRECTORY ${STARK_CLI_BUILD_DIR})
+
+# Build STARK CLI using cargo
+execute_process(
+    COMMAND cargo build --bin xfg-stark-cli --release
+    WORKING_DIRECTORY ${STARK_CLI_DIR}
+    OUTPUT_VARIABLE STARK_CLI_BUILD_OUTPUT
+    ERROR_VARIABLE STARK_CLI_BUILD_ERROR
+    RESULT_VARIABLE STARK_CLI_BUILD_RESULT
+)
+
+if(STARK_CLI_BUILD_RESULT EQUAL 0)
+    message(STATUS "XFG STARK CLI built successfully")
+    set(STARK_CLI_PATH "${STARK_CLI_DIR}/target/release/xfg-stark-cli")
+else()
+    message(FATAL_ERROR "Failed to build XFG STARK CLI: ${STARK_CLI_BUILD_ERROR}")
+endif()
+
+# Verify STARK CLI binary exists
+if(NOT EXISTS "${STARK_CLI_PATH}")
+    message(FATAL_ERROR "STARK CLI binary not found at: ${STARK_CLI_PATH}")
+endif()
