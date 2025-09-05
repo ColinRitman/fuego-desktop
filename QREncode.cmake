@@ -1,16 +1,35 @@
+# QREncode CMake Configuration
+# This file provides CMake configuration for the QR code encoding library
 
-set(QRENCODE_LIB qrencode)
+# Set QR encode source directories
+set(QRENCODE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libqrencode)
+set(QRENCODE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libqrencode)
 
-file(GLOB QRENCODE_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} libqrencode/*.c)
-list(REMOVE_ITEM QRENCODE_SOURCES libqrencode/qrenc.c)
-file(GLOB QRENCODE_HEADERS libqrencode/*.h)
+# Add QR encode include directories
+include_directories(${QRENCODE_INCLUDE_DIR})
 
-list(APPEND my_definitions "STATIC_IN_RELEASE=static")
-list(APPEND my_definitions "MAJOR_VERSION=4")
-list(APPEND my_definitions "MINOR_VERSION=0")
-list(APPEND my_definitions "MICRO_VERSION=2")
-if(WIN32)
-  list(APPEND my_definitions "inline=__inline")
-endif(WIN32)
-add_library(${QRENCODE_LIB} ${QRENCODE_SOURCES} ${QRENCODE_HEADERS})
-set_target_properties(${QRENCODE_LIB} PROPERTIES COMPILE_DEFINITIONS "${my_definitions}")
+# QR encode source files
+set(QRENCODE_SOURCES
+    ${QRENCODE_SOURCE_DIR}/qrencode.c
+    ${QRENCODE_SOURCE_DIR}/qrenc.c
+    ${QRENCODE_SOURCE_DIR}/qrinput.c
+    ${QRENCODE_SOURCE_DIR}/qrspec.c
+    ${QRENCODE_SOURCE_DIR}/mask.c
+    ${QRENCODE_SOURCE_DIR}/mmask.c
+    ${QRENCODE_SOURCE_DIR}/mqrspec.c
+    ${QRENCODE_SOURCE_DIR}/split.c
+    ${QRENCODE_SOURCE_DIR}/rsecc.c
+    ${QRENCODE_SOURCE_DIR}/bitstream.c
+)
+
+# Create QR encode library
+add_library(qrencode STATIC ${QRENCODE_SOURCES})
+
+# Set compile definitions for QR encode
+target_compile_definitions(qrencode PRIVATE
+    MAJOR_VERSION=4
+    MINOR_VERSION=1
+    MICRO_VERSION=2
+    VERSION="4.1.2"
+    STATIC_IN_RELEASE=static
+)

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Set project name before including other files
+set(CN_PROJECT_NAME "FuegoWallet")
+
 include(CryptoNoteWallet.cmake)
 include(QREncode.cmake)
 
@@ -27,6 +30,17 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Charts)
+
+# Handle OpenGL on macOS
+if(APPLE)
+    find_library(OPENGL_LIBRARY OpenGL)
+    find_library(AGL_LIBRARY AGL)
+    set(OPENGL_LIBRARIES ${OPENGL_LIBRARY} ${AGL_LIBRARY})
+    include_directories(/System/Library/Frameworks/OpenGL.framework/Headers)
+    include_directories(/System/Library/Frameworks/AGL.framework/Headers)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_STATIC_LIBS ON)
