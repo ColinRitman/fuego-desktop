@@ -52,7 +52,11 @@ jobs:
         cd xfgwin
         git checkout complete-xfgwin-system
         cargo build --bin xfg-stark-cli --release
-        ls -la target/release/xfg-stark-cli
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          dir target\release\xfg-stark-cli.exe
+        else
+          ls -la target/release/xfg-stark-cli
+        fi
 
     - name: Setup Qt (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -169,7 +173,11 @@ jobs:
 
     - name: Test STARK CLI Integration
       run: |
-        ls -la xfgwin/target/release/xfg-stark-cli
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          dir xfgwin\target\release\xfg-stark-cli.exe
+        else
+          ls -la xfgwin/target/release/xfg-stark-cli
+        fi
         chmod +x scripts/auto_stark_proof.sh
         ./scripts/auto_stark_proof.sh --test || echo "STARK test failed but continuing"
 
