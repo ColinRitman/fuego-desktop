@@ -82,7 +82,6 @@ std::string extractPaymentId(const std::string& extra) {
 }
 
 Node::~Node() {
-  // Virtual destructor implementation
 }
 
 class RpcNode : CryptoNote::INodeObserver, public Node {

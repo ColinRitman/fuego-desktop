@@ -20,21 +20,6 @@ CMAKE_BUILD_TYPE:UNINITIALIZED=Release
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=/Users/aejt/fuegowalletproof/fuego-wallet/CMakeFiles/pkgRedirects
 
-//Minimum OS X deployment version
-CMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.12
-
-//No help, variable specified on the command line.
-CMAKE_POLICY_VERSION_MINIMUM:UNINITIALIZED=3.5
-
-//The directory containing a CMake configuration file for Qt5Core.
-Qt5Core_DIR:PATH=/usr/local/opt/qt@5/lib/cmake/Qt5Core
-
-//The directory containing a CMake configuration file for Qt5Gui.
-Qt5Gui_DIR:PATH=/usr/local/opt/qt@5/lib/cmake/Qt5Gui
-
-//Path to a file.
-_qt5gui_OPENGL_INCLUDE_DIR:PATH=_qt5gui_OPENGL_INCLUDE_DIR-NOTFOUND
-
 
 ########################
 # INTERNAL cache entries
