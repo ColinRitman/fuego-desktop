@@ -899,7 +899,7 @@ void QRcode_APIVersion(int *major_version, int *minor_version, int *micro_versio
 
 char *QRcode_APIVersionString(void)
 {
-	return VERSION;
+	return "4.1.2";
 }
 
 void QRcode_clearCache(void)
