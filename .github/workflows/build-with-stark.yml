@@ -159,6 +159,31 @@ jobs:
         echo '}' >> cryptonote/src/System/Dispatcher.h
         echo '#endif' >> cryptonote/src/System/Dispatcher.h
         
+        # Create Timer.h
+        echo '// System/Timer.h' > cryptonote/src/System/Timer.h
+        echo '#ifndef SYSTEM_TIMER_H' >> cryptonote/src/System/Timer.h
+        echo '#define SYSTEM_TIMER_H' >> cryptonote/src/System/Timer.h
+        echo 'namespace System {' >> cryptonote/src/System/Timer.h
+        echo '    class Timer {' >> cryptonote/src/System/Timer.h
+        echo '    public:' >> cryptonote/src/System/Timer.h
+        echo '        Timer() = default;' >> cryptonote/src/System/Timer.h
+        echo '        virtual ~Timer() = default;' >> cryptonote/src/System/Timer.h
+        echo '    };' >> cryptonote/src/System/Timer.h
+        echo '}' >> cryptonote/src/System/Timer.h
+        echo '#endif' >> cryptonote/src/System/Timer.h
+        
+        # Create CryptoNoteWalletConfig.h
+        echo '// CryptoNoteWalletConfig.h' > src/CryptoNoteWalletConfig.h
+        echo '#ifndef CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        echo '#define CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        echo '// Wallet configuration constants' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MAJOR 1' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MINOR 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_PATCH 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_DISPLAY_NAME "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_TICKER "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#endif // CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        
         # Create phmap.h
         mkdir -p cryptonote/external/parallel_hashmap
         echo '// Minimal phmap.h header for compatibility' > cryptonote/external/parallel_hashmap/phmap.h
