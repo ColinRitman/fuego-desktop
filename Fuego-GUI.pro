@@ -7,6 +7,7 @@ TARGET = fuego-desktop
 INCLUDEPATH += .
 INCLUDEPATH += cryptonote/src
 INCLUDEPATH += cryptonote/include
+INCLUDEPATH += cryptonote/external
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /opt/homebrew/include
 
@@ -28,6 +29,7 @@ DEFINES += STATIC_IN_RELEASE=static
 DEFINES += MAJOR_VERSION=4
 DEFINES += MINOR_VERSION=1
 DEFINES += MICRO_VERSION=2
+DEFINES += VERSION=\"4.1.2\"
 DEFINES += QRENCODE_VERSION=\"4.1.2\"
 
 # Qt modules
