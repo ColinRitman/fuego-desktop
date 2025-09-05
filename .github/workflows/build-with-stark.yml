@@ -171,10 +171,16 @@ jobs:
 
     - name: Build Fuego Wallet (qmake)
       run: |
+        # Clean build directory on macOS due to SDK version changes
+        if [ "$RUNNER_OS" = "macOS" ]; then
+          rm -rf .qmake.stash Makefile* *.o
+        fi
         # Use qmake instead of cmake for better compatibility
         qmake Fuego-GUI.pro
         if [ "$RUNNER_OS" = "Windows" ]; then
           nmake || make -j2
+        elif [ "$RUNNER_OS" = "macOS" ]; then
+          make -j$(sysctl -n hw.ncpu) || make -j2
         else
           make -j$(nproc) || make -j2
         fi
