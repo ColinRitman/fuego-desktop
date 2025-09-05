@@ -53,7 +53,7 @@ jobs:
         git checkout complete-xfgwin-system
         cargo build --bin xfg-stark-cli --release
         if [ "$RUNNER_OS" == "Windows" ]; then
-          dir target\release\xfg-stark-cli.exe
+          dir target\\release\\xfg-stark-cli.exe
         else
           ls -la target/release/xfg-stark-cli
         fi
@@ -175,7 +175,7 @@ jobs:
     - name: Test STARK CLI Integration
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
-          dir xfgwin\target\release\xfg-stark-cli.exe
+          dir xfgwin\\target\\release\\xfg-stark-cli.exe
         else
           ls -la xfgwin/target/release/xfg-stark-cli
         fi
