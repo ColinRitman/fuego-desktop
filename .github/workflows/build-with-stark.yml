@@ -58,9 +58,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y qt5-default qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+        sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+        sudo apt-get install -y libqt5core5a libqt5gui5 libqt5widgets5 libqt5network5
         sudo apt-get install -y libboost-all-dev cmake build-essential
         sudo apt-get install -y libssl-dev libcurl4-openssl-dev
+        sudo apt-get install -y pkg-config
 
     - name: Setup Qt (macOS)
       if: matrix.os == 'macos-latest'
@@ -74,7 +76,10 @@ jobs:
     - name: Setup Qt (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        choco install qt5 boost cmake
+        choco install qt5 boost cmake --yes
+        # Set Qt environment variables
+        echo "QT_DIR=C:\Qt\5.15.2\msvc2019_64" >> $env:GITHUB_ENV
+        echo "PATH=C:\Qt\5.15.2\msvc2019_64\bin;$env:PATH" >> $env:GITHUB_ENV
 
     - name: Fix Submodules
       run: |
@@ -156,7 +161,11 @@ jobs:
       run: |
         # Use qmake instead of cmake for better compatibility
         qmake Fuego-GUI.pro
-        make -j$(nproc) || make -j2
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          nmake || make -j2
+        else
+          make -j$(nproc) || make -j2
+        fi
 
     - name: Test STARK CLI Integration
       run: |
