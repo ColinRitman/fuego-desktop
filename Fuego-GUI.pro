@@ -8,6 +8,7 @@ INCLUDEPATH += .
 INCLUDEPATH += cryptonote/src
 INCLUDEPATH += cryptonote/include
 INCLUDEPATH += cryptonote/external
+INCLUDEPATH += src
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /opt/homebrew/include
 
