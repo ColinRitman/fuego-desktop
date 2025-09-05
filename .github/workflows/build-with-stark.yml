@@ -200,20 +200,38 @@ jobs:
         echo '    using parallel_flat_hash_map = std::unordered_map<K, V, Hash>;' >> cryptonote/external/parallel_hashmap/phmap.h
         echo '}' >> cryptonote/external/parallel_hashmap/phmap.h
         echo '#endif' >> cryptonote/external/parallel_hashmap/phmap.h
+        
+        # Create TcpConnection.h stub
+        mkdir -p cryptonote/src/System
+        cat > cryptonote/src/System/TcpConnection.h << 'EOF'
+#pragma once
+
+#include "Dispatcher.h"
+
+namespace System {
+
+class TcpConnection {
+public:
+    TcpConnection() = default;
+    virtual ~TcpConnection() = default;
+    
+    // Stub methods
+    void close() {}
+    bool isConnected() const { return false; }
+    void write(const void* data, size_t size) {}
+    size_t read(void* data, size_t size) { return 0; }
+};
+
+} // namespace System
+EOF
 
     - name: Fix Serialization Conflicts
       run: |
-        # Comment out conflicting serialization functions
+        # Comment out conflicting serialization functions more carefully
         if [ "$RUNNER_OS" == "macOS" ]; then
-          sed -i '' 's/template <typename K, typename V, typename Hash>/\/\/ Commented out to avoid conflict\n\/\/ template <typename K, typename V, typename Hash>/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i '' 's/bool serialize(flat_hash_map<K, V, Hash> &value, Common::StringView name, CryptoNote::ISerializer \&serializer)/\/\/ bool serialize(flat_hash_map<K, V, Hash> \&value, Common::StringView name, CryptoNote::ISerializer \&serializer)/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i '' 's/return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/\/\/ return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i '' 's/^}/\n\/\/ }/' cryptonote/src/Serialization/SerializationOverloads.h
+          sed -i '' '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
         else
-          sed -i 's/template <typename K, typename V, typename Hash>/\/\/ Commented out to avoid conflict\n\/\/ template <typename K, typename V, typename Hash>/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i 's/bool serialize(flat_hash_map<K, V, Hash> &value, Common::StringView name, CryptoNote::ISerializer \&serializer)/\/\/ bool serialize(flat_hash_map<K, V, Hash> \&value, Common::StringView name, CryptoNote::ISerializer \&serializer)/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i 's/return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/\/\/ return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i 's/^}/\n\/\/ }/' cryptonote/src/Serialization/SerializationOverloads.h
+          sed -i '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
         fi
 
     - name: Build Fuego Wallet (qmake)
