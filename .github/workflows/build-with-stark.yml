@@ -159,8 +159,8 @@ jobs:
         # Comment out conflicting serialization functions
         sed -i 's/template <typename K, typename V, typename Hash>/\/\/ Commented out to avoid conflict\n\/\/ template <typename K, typename V, typename Hash>/' cryptonote/src/Serialization/SerializationOverloads.h
         sed -i 's/bool serialize(flat_hash_map<K, V, Hash> &value, Common::StringView name, CryptoNote::ISerializer \&serializer)/\/\/ bool serialize(flat_hash_map<K, V, Hash> \&value, Common::StringView name, CryptoNote::ISerializer \&serializer)/' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i 's/return serializeMap(value, name, serializer, \[\]\(size_t size\) \{\});/\/\/ return serializeMap(value, name, serializer, \[\]\(size_t size\) \{\});/' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i 's/\}/\n\/\/ \}/' cryptonote/src/Serialization/SerializationOverloads.h
+        sed -i 's/return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/\/\/ return serializeMap(value, name, serializer, \[\]\(size_t size\) {}/' cryptonote/src/Serialization/SerializationOverloads.h
+        sed -i 's/^}/\n\/\/ }/' cryptonote/src/Serialization/SerializationOverloads.h
 
     - name: Build Fuego Wallet (qmake)
       run: |
