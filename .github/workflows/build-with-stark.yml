@@ -137,6 +137,28 @@ jobs:
         echo '}' >> cryptonote/src/System/NativeContextGroup.h
         echo '#endif' >> cryptonote/src/System/NativeContextGroup.h
         
+        # Create Dispatcher.h
+        echo '// System/Dispatcher.h' > cryptonote/src/System/Dispatcher.h
+        echo '#ifndef SYSTEM_DISPATCHER_H' >> cryptonote/src/System/Dispatcher.h
+        echo '#define SYSTEM_DISPATCHER_H' >> cryptonote/src/System/Dispatcher.h
+        echo '#include "NativeContext.h"' >> cryptonote/src/System/Dispatcher.h
+        echo '#include "NativeContextGroup.h"' >> cryptonote/src/System/Dispatcher.h
+        echo 'namespace System {' >> cryptonote/src/System/Dispatcher.h
+        echo '    class Dispatcher {' >> cryptonote/src/System/Dispatcher.h
+        echo '    public:' >> cryptonote/src/System/Dispatcher.h
+        echo '        Dispatcher() = default;' >> cryptonote/src/System/Dispatcher.h
+        echo '        virtual ~Dispatcher() = default;' >> cryptonote/src/System/Dispatcher.h
+        echo '        NativeContext& getReusableContext() { static NativeContext ctx; return ctx; }' >> cryptonote/src/System/Dispatcher.h
+        echo '        void pushContext(NativeContext* context) {}' >> cryptonote/src/System/Dispatcher.h
+        echo '        void pushReusableContext(NativeContext& context) {}' >> cryptonote/src/System/Dispatcher.h
+        echo '        void interrupt() {}' >> cryptonote/src/System/Dispatcher.h
+        echo '        void interrupt(NativeContext* context) {}' >> cryptonote/src/System/Dispatcher.h
+        echo '        void clear() {}' >> cryptonote/src/System/Dispatcher.h
+        echo '        void dispatch() {}' >> cryptonote/src/System/Dispatcher.h
+        echo '    };' >> cryptonote/src/System/Dispatcher.h
+        echo '}' >> cryptonote/src/System/Dispatcher.h
+        echo '#endif' >> cryptonote/src/System/Dispatcher.h
+        
         # Create phmap.h
         mkdir -p cryptonote/external/parallel_hashmap
         echo '// Minimal phmap.h header for compatibility' > cryptonote/external/parallel_hashmap/phmap.h
