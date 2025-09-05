@@ -57,6 +57,7 @@ jobs:
         else
           ls -la target/release/xfg-stark-cli
         fi
+      shell: bash
 
     - name: Setup Qt (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -180,6 +181,7 @@ jobs:
         fi
         chmod +x scripts/auto_stark_proof.sh
         ./scripts/auto_stark_proof.sh --test || echo "STARK test failed but continuing"
+      shell: bash
 
     - name: Create Release Package
       if: github.event_name == 'release'
