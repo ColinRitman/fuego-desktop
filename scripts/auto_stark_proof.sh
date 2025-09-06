@@ -8,7 +8,14 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLI_PATH="$SCRIPT_DIR/../../xfgwin/target/debug/xfg-stark-cli"
+# Try to find STARK CLI binary (downloaded from colinritman/xfgwin release)
+CLI_PATH="$SCRIPT_DIR/../xfg-stark-cli"
+if [ ! -f "$CLI_PATH" ]; then
+  CLI_PATH="$SCRIPT_DIR/../../xfg-stark-cli"
+fi
+if [ ! -f "$CLI_PATH" ]; then
+  CLI_PATH="./xfg-stark-cli"
+fi
 PYTHON_SCRIPT="$SCRIPT_DIR/stark_proof_generator.py"
 PROGRESS_LOGGER="$SCRIPT_DIR/progress_logger.py"
 TEMP_DIR="/tmp/fuego-stark-proofs"
@@ -45,6 +52,25 @@ print_eldernode() {
 
 print_progress() {
     echo -e "${CYAN}[PROGRESS]${NC} $1"
+}
+
+# Function to check if STARK CLI is available
+check_stark_cli() {
+    if [ ! -f "$CLI_PATH" ]; then
+        print_error "STARK CLI not found at $CLI_PATH"
+        print_info "Please download the STARK CLI from colinritman/xfgwin release:"
+        print_info "  curl -L https://github.com/ColinRitman/xfgwin/releases/latest/download/xfg-stark-cli-$(uname -s | tr '[:upper:]' '[:lower:]').tar.gz | tar -xz"
+        print_info "  chmod +x xfg-stark-cli"
+        exit 1
+    fi
+    
+    if [ ! -x "$CLI_PATH" ]; then
+        print_error "STARK CLI is not executable: $CLI_PATH"
+        print_info "Making it executable..."
+        chmod +x "$CLI_PATH"
+    fi
+    
+    print_success "STARK CLI found at: $CLI_PATH"
 }
 
 # Function to check if transaction is a burn
@@ -330,6 +356,9 @@ show_completion_summary() {
 
 # Main function
 main() {
+    # Check if STARK CLI is available
+    check_stark_cli
+    
     # Check arguments
     if [[ $# -lt 3 ]]; then
         echo "Usage: $0 <transaction_hash> <recipient_address> <burn_amount> [block_height]"
