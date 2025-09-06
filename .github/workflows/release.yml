@@ -50,7 +50,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="/usr/local/Qt-5.15.2"
           make -j4
           cd ../..
           
@@ -115,7 +115,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="/usr/local/Qt-5.15.2"
           make -j4
           cd ../..
           
@@ -184,7 +184,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="/usr/local/Qt-5.15.2"
           make -j4
           cd ../..
           
@@ -254,7 +254,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="/usr/local/Qt-5.15.2"
           make -j4
           cd ../..
           
