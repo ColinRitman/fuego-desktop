@@ -46,7 +46,6 @@ jobs:
       shell: bash
 
     - name: Setup Qt (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
@@ -56,7 +55,6 @@ jobs:
         sudo apt-get install -y pkg-config libgtest-dev
 
     - name: Setup Qt (macOS)
-      if: matrix.os == 'macos-latest'
       run: |
         # Handle cmake conflict - uninstall existing cmake first
         brew list cmake && brew uninstall cmake || true
@@ -65,7 +63,6 @@ jobs:
         echo "PATH=$PATH" >> $GITHUB_ENV
 
     - name: Setup Qt (Windows)
-      if: matrix.os == 'windows-latest'
       run: |
         choco install qt5 boost cmake --yes
         # Set Qt environment variables
