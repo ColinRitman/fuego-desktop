@@ -248,6 +248,9 @@ jobs:
         fi
         # Use qmake instead of cmake for better compatibility
         qmake Fuego-GUI.pro
+        # Exclude test files from build to avoid gtest dependency issues
+        sed -i 's/cryptonote\/tests\/UnitTests\/main\.o//g' Makefile
+        sed -i 's/cryptonote\/tests\/UnitTests\/main\.cpp//g' Makefile
         if [ "$RUNNER_OS" = "Windows" ]; then
           nmake || make -j2
         elif [ "$RUNNER_OS" = "macOS" ]; then
