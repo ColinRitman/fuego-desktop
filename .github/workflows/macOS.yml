@@ -30,8 +30,9 @@ jobs:
           release_name="fuego-desktop-macOS-v$xfg_ver"
           app_name="Fuego-Wallet.app"
 
-          make -j4 build-release
-          cd "$build_folder"
+          cd cryptonote && make -j4 build-release
+          cd ..
+          cd cryptonote/"$build_folder"
           macdeployqt "$app_name"
           cpack
           mkdir "$release_name"
@@ -41,7 +42,7 @@ jobs:
 
           echo "sha256=${sha256}" >> $GITHUB_OUTPUT
           echo "release_name=${release_name}.zip" >> $GITHUB_OUTPUT
-          echo "asset_path=${build_folder}/${release_name}.zip" >> $GITHUB_OUTPUT
+          echo "asset_path=cryptonote/${build_folder}/${release_name}.zip" >> $GITHUB_OUTPUT
           echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
 
       - name: Create Release

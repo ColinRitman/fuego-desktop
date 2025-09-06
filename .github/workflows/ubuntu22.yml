@@ -32,10 +32,11 @@ jobs:
           release_name=fuego-desktop-ubuntu-2204-v"$xfg_version"
           build_folder="build/release"
 
-          make -j4 build-release
+          cd cryptonote && make -j4 build-release
+          cd ..
           mkdir $release_name
           mkdir -p $release_name/icon
-          mv build/release/Fuego-Wallet $release_name
+          mv cryptonote/build/release/Fuego-Wallet $release_name
           cp fuego-desktop.desktop $release_name
           cp src/images/fuego.png $release_name/icon
           tar -czf "$release_name".tar.gz "$release_name"

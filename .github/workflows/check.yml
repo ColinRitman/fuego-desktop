@@ -135,10 +135,11 @@ jobs:
           xfg_version=${GITHUB_SHA::7}
           release_name=fuego-desktop-ubuntu-2004-dev-"$xfg_version"
 
-          make -j4 build-release
+          cd cryptonote && make -j4 build-release
+          cd ..
           mkdir $release_name
           mkdir -p $release_name/icon
-          mv build/release/Fuego-Wallet $release_name
+          mv cryptonote/build/release/Fuego-Wallet $release_name
           cp fuego-desktop.desktop $release_name
           cp src/images/fuego.png $release_name/icon
           tar -czf "$release_name".tar.gz "$release_name"
@@ -176,10 +177,11 @@ jobs:
           xfg_version=${GITHUB_SHA::7}
           release_name=fuego-desktop-ubuntu-2204-dev-"$xfg_version"
 
-          make -j4 build-release
+          cd cryptonote && make -j4 build-release
+          cd ..
           mkdir $release_name
           mkdir -p $release_name/icon
-          mv build/release/Fuego-Wallet $release_name
+          mv cryptonote/build/release/Fuego-Wallet $release_name
           cp fuego-desktop.desktop $release_name
           cp src/images/fuego.png $release_name/icon
           tar -czf "$release_name".tar.gz "$release_name"
@@ -223,16 +225,17 @@ jobs:
           release_name="fuego-desktop-macOS-dev-$xfg_ver"
           app_name="Fuego-Wallet.app"
 
-          make -j4 build-release
-          cd "$build_folder"
+          cd cryptonote && make -j4 build-release
+          cd ..
+          cd cryptonote/"$build_folder"
           macdeployqt "$app_name"
           cpack
           mkdir "$release_name"
           mv *.dmg "$release_name".dmg
           mv "$release_name".dmg "$release_name"
 
-          echo "release_name::${release_name}" >> $GITHUB_OUTPUT
-          echo "artifact_path=${build_folder}/${release_name}" >> $GITHUB_OUTPUT
+          echo "release_name=${release_name}" >> $GITHUB_OUTPUT
+          echo "artifact_path=cryptonote/${build_folder}/${release_name}" >> $GITHUB_OUTPUT
 
       - name: Upload To GH Artifacts
         uses: actions/upload-artifact@v4
@@ -267,8 +270,9 @@ jobs:
           release_name="fuego-desktop-macOS11-$xfg_ver"
           app_name="Fuego-Wallet.app"
 
-          make -j4 build-release
-          cd "$build_folder"
+          cd cryptonote && make -j4 build-release
+          cd ..
+          cd cryptonote/"$build_folder"
           macdeployqt "$app_name"
           cpack
           mkdir "$release_name"
@@ -276,7 +280,7 @@ jobs:
           mv "$release_name".dmg "$release_name"
 
           echo "release_name=${release_name}" >> $GITHUB_OUTPUT
-          echo "artifact_path=${build_folder}/${release_name}" >> $GITHUB_OUTPUT
+          echo "artifact_path=cryptonote/${build_folder}/${release_name}" >> $GITHUB_OUTPUT
 
       - name: Upload To GH Artifacts
         uses: actions/upload-artifact@v4
