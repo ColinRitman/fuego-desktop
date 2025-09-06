@@ -294,7 +294,7 @@ jobs:
     name: Build Windows
     runs-on: windows-2022
     env:
-      BOOST_ROOT: C:/tools/boost/x86_64
+      BOOST_ROOT: C:\hostedtoolcache\windows\Boost\1.72.0\x86_64
     steps:
       - uses: actions/checkout@v4
 
@@ -306,8 +306,13 @@ jobs:
           # Install Qt5
           choco install qt5 --version=5.15.2
           
-          # Install Boost using Chocolatey (reliable for GitHub Actions)
-          choco install boost-msvc-14.2 -y
+          # Verify Boost is available (pre-installed on GitHub Actions)
+          if (Test-Path "$env:BOOST_ROOT") {
+            Write-Output "✅ Boost is available at $env:BOOST_ROOT"
+          } else {
+            Write-Error "❌ Boost not found at $env:BOOST_ROOT"
+            exit 1
+          }
 
       - name: Clone fuego
         run: |
