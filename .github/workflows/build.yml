@@ -87,7 +87,7 @@ jobs:
           files: ${{ steps.build.outputs.asset_path }}
           name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
           body: |
-            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> [Download for Windows](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            <img src="https://camo.githubusercontent.com/cbd9fe20e5a69edc9a14b1a1f14d59f1a622aee1e2e3e7ffcf1e9adcd44b5f3b/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3232362f3232363737312e706e67" width="16"> [Download for Windows](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
             `SHA256 : ${{ steps.build.outputs.sha256 }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -169,7 +169,7 @@ jobs:
           files: ${{ steps.build.outputs.asset_path }}
           name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
           body: |
-            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> [Download for Ubuntu 22.04](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            <img src="https://camo.githubusercontent.com/95ad8ed31c0e145dd722621b7d26661bbed66df59ce2d1fa52ecb3f5f99a5de5/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3838382f3838383837392e706e67" width="16"> [Download for Ubuntu 22.04](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
             `SHA256 : ${{ steps.build.outputs.sha256 }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -251,7 +251,7 @@ jobs:
           files: ${{ steps.build.outputs.asset_path }}
           name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
           body: |
-            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> [Download for Ubuntu 24.04](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            <img src="https://camo.githubusercontent.com/95ad8ed31c0e145dd722621b7d26661bbed66df59ce2d1fa52ecb3f5f99a5de5/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3838382f3838383837392e706e67" width="16"> [Download for Ubuntu 24.04](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
             `SHA256 : ${{ steps.build.outputs.sha256 }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -335,7 +335,7 @@ jobs:
           files: ${{ steps.build.outputs.asset_path }}
           name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
           body: |
-            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> [Download for macOS Intel](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            <img src="https://camo.githubusercontent.com/db6daf7df2ad2d89a28c0916039d3b9ee6c97801425b6937c353139ebf630cb3/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3838322f3838323630322e706e67" width="16"> [Download for macOS Intel](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
             `SHA256 : ${{ steps.build.outputs.sha256 }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -419,7 +419,7 @@ jobs:
           files: ${{ steps.build.outputs.asset_path }}
           name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
           body: |
-            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> [Download for macOS Apple Silicon](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            <img src="https://camo.githubusercontent.com/db6daf7df2ad2d89a28c0916039d3b9ee6c97801425b6937c353139ebf630cb3/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3838322f3838323630322e706e67" width="16"> [Download for macOS Apple Silicon](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
             `SHA256 : ${{ steps.build.outputs.sha256 }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
