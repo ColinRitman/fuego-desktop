@@ -4,9 +4,14 @@
 #include <QString>
 #include <QThread>
 #include <QMutex>
+#include <QProcess>
+#include <QMap>
 #include <atomic>
 
 namespace WalletGui {
+
+// Forward declaration
+class ProofGenerationWorker;
 
 class StarkProofService : public QObject {
   Q_OBJECT
@@ -40,23 +45,10 @@ public:
   
   // Enable/disable automatic proof generation
   void setEnabled(bool enabled);
-
-  // Nested worker class for proof generation
-  class ProofGenerationWorker : public QObject {
-    Q_OBJECT
-
-  public:
-    ProofGenerationWorker() : QObject() {}
-
-  public slots:
-    void generateProof(const QString& transactionHash, 
-                      const QString& recipientAddress,
-                      quint64 burnAmount);
-
-  signals:
-    void proofGenerationCompleted(const QString& transactionHash, bool success, const QString& errorMessage);
-    void proofGenerationProgress(const QString& transactionHash, int progress);
-  };
+  
+  // Process management for xfg-stark-cli tracking
+  void storeProcess(const QString& transactionHash, QProcess* process);
+  void removeProcess(const QString& transactionHash);
 
 signals:
   void proofGenerationStarted(const QString& transactionHash);
@@ -71,6 +63,12 @@ private:
   ProofGenerationWorker* m_worker;
   QMutex m_mutex;
   std::atomic<bool> m_enabled;
+  
+  // Process tracking for xfg-stark-cli
+  QMap<QString, QProcess*> m_runningProcesses;
+  QMap<QString, QString> m_statusMap;
+  QMap<QString, QString> m_errorMap;
+  QMap<QString, int> m_progressMap;
   
   void onProofGenerationCompleted(const QString& transactionHash, bool success, const QString& errorMessage);
 };

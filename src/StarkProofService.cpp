@@ -155,7 +155,35 @@ QString StarkProofService::getProofErrorMessage(const QString& transactionHash) 
 
 QString StarkProofService::getProofStatus(const QString& transactionHash) {
   QMutexLocker locker(&m_mutex);
+  
+  // Check if we have a running process for this transaction
+  if (m_runningProcesses.contains(transactionHash)) {
+    QProcess* process = m_runningProcesses.value(transactionHash);
+    if (process && process->state() == QProcess::Running) {
+      return "running";
+    } else if (process && process->state() == QProcess::NotRunning) {
+      // Process finished, check exit code
+      if (process->exitCode() == 0) {
+        return "completed";
+      } else {
+        return "failed";
+      }
+    }
+  }
+  
+  // Return stored status or default
   return m_statusMap.value(transactionHash, "none");
+}
+
+void StarkProofService::storeProcess(const QString& transactionHash, QProcess* process) {
+  QMutexLocker locker(&m_mutex);
+  m_runningProcesses.insert(transactionHash, process);
+  m_statusMap.insert(transactionHash, "running");
+}
+
+void StarkProofService::removeProcess(const QString& transactionHash) {
+  QMutexLocker locker(&m_mutex);
+  m_runningProcesses.remove(transactionHash);
 }
 
 } // namespace WalletGui

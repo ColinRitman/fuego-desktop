@@ -55,8 +55,11 @@ void ProofGenerationWorker::generateProof(const QString& transactionHash,
                            QFile::ReadGroup | QFile::ExeGroup |
                            QFile::ReadOther | QFile::ExeOther);
 
-  // Run the auto-stark-proof script with transaction details
-  QProcess process;
+  // Create process for xfg-stark-cli
+  QProcess* process = new QProcess(this);
+  
+  // Store the process in StarkProofService for tracking
+  StarkProofService::instance().storeProcess(transactionHash, process);
 
   QStringList arguments;
   arguments << transactionHash << recipientAddress << QString::number(burnAmount);
@@ -66,21 +69,47 @@ void ProofGenerationWorker::generateProof(const QString& transactionHash,
   env.insert("FUEGO_AUTO_STARK_PROOF", "true");
   env.insert("FUEGO_ELDERNODE_VERIFICATION", "true");
   env.insert("FUEGO_ELDERNODE_TIMEOUT", "300");
-  process.setProcessEnvironment(env);
+  process->setProcessEnvironment(env);
 
-  process.start(scriptPath, arguments);
+  // Connect process signals for progress tracking
+  connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+          [this, transactionHash, process](int exitCode, QProcess::ExitStatus exitStatus) {
+            bool success = (exitCode == 0 && exitStatus == QProcess::NormalExit);
+            QString error = success ? "" : QString::fromUtf8(process->readAllStandardError());
+            Q_EMIT proofGenerationCompleted(transactionHash, success, error);
+            
+            // Clean up process
+            StarkProofService::instance().removeProcess(transactionHash);
+            process->deleteLater();
+          });
 
-  if (process.waitForFinished(300000)) { // 5 minute timeout
-    if (process.exitCode() == 0) {
-      Q_EMIT proofGenerationCompleted(transactionHash, true, "");
-    } else {
-      QString error = QString::fromUtf8(process.readAllStandardError());
-      Q_EMIT proofGenerationCompleted(transactionHash, false, error);
-    }
-  } else {
-    process.kill();
-    Q_EMIT proofGenerationCompleted(transactionHash, false, "Proof generation timed out");
+  connect(process, &QProcess::readyReadStandardOutput,
+          [this, transactionHash, process]() {
+            // Parse progress from xfg-stark-cli output
+            QString output = QString::fromUtf8(process->readAllStandardOutput());
+            // Look for progress indicators in the output
+            // This would need to be customized based on xfg-stark-cli output format
+            Q_EMIT proofGenerationProgress(transactionHash, 50); // Placeholder
+          });
+
+  process->start(scriptPath, arguments);
+
+  if (!process->waitForStarted(5000)) {
+    Q_EMIT proofGenerationCompleted(transactionHash, false, "Failed to start STARK proof generation");
+    StarkProofService::instance().removeProcess(transactionHash);
+    process->deleteLater();
+    return;
   }
+
+  // Set timeout
+  QTimer::singleShot(300000, [this, transactionHash, process]() { // 5 minute timeout
+    if (process->state() == QProcess::Running) {
+      process->kill();
+      Q_EMIT proofGenerationCompleted(transactionHash, false, "Proof generation timed out");
+      StarkProofService::instance().removeProcess(transactionHash);
+      process->deleteLater();
+    }
+  });
 }
 
 } // namespace WalletGui
