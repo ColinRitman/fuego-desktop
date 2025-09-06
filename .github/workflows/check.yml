@@ -89,7 +89,7 @@ jobs:
           New-Item "$build_folder\$release_folder" -ItemType Directory
           cd "$build_folder"
 
-          cmake -G "Visual Studio 16 2019" .. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+          cmake -G "Visual Studio 17 2022" .. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
           msbuild Fuego-Wallet.sln /p:Configuration=Release /m:2
 
           echo "build_folder=${build_folder}" >> $env:GITHUB_OUTPUT

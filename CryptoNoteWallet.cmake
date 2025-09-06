@@ -14,11 +14,20 @@ cmake_policy(SET CMP0167 NEW)
 
 # Find required libraries
 # Handle different Boost versions and CMake configurations
-set(Boost_NO_BOOST_CMAKE ON)
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+if(APPLE)
+    # macOS with Boost 1.89.0+ uses new package structure
+    find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+    # Set Boost variables for compatibility
+    set(Boost_LIBRARIES ${Boost_LIBRARIES})
+    set(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+else()
+    # Linux/Windows use traditional Boost configuration
+    set(Boost_NO_BOOST_CMAKE ON)
+    set(Boost_USE_STATIC_LIBS OFF)
+    set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_RUNTIME OFF)
+    find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+endif()
 
 # CryptoNote library is already created in main CMakeLists.txt
 # This file only provides Boost configuration and include directories
