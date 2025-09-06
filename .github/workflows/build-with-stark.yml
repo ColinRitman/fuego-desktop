@@ -1,5 +1,6 @@
 name: Build Fuego Wallet with STARK CLI
 
+# Trigger workflow on push, PR, manual dispatch, and schedule
 on:
   push:
     branches: [ main, develop, master ]
