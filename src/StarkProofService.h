@@ -5,13 +5,10 @@
 #include <QThread>
 #include <QMutex>
 #include <QProcess>
-#include <QMap>
+#include <QHash>
 #include <atomic>
 
 namespace WalletGui {
-
-// Forward declaration
-class ProofGenerationWorker;
 
 class StarkProofService : public QObject {
   Q_OBJECT
@@ -65,10 +62,10 @@ private:
   std::atomic<bool> m_enabled;
   
   // Process tracking for xfg-stark-cli
-  QMap<QString, QProcess*> m_runningProcesses;
-  QMap<QString, QString> m_statusMap;
-  QMap<QString, QString> m_errorMap;
-  QMap<QString, int> m_progressMap;
+  QHash<QString, QProcess*> m_runningProcesses;
+  QHash<QString, QString> m_statusMap;
+  QHash<QString, QString> m_errorMap;
+  QHash<QString, int> m_progressMap;
   
   void onProofGenerationCompleted(const QString& transactionHash, bool success, const QString& errorMessage);
 };
