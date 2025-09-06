@@ -12,24 +12,27 @@ jobs:
   build-windows:
     name: Windows
     runs-on: windows-2022
-    env:
-      BOOST_ROOT: C:\hostedtoolcache\windows\Boost\1.72.0\x86_64
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Verify Boost Installation
+      - name: Install Boost using vcpkg
         shell: powershell
         run: |
-          echo "BOOST_ROOT: ${env:BOOST_ROOT}"
-          if (Test-Path "$env:BOOST_ROOT") {
-            Write-Output "✅ Boost is available at $env:BOOST_ROOT"
-          } else {
-            Write-Error "❌ Boost not found at $env:BOOST_ROOT"
-            exit 1
-          }
+          # Install vcpkg
+          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
+          
+          # Install Boost components
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic --triplet=x64-windows
+          
+          # Set environment variables
+          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
+          
+          Write-Output "✅ Boost installed via vcpkg"
           
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -78,7 +81,7 @@ jobs:
           New-Item "$build_folder\$release_folder" -ItemType Directory
           cd "$build_folder"
 
-          cmake -G "Visual Studio 16 2019" ..
+          cmake -G "Visual Studio 16 2019" .. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
           msbuild Fuego-Wallet.sln /p:Configuration=Release /m:2
 
           echo "build_folder=${build_folder}" >> $env:GITHUB_OUTPUT
