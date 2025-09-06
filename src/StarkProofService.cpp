@@ -1,4 +1,5 @@
 #include "StarkProofService.h"
+#include "ProofGenerationWorker.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -137,9 +138,9 @@ QString StarkProofService::getProofStatus(const QString& transactionHash) {
 }
 
 // ProofGenerationWorker implementation
-void StarkProofService::ProofGenerationWorker::generateProof(const QString& transactionHash, 
-                                                            const QString& recipientAddress,
-                                                            quint64 burnAmount) {
+void ProofGenerationWorker::generateProof(const QString& transactionHash, 
+                                         const QString& recipientAddress,
+                                         quint64 burnAmount) {
   
   // Get the path to the auto-stark-proof script
   QString scriptPath = QCoreApplication::applicationDirPath() + "/auto_stark_proof.sh";
@@ -205,3 +206,4 @@ void StarkProofService::ProofGenerationWorker::generateProof(const QString& tran
 } // namespace WalletGui
 
 #include "StarkProofService.moc"
+#include "ProofGenerationWorker.moc"
