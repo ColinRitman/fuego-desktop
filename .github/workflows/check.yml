@@ -114,7 +114,7 @@ jobs:
 
 
   build-ubuntu24:
-    name: Ubuntu 20.04
+    name: Ubuntu 24.04
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -122,7 +122,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qt5-default qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
 
       - name: Clone fuego
         run: |
@@ -133,7 +133,7 @@ jobs:
         id: build
         run: |
           xfg_version=${GITHUB_SHA::7}
-          release_name=fuego-desktop-ubuntu-2004-dev-"$xfg_version"
+          release_name=fuego-desktop-ubuntu-2404-dev-"$xfg_version"
 
           cd cryptonote && make -j4 build-release
           cd ..
