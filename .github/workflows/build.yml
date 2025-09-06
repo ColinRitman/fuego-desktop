@@ -17,9 +17,20 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Install CMake
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install boost-msvc-14.3 --version=1.82.0
+          
+          # Install Qt5
           choco install qt5 --version=5.15.2
+          
+          # Install Boost using vcpkg (more reliable)
+          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic --triplet=x64-windows
+          
+          # Set environment variables for Boost
+          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -58,7 +69,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           New-Item -ItemType Directory -Path "build\release" -Force
           Set-Location "build\release"
-          cmake ..\..
+          cmake ..\.. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
           cmake --build . --config Release --parallel 4
           Set-Location ..\..
           
