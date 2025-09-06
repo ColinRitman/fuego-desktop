@@ -54,20 +54,6 @@ jobs:
         sudo apt-get install -y libssl-dev libcurl4-openssl-dev
         sudo apt-get install -y pkg-config libgtest-dev
 
-    - name: Setup Qt (macOS)
-      run: |
-        # Handle cmake conflict - uninstall existing cmake first
-        brew list cmake && brew uninstall cmake || true
-        brew install qt@5 boost cmake
-        export PATH="/usr/local/opt/qt@5/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
-        echo "PATH=$PATH" >> $GITHUB_ENV
-
-    - name: Setup Qt (Windows)
-      run: |
-        choco install qt5 boost cmake --yes
-        # Set Qt environment variables
-        echo "QT_DIR=C:\Qt\5.15.2\msvc2019_64" >> $env:GITHUB_ENV
-        echo "PATH=C:\Qt\5.15.2\msvc2019_64\bin;$env:PATH" >> $env:GITHUB_ENV
 
     - name: Fix Submodules
       run: |
@@ -297,14 +283,6 @@ jobs:
       run: |
         cd xfgwin
         cargo build --release --bin xfg-stark-cli
-
-    - name: Setup Qt (macOS)
-      run: |
-        # Handle cmake conflict - uninstall existing cmake first
-        brew list cmake && brew uninstall cmake || true
-        brew install qt@5 boost cmake
-        export PATH="/usr/local/opt/qt@5/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
-        echo "PATH=$PATH" >> $GITHUB_ENV
 
     - name: Fix Submodules
       run: |
