@@ -569,65 +569,7 @@ border: none;
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="lm_burnDepositsButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>199</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>199</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>orbitron</family>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-text-align: left; 
-color: #ddd; 
-padding-left: 20px;
-font-weight: normal;
-border: none;
-
-}
-
-QPushButton:hover {
-text-align: left; color: black; 
-padding-left: 20px;
-border: none;
-	background-color: qradialgradient(spread:reflect, cx:0.5, cy:0.5, radius:0.617, fx:0.500025, fy:0.5, stop:0.268657 rgba(255, 239, 0, 255), stop:0.437811 rgba(255, 203, 0, 255), stop:1 rgba(0, 0, 0, 255));
-}</string>
-           </property>
-           <property name="text">
-            <string>BURN DEPOSITS</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../resources.qrc">
-             <normaloff>:/icons/icon-banking</normaloff>:/icons/icon-banking</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>18</width>
-             <height>18</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
+          <widget class="QPushButton" name="lm_transactionButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -1084,7 +1026,6 @@ border: none;
         </layout>
         <zorder>lm_dashboardButton</zorder>
         <zorder>lm_bankingButton</zorder>
-        <zorder>lm_burnDepositsButton</zorder>
         <zorder>lm_transactionButton</zorder>
         <zorder>lm_messagesButton</zorder>
         <zorder>lm_addressBookButton_2</zorder>
@@ -6179,16 +6120,6 @@ text-align: left;
         </layout>
        </widget>
       </item>
-      <item row="1" column="1" rowspan="4" colspan="3">
-       <widget class="WalletGui::BurnDepositsFrame" name="burnDepositsBox">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0" rowspan="6" colspan="4">
        <widget class="QGroupBox" name="lockBox">
         <property name="sizePolicy">
@@ -8890,7 +8821,6 @@ QToolTip { color: #eeeeee; background-color: #000000; border: 0px; padding: 8px;
      <zorder>headerBox</zorder>
      <zorder>statusBox</zorder>
      <zorder>bankingBox</zorder>
-     <zorder>burnDepositsBox</zorder>
      <zorder>newMessageBox</zorder>
      <zorder>messageBox</zorder>
      <zorder>addressBookBox</zorder>
@@ -8948,22 +8878,6 @@ QToolTip { color: #eeeeee; background-color: #000000; border: 0px; padding: 8px;
     <hint type="sourcelabel">
      <x>100</x>
      <y>385</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>649</x>
-     <y>349</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lm_burnDepositsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>OverviewFrame</receiver>
-   <slot>burnDepositsClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>100</x>
-     <y>265</y>
     </hint>
     <hint type="destinationlabel">
      <x>649</x>
@@ -10018,7 +9932,6 @@ QToolTip { color: #eeeeee; background-color: #000000; border: 0px; padding: 8px;
   <slot>copyClicked()</slot>
   <slot>changeFontSize()</slot>
   <slot>bankingClicked()</slot>
-  <slot>burnDepositsClicked()</slot>
   <slot>newDepositClicked()</slot>
   <slot>dashboardClicked()</slot>
   <slot>settingsClicked()</slot>
@@ -10088,12 +10001,4 @@ QToolTip { color: #eeeeee; background-color: #000000; border: 0px; padding: 8px;
   <buttongroup name="buttonGroup_3"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
- <customwidgets>
-  <customwidget>
-   <class>WalletGui::BurnDepositsFrame</class>
-   <extends>QFrame</extends>
-   <header>gui/BurnDepositsFrame.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
 </ui>
