@@ -3,8 +3,8 @@
 
 if(WIN32)
     # On Windows, use vcpkg to find libqrencode
-    find_package(qrencode CONFIG REQUIRED)
-    add_library(qrencode ALIAS qrencode::qrencode)
+    find_package(QREncode CONFIG REQUIRED)
+    add_library(qrencode ALIAS QREncode::QREncode)
 else()
     # On Unix systems, use PkgConfig
     find_package(PkgConfig REQUIRED)

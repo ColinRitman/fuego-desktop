@@ -25,8 +25,8 @@ jobs:
           git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
           C:\vcpkg\bootstrap-vcpkg.bat
           
-          # Install Boost components and qrencode
-          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic qrencode --triplet=x64-windows
+          # Install Boost components and libqrencode
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode --triplet=x64-windows
           
           # Set environment variables
           echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
