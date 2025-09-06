@@ -6180,7 +6180,6 @@ text-align: left;
        </widget>
       </item>
       <item row="1" column="1" rowspan="4" colspan="3">
-       <widget class="WalletGui::BurnDepositsFrame" name="burnDepositsBox">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -8890,7 +8889,6 @@ QToolTip { color: #eeeeee; background-color: #000000; border: 0px; padding: 8px;
      <zorder>headerBox</zorder>
      <zorder>statusBox</zorder>
      <zorder>bankingBox</zorder>
-     <zorder>burnDepositsBox</zorder>
      <zorder>newMessageBox</zorder>
      <zorder>messageBox</zorder>
      <zorder>addressBookBox</zorder>
