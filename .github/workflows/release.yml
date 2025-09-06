@@ -142,9 +142,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          modules: "qtcharts"
+
       - name: Install dependencies
         run: |
-          brew install boost qt@5 libqrencode
+          brew install boost libqrencode
 
       - name: Clone fuego
         run: |
@@ -167,7 +172,6 @@ jobs:
 
       - name: Build
         run: |
-          export PATH="/usr/local/opt/qt@5/bin:$PATH"
           build_folder="build/release"
           xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
           release_name="fuego-desktop-macOS-intel-v$xfg_ver"
@@ -209,9 +213,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          modules: "qtcharts"
+
       - name: Install dependencies
         run: |
-          brew install boost qt@5 libqrencode
+          brew install boost libqrencode
 
       - name: Clone fuego
         run: |
@@ -233,7 +242,6 @@ jobs:
 
       - name: Build
         run: |
-          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
           build_folder="build/release"
           xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
           release_name="fuego-desktop-macOS-apple-silicon-v$xfg_ver"

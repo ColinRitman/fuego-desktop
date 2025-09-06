@@ -325,9 +325,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          modules: "qtcharts"
+
       - name: Install dependencies
         run: |
-          brew install boost qt@5 libqrencode
+          brew install boost libqrencode
 
       - name: Download XFG STARK CLI
         run: |
