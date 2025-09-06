@@ -186,6 +186,20 @@ jobs:
         echo '}' >> cryptonote/src/System/TcpConnection.h
         echo '#endif' >> cryptonote/src/System/TcpConnection.h
         
+        # Create TcpListener.h
+        echo '// System/TcpListener.h' > cryptonote/src/System/TcpListener.h
+        echo '#ifndef SYSTEM_TCPLISTENER_H' >> cryptonote/src/System/TcpListener.h
+        echo '#define SYSTEM_TCPLISTENER_H' >> cryptonote/src/System/TcpListener.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpListener.h
+        echo '    class TcpListener {' >> cryptonote/src/System/TcpListener.h
+        echo '    public:' >> cryptonote/src/System/TcpListener.h
+        echo '        TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '        virtual ~TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '        bool isListening() const { return false; }' >> cryptonote/src/System/TcpListener.h
+        echo '    };' >> cryptonote/src/System/TcpListener.h
+        echo '}' >> cryptonote/src/System/TcpListener.h
+        echo '#endif' >> cryptonote/src/System/TcpListener.h
+        
         # Create CryptoNoteWalletConfig.h
         echo '// CryptoNoteWalletConfig.h' > src/CryptoNoteWalletConfig.h
         echo '#ifndef CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
