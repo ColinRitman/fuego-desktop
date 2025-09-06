@@ -42,6 +42,14 @@ jobs:
           modules: "qtcharts"
           install-deps: "true"
 
+      - name: Download XFG STARK CLI
+        shell: powershell
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows-x86_64.exe" -OutFile "xfg-stark-cli.exe"
+          New-Item -ItemType Directory -Path "bin" -Force
+          Move-Item "xfg-stark-cli.exe" "bin/"
+
       - name: Clone fuego
         shell: powershell
         run: |
@@ -130,6 +138,14 @@ jobs:
           sudo apt update -y
           sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
 
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
+
       - name: Clone fuego
         run: |
           rm -rf cryptonote
@@ -179,7 +195,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
+
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
 
       - name: Clone fuego
         run: |
@@ -236,6 +260,14 @@ jobs:
         run: |
           brew install boost
 
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-x86_64
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
+
       - name: Clone fuego
         run: |
           rm -rf cryptonote
@@ -288,6 +320,14 @@ jobs:
       - name: Install dependencies
         run: |
           brew install boost qt@5
+
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-aarch64
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
 
       - name: Clone fuego
         run: |

@@ -10,6 +10,15 @@ endif(APPLE)
 # Enable C++ language before including other files that need it
 project(${CN_PROJECT_NAME} CXX)
 
+# Set STARK CLI path for binary download
+if(WIN32)
+    set(STARK_CLI_PATH "bin/xfg-stark-cli.exe")
+elseif(APPLE)
+    set(STARK_CLI_PATH "bin/xfg-stark-cli")
+else()
+    set(STARK_CLI_PATH "bin/xfg-stark-cli")
+endif()
+
 include(CryptoNoteWallet.cmake)
 include(QREncode.cmake)
 
