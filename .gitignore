@@ -16,3 +16,6 @@ CMakeLists.txt
 cmake-build*
 src/images/appicon/.DS_Store
 .DS_Store
+Makefile
+*.o
+.qmake.stash
