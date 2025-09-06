@@ -8,9 +8,6 @@
 
 namespace WalletGui {
 
-// Forward declaration
-class ProofGenerationWorker;
-
 class StarkProofService : public QObject {
   Q_OBJECT
   Q_DISABLE_COPY(StarkProofService)
@@ -43,6 +40,23 @@ public:
   
   // Enable/disable automatic proof generation
   void setEnabled(bool enabled);
+
+  // Nested worker class for proof generation
+  class ProofGenerationWorker : public QObject {
+    Q_OBJECT
+
+  public:
+    ProofGenerationWorker() : QObject() {}
+
+  public slots:
+    void generateProof(const QString& transactionHash, 
+                      const QString& recipientAddress,
+                      quint64 burnAmount);
+
+  signals:
+    void proofGenerationCompleted(const QString& transactionHash, bool success, const QString& errorMessage);
+    void proofGenerationProgress(const QString& transactionHash, int progress);
+  };
 
 signals:
   void proofGenerationStarted(const QString& transactionHash);
