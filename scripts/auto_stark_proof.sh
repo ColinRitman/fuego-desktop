@@ -8,7 +8,14 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLI_PATH="$SCRIPT_DIR/../../xfgwin/target/debug/xfg-stark-cli"
+# Try to find STARK CLI binary (downloaded from colinritman/xfgwin release)
+CLI_PATH="$SCRIPT_DIR/../xfg-stark-cli"
+if [ ! -f "$CLI_PATH" ]; then
+  CLI_PATH="$SCRIPT_DIR/../../xfg-stark-cli"
+fi
+if [ ! -f "$CLI_PATH" ]; then
+  CLI_PATH="./xfg-stark-cli"
+fi
 PYTHON_SCRIPT="$SCRIPT_DIR/stark_proof_generator.py"
 PROGRESS_LOGGER="$SCRIPT_DIR/progress_logger.py"
 TEMP_DIR="/tmp/fuego-stark-proofs"
@@ -45,6 +52,25 @@ print_eldernode() {
 
 print_progress() {
     echo -e "${CYAN}[PROGRESS]${NC} $1"
+}
+
+# Function to check if STARK CLI is available
+check_stark_cli() {
+    if [ ! -f "$CLI_PATH" ]; then
+        print_error "STARK CLI not found at $CLI_PATH"
+        print_info "Please download the STARK CLI from colinritman/xfgwin release:"
+        print_info "  curl -L https://github.com/ColinRitman/xfgwin/releases/latest/download/xfg-stark-cli-$(uname -s | tr '[:upper:]' '[:lower:]').tar.gz | tar -xz"
+        print_info "  chmod +x xfg-stark-cli"
+        exit 1
+    fi
+    
+    if [ ! -x "$CLI_PATH" ]; then
+        print_error "STARK CLI is not executable: $CLI_PATH"
+        print_info "Making it executable..."
+        chmod +x "$CLI_PATH"
+    fi
+    
+    print_success "STARK CLI found at: $CLI_PATH"
 }
 
 # Function to check if transaction is a burn
@@ -89,31 +115,21 @@ generate_stark_proof() {
     # Create JSON package
     cat > "$package_file" << EOF
 {
-  "metadata": {
-    "version": "1.0.0",
-    "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-    "description": "Auto-generated for burn transaction $tx_hash",
-    "network": "fuego-mainnet"
-  },
   "burn_transaction": {
     "transaction_hash": "$tx_hash",
-    "burn_amount_xfg": "0.8",
-    "burn_amount_atomic": 8000000,
-    "block_height": $block_height,
-    "timestamp": $(date +%s),
-    "network_id": "fuego-mainnet"
+    "burn_amount_xfg": $amount,
+    "block_height": $block_height
   },
   "recipient": {
-    "ethereum_address": "$recipient",
-    "ens_name": null,
-    "label": null
+    "ethereum_address": "$recipient"
   },
   "secret": {
-    "secret_key": "dummy_secret_key_for_testing",
-    "salt": null,
-    "hint": null
+    "secret_key": ""
   },
-  "additional_data": {}
+  "metadata": {
+    "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "description": "Auto-generated for burn transaction $tx_hash"
+  }
 }
 EOF
     
@@ -131,7 +147,7 @@ EOF
     
     # Run the CLI with progress logging
     print_progress "Running STARK proof generation..."
-    if "$CLI_PATH" generate --input "$package_file" --output "$proof_file"; then
+    if "$CLI_PATH" generate "$package_file" "$proof_file"; then
         print_success "STARK proof generated successfully!"
         print_info "Proof file: $proof_file"
         print_info "Package file: $package_file"
@@ -340,6 +356,9 @@ show_completion_summary() {
 
 # Main function
 main() {
+    # Check if STARK CLI is available
+    check_stark_cli
+    
     # Check arguments
     if [[ $# -lt 3 ]]; then
         echo "Usage: $0 <transaction_hash> <recipient_address> <burn_amount> [block_height]"
