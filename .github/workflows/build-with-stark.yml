@@ -223,6 +223,26 @@ jobs:
         echo '};' >> cryptonote/src/System/TcpConnection.h
         echo '' >> cryptonote/src/System/TcpConnection.h
         echo '} // namespace System' >> cryptonote/src/System/TcpConnection.h
+        
+        # Create TcpListener.h stub
+        echo '#pragma once' > cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'class TcpListener {' >> cryptonote/src/System/TcpListener.h
+        echo 'public:' >> cryptonote/src/System/TcpListener.h
+        echo '    TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    virtual ~TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    ' >> cryptonote/src/System/TcpListener.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpListener.h
+        echo '    void start() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    void stop() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    bool isListening() const { return false; }' >> cryptonote/src/System/TcpListener.h
+        echo '};' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpListener.h
 
     - name: Fix Serialization Conflicts
       run: |
