@@ -41,7 +41,7 @@ jobs:
         shell: powershell
         run: |
           Remove-Item cryptonote -Recurse -Force -ErrorAction Ignore
-          git clone https://github.com/usexfg/fuego cryptonote
+          git clone https://github.com/colinritman/fuego cryptonote
 
       - name: Download STARK CLI from colinritman/xfgwin release
         shell: powershell
