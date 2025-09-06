@@ -31,11 +31,16 @@ jobs:
           xfg_version=${GITHUB_SHA::7}
           release_name=fuego-desktop-ubuntu-2404-dev-"$xfg_version"
 
-          cd cryptonote && make -j4 build-release
-          cd ..
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          cmake ../..
+          make -j4
+          cd ../..
+          
           mkdir $release_name
           mkdir -p $release_name/icon
-          mv cryptonote/build/release/Fuego-Wallet $release_name
+          mv build/release/FuegoWallet $release_name
           cp fuego-desktop.desktop $release_name
           cp src/images/fuego.png $release_name/icon
           tar -czf "$release_name".tar.gz "$release_name"
