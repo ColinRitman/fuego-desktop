@@ -384,38 +384,5 @@ endif (APPLE)
 
 include(CPack)
 
-# Build XFG STARK CLI (Required Component)
-message(STATUS "Building XFG STARK CLI...")
-
-# Set up Rust build for STARK CLI
-set(STARK_CLI_DIR "${CMAKE_SOURCE_DIR}/xfgwin")
-set(STARK_CLI_BUILD_DIR "${CMAKE_BINARY_DIR}/stark-cli-build")
-
-# Verify STARK CLI source exists
-if(NOT EXISTS "${STARK_CLI_DIR}")
-    message(FATAL_ERROR "XFG STARK CLI source not found at: ${STARK_CLI_DIR}")
-endif()
-
-# Create build directory
-file(MAKE_DIRECTORY ${STARK_CLI_BUILD_DIR})
-
-# Build STARK CLI using cargo
-execute_process(
-    COMMAND cargo build --bin xfg-stark-cli --release
-    WORKING_DIRECTORY ${STARK_CLI_DIR}
-    OUTPUT_VARIABLE STARK_CLI_BUILD_OUTPUT
-    ERROR_VARIABLE STARK_CLI_BUILD_ERROR
-    RESULT_VARIABLE STARK_CLI_BUILD_RESULT
-)
-
-if(STARK_CLI_BUILD_RESULT EQUAL 0)
-    message(STATUS "XFG STARK CLI built successfully")
-    set(STARK_CLI_PATH "${STARK_CLI_DIR}/target/release/xfg-stark-cli")
-else()
-    message(FATAL_ERROR "Failed to build XFG STARK CLI: ${STARK_CLI_BUILD_ERROR}")
-endif()
-
-# Verify STARK CLI binary exists
-if(NOT EXISTS "${STARK_CLI_PATH}")
-    message(FATAL_ERROR "STARK CLI binary not found at: ${STARK_CLI_PATH}")
-endif()
+# XFG STARK CLI is downloaded as pre-built binary in CI/CD workflows
+message(STATUS "XFG STARK CLI will be downloaded as pre-built binary")
