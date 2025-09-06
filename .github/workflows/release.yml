@@ -144,7 +144,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost qt@5
+          brew install boost qt@5 libqrencode
 
       - name: Clone fuego
         run: |
@@ -211,7 +211,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost qt@5
+          brew install boost qt@5 libqrencode
 
       - name: Clone fuego
         run: |
