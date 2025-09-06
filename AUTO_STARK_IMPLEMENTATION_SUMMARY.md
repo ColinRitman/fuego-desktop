@@ -57,6 +57,8 @@ bool WalletAdapter::isBurnTransaction(const QString& txHash, quint64 amount) {
   
   // For now, consider any valid transaction as potential burn
   // In a real implementation, you'd check transaction type/extra data
+  // if (TX_EXTRA_TAG = 0x08) 
+
   return true;
 }
 ```
