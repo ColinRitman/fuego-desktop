@@ -6,20 +6,18 @@ on:
       - "v*.*.*"
 
 jobs:
-  build-linux:
-    name: Build Linux
+  build-ubuntu22:
+    name: Build Ubuntu 22.04
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev build-essential cmake
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
 
-      - name: Setup cryptonote submodule
+      - name: Clone fuego
         run: |
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
@@ -45,43 +43,120 @@ jobs:
 
       - name: Build
         run: |
-          export PATH="/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH"
-          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
-          release_name=fuego-desktop-ubuntu-22.04-v"$xfg_version"
-          make -j$(nproc) build-release
-          mkdir $release_name
-          mkdir -p $release_name/icon
-          mkdir -p $release_name/tools
-          mv build/release/Fuego-Wallet $release_name
-          cp fuego-desktop.desktop $release_name
-          cp src/images/fuego.png $release_name/icon
+          build_folder="build/release"
+          xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
+          release_name="fuego-desktop-ubuntu22-v$xfg_ver"
+          app_name="FuegoWallet"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          cmake ../..
+          make -j4
+          cd ../..
+          
+          cd build/release
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          cp "$app_name" "$release_name/"
           # Include STARK CLI in release
-          cp xfg-stark-cli $release_name/tools/
-          cp download-stark-cli.sh $release_name/tools/
-          cp scripts/auto_stark_proof.sh $release_name/tools/
-          cp STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name/
+          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
           tar -czf "$release_name".tar.gz "$release_name"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-release
-          path: fuego-desktop-ubuntu-22.04-v*.tar.gz
+          name: ubuntu22-release
+          path: build/release/fuego-desktop-ubuntu22-v*.tar.gz
 
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
+  build-ubuntu24:
+    name: Build Ubuntu 24.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install dependencies
         run: |
-          brew install qt@5 boost cmake
-          export PATH="/usr/local/opt/qt@5/bin:$PATH"
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
 
-      - name: Setup cryptonote submodule
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
+          
+          echo "Downloading STARK CLI from: $RELEASE_URL"
+          
+          # Download and extract the binary
+          curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
+          tar -xzf xfg-stark-cli-linux.tar.gz
+          
+          # Make binary executable
+          chmod +x xfg-stark-cli
+          
+          # Verify the binary works
+          ./xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
+      - name: Build
+        run: |
+          build_folder="build/release"
+          xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
+          release_name="fuego-desktop-ubuntu24-v$xfg_ver"
+          app_name="FuegoWallet"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          cmake ../..
+          make -j4
+          cd ../..
+          
+          cd build/release
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          cp "$app_name" "$release_name/"
+          # Include STARK CLI in release
+          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
+          tar -czf "$release_name".tar.gz "$release_name"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu24-release
+          path: build/release/fuego-desktop-ubuntu24-v*.tar.gz
+
+  build-macos-intel:
+    name: Build macOS Intel
+    runs-on: macos-13  # Intel runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install boost qt@5
+
+      - name: Clone fuego
         run: |
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
@@ -108,41 +183,128 @@ jobs:
       - name: Build
         run: |
           export PATH="/usr/local/opt/qt@5/bin:$PATH"
-          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
-          release_name=fuego-desktop-macOS-v"$xfg_version"
-          qmake Fuego-GUI.pro
-          make -j$(sysctl -n hw.ncpu)
-          mkdir $release_name
-          mkdir -p $release_name/tools
-          mv Fuego-Wallet.app $release_name
+          build_folder="build/release"
+          xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
+          release_name="fuego-desktop-macOS-intel-v$xfg_ver"
+          app_name="Fuego-Wallet.app"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          cmake ../..
+          make -j4
+          cd ../..
+          
+          cd build/release
+          macdeployqt "$app_name"
+          cpack
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          mv *.dmg "$release_name".dmg
           # Include STARK CLI in release
-          cp xfg-stark-cli $release_name/tools/
-          cp download-stark-cli.sh $release_name/tools/
-          cp scripts/auto_stark_proof.sh $release_name/tools/
-          cp STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name/
-          tar -czf "$release_name".tar.gz "$release_name"
+          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
+          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-release
-          path: fuego-desktop-macOS-v*.tar.gz
+          name: macos-intel-release
+          path: build/release/fuego-desktop-macOS-intel-v*.zip
 
-  build-windows:
-    name: Build Windows
-    runs-on: windows-latest
+  build-macos-apple-silicon:
+    name: Build macOS Apple Silicon
+    runs-on: macos-14  # Apple Silicon runner
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install dependencies
         run: |
-          choco install qt-sdk boost --version=1.72.0 cmake -y
-          echo "C:\Qt\5.15.2\msvc2019_64\bin" >> $GITHUB_PATH
-          echo "C:\Program Files\Boost\lib64-msvc-14.2" >> $GITHUB_PATH
+          brew install boost qt@5
 
-      - name: Setup cryptonote submodule
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-macos.tar.gz") | .browser_download_url')
+          
+          echo "Downloading STARK CLI from: $RELEASE_URL"
+          
+          # Download and extract the binary
+          curl -L -o xfg-stark-cli-macos.tar.gz "$RELEASE_URL"
+          tar -xzf xfg-stark-cli-macos.tar.gz
+          
+          # Make binary executable
+          chmod +x xfg-stark-cli
+          
+          # Verify the binary works
+          ./xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
+      - name: Build
+        run: |
+          export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+          build_folder="build/release"
+          xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/v||')
+          release_name="fuego-desktop-macOS-apple-silicon-v$xfg_ver"
+          app_name="Fuego-Wallet.app"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          cmake ../..
+          make -j4
+          cd ../..
+          
+          cd build/release
+          macdeployqt "$app_name"
+          cpack
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          mv *.dmg "$release_name".dmg
+          # Include STARK CLI in release
+          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
+          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-apple-silicon-release
+          path: build/release/fuego-desktop-macOS-apple-silicon-v*.zip
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
+    env:
+      BOOST_ROOT: C:/tools/boost/x86_64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          choco install boost-msvc-14.3 --version=1.82.0
+          choco install qt5 --version=5.15.2
+
+      - name: Clone fuego
         run: |
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
           git clone https://github.com/colinritman/fuego.git cryptonote
@@ -151,14 +313,13 @@ jobs:
         run: |
           # Get the latest release info
           $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/ColinRitman/xfgwin/releases/latest"
-          $downloadUrl = ($releaseInfo.assets | Where-Object { $_.name -eq "xfg-stark-cli-windows.tar.gz" }).browser_download_url
+          $asset = $releaseInfo.assets | Where-Object { $_.name -eq "xfg-stark-cli-windows.tar.gz" }
+          $downloadUrl = $asset.browser_download_url
           
           Write-Host "Downloading STARK CLI from: $downloadUrl"
           
           # Download and extract the binary
           Invoke-WebRequest -Uri $downloadUrl -OutFile "xfg-stark-cli-windows.tar.gz"
-          
-          # Extract using tar (available in Windows 10+)
           tar -xzf xfg-stark-cli-windows.tar.gz
           
           # Verify the binary works
@@ -168,29 +329,43 @@ jobs:
 
       - name: Build
         run: |
-          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
-          release_name=fuego-desktop-windows-v"$xfg_version"
-          qmake Fuego-GUI.pro "CONFIG+=release"
-          nmake -f Makefile.Release
-          mkdir $release_name
-          mkdir $release_name\tools
-          mv release/Fuego-Wallet.exe $release_name
+          $xfgVer = $env:GITHUB_REF -replace "refs/tags/v", ""
+          $releaseName = "fuego-desktop-windows-v$xfgVer"
+          $appName = "Fuego-Wallet.exe"
+
+          # Clean up any existing CMake cache files
+          Remove-Item -Force CMakeCache.txt -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          New-Item -ItemType Directory -Path "build\release" -Force
+          Set-Location "build\release"
+          cmake ..\..
+          cmake --build . --config Release --parallel 4
+          Set-Location ..\..
+          
+          Set-Location "build\release"
+          windeployqt "$appName"
+          cpack
+          New-Item -ItemType Directory -Path "$releaseName" -Force
+          New-Item -ItemType Directory -Path "$releaseName\tools" -Force
+          Move-Item "*.exe" "$releaseName\"
           # Include STARK CLI in release
-          copy xfg-stark-cli.exe $release_name\tools\
-          copy download-stark-cli.sh $release_name\tools\
-          copy scripts\auto_stark_proof.sh $release_name\tools\
-          copy STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name\
-          powershell Compress-Archive -Path "$release_name" -DestinationPath "$release_name.zip"
+          Copy-Item "..\..\xfg-stark-cli.exe" "$releaseName\tools\"
+          Copy-Item "..\..\download-stark-cli.sh" "$releaseName\tools\"
+          Copy-Item "..\..\scripts\auto_stark_proof.sh" "$releaseName\tools\"
+          Copy-Item "..\..\STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$releaseName\"
+          Compress-Archive -Path "$releaseName", "*.exe" -DestinationPath "$releaseName.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: fuego-desktop-windows-v*.zip
+          path: build/release/fuego-desktop-windows-v*.zip
 
   create-release:
     name: Create Release
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-ubuntu22, build-ubuntu24, build-macos-intel, build-macos-apple-silicon, build-windows]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -202,12 +377,49 @@ jobs:
         run: ls -R artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v4
         with:
           files: artifacts/*/*
           fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            ## 🚀 Fuego Desktop Release
+            
+            ### 📦 Downloads
+            
+            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> **Ubuntu 22.04** - [Download](../../releases/download/${{ github.ref_name }}/fuego-desktop-ubuntu22-v${{ github.ref_name }}.tar.gz)
+            
+            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> **Ubuntu 24.04** - [Download](../../releases/download/${{ github.ref_name }}/fuego-desktop-ubuntu24-v${{ github.ref_name }}.tar.gz)
+            
+            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> **macOS Intel** - [Download](../../releases/download/${{ github.ref_name }}/fuego-desktop-macOS-intel-v${{ github.ref_name }}.zip)
+            
+            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> **macOS Apple Silicon** - [Download](../../releases/download/${{ github.ref_name }}/fuego-desktop-macOS-apple-silicon-v${{ github.ref_name }}.zip)
+            
+            <img src="https://cdn-icons-png.flaticon.com/512/882/882602.png" width="16"> **Windows** - [Download](../../releases/download/${{ github.ref_name }}/fuego-desktop-windows-v${{ github.ref_name }}.zip)
+            
+            ### 🔧 What's Included
+            
+            - **Fuego Desktop Wallet** - Full-featured desktop wallet
+            - **XFG STARK CLI** - Command-line tool for STARK proof generation
+            - **Auto STARK Proof Script** - Automated proof generation
+            - **Integration Documentation** - Complete setup guides
+            
+            ### 📋 Installation Instructions
+            
+            1. Download the appropriate package for your operating system
+            2. Extract the archive
+            3. Run the executable
+            4. Follow the on-screen setup wizard
+            
+            ### 🛠️ STARK CLI Integration
+            
+            The STARK CLI is included in the `tools/` directory of each release. This enables:
+            - Automatic STARK proof generation
+            - Privacy-preserving transactions
+            - Advanced cryptographic operations
+            
+            For detailed integration instructions, see `STARK_CLI_INTEGRATION_OPTIMIZATION.md` in the release package.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
