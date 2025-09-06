@@ -22,22 +22,16 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Download STARK CLI from colinritman/xfgwin release
+      - name: Download XFG STARK CLI
         run: |
-          # Get the latest release info
-          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
-          
-          echo "Downloading STARK CLI from: $RELEASE_URL"
-          
-          # Download and extract the binary
-          curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
-          tar -xzf xfg-stark-cli-linux.tar.gz
-          
-          # Make binary executable
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
           chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
           
           # Verify the binary works
-          ./xfg-stark-cli --version
+          ./bin/xfg-stark-cli --version
           
           echo "✅ STARK CLI downloaded and verified successfully"
 
@@ -92,22 +86,16 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Download STARK CLI from colinritman/xfgwin release
+      - name: Download XFG STARK CLI
         run: |
-          # Get the latest release info
-          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
-          
-          echo "Downloading STARK CLI from: $RELEASE_URL"
-          
-          # Download and extract the binary
-          curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
-          tar -xzf xfg-stark-cli-linux.tar.gz
-          
-          # Make binary executable
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
           chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
           
           # Verify the binary works
-          ./xfg-stark-cli --version
+          ./bin/xfg-stark-cli --version
           
           echo "✅ STARK CLI downloaded and verified successfully"
 
@@ -161,22 +149,16 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Download STARK CLI from colinritman/xfgwin release
+      - name: Download XFG STARK CLI
         run: |
-          # Get the latest release info
-          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-macos.tar.gz") | .browser_download_url')
-          
-          echo "Downloading STARK CLI from: $RELEASE_URL"
-          
-          # Download and extract the binary
-          curl -L -o xfg-stark-cli-macos.tar.gz "$RELEASE_URL"
-          tar -xzf xfg-stark-cli-macos.tar.gz
-          
-          # Make binary executable
+          # Download pre-built xfg-stark-cli binary from releases
+          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-x86_64
           chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
           
           # Verify the binary works
-          ./xfg-stark-cli --version
+          ./bin/xfg-stark-cli --version
           
           echo "✅ STARK CLI downloaded and verified successfully"
 
@@ -233,22 +215,16 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Download STARK CLI from colinritman/xfgwin release
+      - name: Download XFG STARK CLI
         run: |
-          # Get the latest release info
-          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-macos.tar.gz") | .browser_download_url')
-          
-          echo "Downloading STARK CLI from: $RELEASE_URL"
-          
-          # Download and extract the binary
-          curl -L -o xfg-stark-cli-macos.tar.gz "$RELEASE_URL"
-          tar -xzf xfg-stark-cli-macos.tar.gz
-          
-          # Make binary executable
+          # Download pre-built xfg-stark-cli binary from releases
+          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-aarch64
           chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
           
           # Verify the binary works
-          ./xfg-stark-cli --version
+          ./bin/xfg-stark-cli --version
           
           echo "✅ STARK CLI downloaded and verified successfully"
 
@@ -319,21 +295,16 @@ jobs:
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
           git clone https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Download STARK CLI from colinritman/xfgwin release
+      - name: Download XFG STARK CLI
+        shell: powershell
         run: |
-          # Get the latest release info
-          $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/ColinRitman/xfgwin/releases/latest"
-          $asset = $releaseInfo.assets | Where-Object { $_.name -eq "xfg-stark-cli-windows.tar.gz" }
-          $downloadUrl = $asset.browser_download_url
-          
-          Write-Host "Downloading STARK CLI from: $downloadUrl"
-          
-          # Download and extract the binary
-          Invoke-WebRequest -Uri $downloadUrl -OutFile "xfg-stark-cli-windows.tar.gz"
-          tar -xzf xfg-stark-cli-windows.tar.gz
+          # Download pre-built xfg-stark-cli binary from releases
+          Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows-x86_64.exe" -OutFile "xfg-stark-cli.exe"
+          New-Item -ItemType Directory -Path "bin" -Force
+          Move-Item "xfg-stark-cli.exe" "bin/"
           
           # Verify the binary works
-          .\xfg-stark-cli.exe --version
+          .\bin\xfg-stark-cli.exe --version
           
           Write-Host "✅ STARK CLI downloaded and verified successfully"
 
