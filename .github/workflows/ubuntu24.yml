@@ -1,0 +1,80 @@
+name: Ubuntu 24.04
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-ubuntu24:
+    name: Ubuntu 24.04
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev build-essential cmake
+
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/usexfg/fuego.git cryptonote
+
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
+          
+          echo "Downloading STARK CLI from: $RELEASE_URL"
+          
+          # Download and extract the binary
+          curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
+          tar -xzf xfg-stark-cli-linux.tar.gz
+          
+          # Make binary executable
+          chmod +x xfg-stark-cli
+          
+          # Verify the binary works
+          ./xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
+      - name: Build
+        id: build
+        run: |
+          xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/||')
+          release_name=fuego-desktop-ubuntu-2404-v"$xfg_version"
+          build_folder="build/release"
+
+          cd cryptonote && make -j4 build-release
+          cd ..
+          mkdir $release_name
+          mkdir -p $release_name/icon
+          mkdir -p $release_name/tools
+          mv cryptonote/build/release/Fuego-Wallet $release_name
+          cp fuego-desktop.desktop $release_name
+          cp src/images/fuego.png $release_name/icon
+          # Include STARK CLI in release
+          cp xfg-stark-cli $release_name/tools/
+          cp download-stark-cli.sh $release_name/tools/
+          cp scripts/auto_stark_proof.sh $release_name/tools/
+          cp STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name/
+          tar -czf "$release_name".tar.gz "$release_name"
+          sha256=$(shasum -a 256 "$release_name".tar.gz | awk '{print toupper($1)}')
+
+          echo "sha256=${sha256}" >> $GITHUB_OUTPUT
+          echo "release_name=${release_name}.tar.gz" >> $GITHUB_OUTPUT
+          echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v4
+        with:
+          files: ${{ steps.build.outputs.release_name }}
+          name: Fuego Desktop v${{ steps.build.outputs.xfg_version }}
+          body: |
+            <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" width="16"> [Download for Ubuntu 24.04](../../releases/download/${{ steps.build.outputs.xfg_version }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            `SHA256 : ${{ steps.build.outputs.sha256 }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
