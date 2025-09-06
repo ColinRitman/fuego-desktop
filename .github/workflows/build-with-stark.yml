@@ -11,22 +11,8 @@ on:
     - cron: '*/2 * * * *'  # Run every 2 minutes for monitoring
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            package_manager: apt
-            qt_version: "5.15"
-          - os: macos-latest
-            package_manager: brew
-            qt_version: "5.15"
-          - os: windows-latest
-            package_manager: choco
-            qt_version: "5.15"
-
+  build-ubuntu:
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Fuego Wallet
       uses: actions/checkout@v4
@@ -53,15 +39,10 @@ jobs:
         cd xfgwin
         git checkout complete-xfgwin-system
         cargo build --bin xfg-stark-cli --release
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          dir target\\release\\xfg-stark-cli.exe
-        else
-          ls -la target/release/xfg-stark-cli
-        fi
+        ls -la target/release/xfg-stark-cli
       shell: bash
 
     - name: Setup Qt (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
@@ -69,23 +50,6 @@ jobs:
         sudo apt-get install -y libboost-all-dev cmake build-essential
         sudo apt-get install -y libssl-dev libcurl4-openssl-dev
         sudo apt-get install -y pkg-config
-
-    - name: Setup Qt (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        # Handle cmake conflict - uninstall existing cmake first
-        brew list cmake && brew uninstall cmake || true
-        brew install qt@5 boost cmake
-        export PATH="/usr/local/opt/qt@5/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
-        echo "PATH=$PATH" >> $GITHUB_ENV
-
-    - name: Setup Qt (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install qt5 boost cmake --yes
-        # Set Qt environment variables
-        echo "QT_DIR=C:\Qt\5.15.2\msvc2019_64" >> $env:GITHUB_ENV
-        echo "PATH=C:\Qt\5.15.2\msvc2019_64\bin;$env:PATH" >> $env:GITHUB_ENV
 
     - name: Fix Submodules
       run: |
@@ -247,35 +211,17 @@ jobs:
     - name: Fix Serialization Conflicts
       run: |
         # Comment out conflicting serialization functions more carefully
-        if [ "$RUNNER_OS" == "macOS" ]; then
-          sed -i '' '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
-        else
-          sed -i '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
-        fi
+        sed -i '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
 
     - name: Build Fuego Wallet (qmake)
       run: |
-        # Clean build directory on macOS due to SDK version changes
-        if [ "$RUNNER_OS" = "macOS" ]; then
-          rm -rf .qmake.stash Makefile* *.o
-        fi
         # Use qmake instead of cmake for better compatibility
         qmake Fuego-GUI.pro
-        if [ "$RUNNER_OS" = "Windows" ]; then
-          nmake || make -j2
-        elif [ "$RUNNER_OS" = "macOS" ]; then
-          make -j$(sysctl -n hw.ncpu) || make -j2
-        else
-          make -j$(nproc) || make -j2
-        fi
+        make -j$(nproc) || make -j2
 
     - name: Test STARK CLI Integration
       run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          dir xfgwin\\target\\release\\xfg-stark-cli.exe
-        else
-          ls -la xfgwin/target/release/xfg-stark-cli
-        fi
+        ls -la xfgwin/target/release/xfg-stark-cli
         chmod +x scripts/auto_stark_proof.sh
         ./scripts/auto_stark_proof.sh --test || echo "STARK test failed but continuing"
       shell: bash
@@ -289,7 +235,318 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: fuego-wallet-${{ matrix.os }}
+        name: fuego-wallet-ubuntu
+        path: |
+          fuego-desktop.app/Contents/MacOS/fuego-desktop
+          fuego-desktop
+          xfgwin/target/release/xfg-stark-cli
+          scripts/auto_stark_proof.sh
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout Fuego Wallet
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Checkout STARK CLI
+      uses: actions/checkout@v4
+      with:
+        repository: colinritman/xfgwin
+        path: xfgwin
+        ref: complete-xfgwin-system
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Build STARK CLI
+      run: |
+        cd xfgwin
+        git checkout complete-xfgwin-system
+        cargo build --bin xfg-stark-cli --release
+        ls -la target/release/xfg-stark-cli
+
+    - name: Setup Qt (macOS)
+      run: |
+        brew list cmake && brew uninstall cmake || true
+        brew install qt@5 cmake boost pkg-config
+        echo "PATH=$PATH" >> $GITHUB_ENV
+
+    - name: Fix Submodules
+      run: |
+        git submodule update --init --recursive
+        if [ ! -d "cryptonote/.git" ]; then
+          git clone https://github.com/colinritman/fuego.git cryptonote
+        fi
+        if [ ! -d "libqrencode/.git" ]; then
+          git clone https://github.com/fukuchi/libqrencode.git libqrencode
+        fi
+
+    - name: Create Missing Headers
+      run: |
+        # Create CryptoNoteWalletConfig.h
+        mkdir -p src
+        echo '#ifndef CRYPTONOTEWALLETCONFIG_H' > src/CryptoNoteWalletConfig.h
+        echo '#define CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        echo '// Wallet configuration constants' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MAJOR 1' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MINOR 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_PATCH 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_DISPLAY_NAME "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_TICKER "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#endif // CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        
+        # Create phmap.h
+        mkdir -p cryptonote/external/parallel_hashmap
+        echo '// Minimal phmap.h header for compatibility' > cryptonote/external/parallel_hashmap/phmap.h
+        echo '#ifndef PHMAP_H' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#define PHMAP_H' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#include <unordered_map>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#include <unordered_set>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo 'namespace phmap {' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K, typename V, typename Hash = std::hash<K>>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using flat_hash_map = std::unordered_map<K, V, Hash>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using flat_hash_set = std::unordered_set<K>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K, typename V, typename Hash = std::hash<K>>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using parallel_flat_hash_map = std::unordered_map<K, V, Hash>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '}' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#endif' >> cryptonote/external/parallel_hashmap/phmap.h
+        
+        # Create TcpConnection.h stub
+        mkdir -p cryptonote/src/System
+        echo '#pragma once' > cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'class TcpConnection {' >> cryptonote/src/System/TcpConnection.h
+        echo 'public:' >> cryptonote/src/System/TcpConnection.h
+        echo '    TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    virtual ~TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    ' >> cryptonote/src/System/TcpConnection.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpConnection.h
+        echo '    void close() {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    bool isConnected() const { return false; }' >> cryptonote/src/System/TcpConnection.h
+        echo '    void write(const void* data, size_t size) {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    size_t read(void* data, size_t size) { return 0; }' >> cryptonote/src/System/TcpConnection.h
+        echo '};' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpConnection.h
+        
+        # Create TcpListener.h stub
+        echo '#pragma once' > cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'class TcpListener {' >> cryptonote/src/System/TcpListener.h
+        echo 'public:' >> cryptonote/src/System/TcpListener.h
+        echo '    TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    virtual ~TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    ' >> cryptonote/src/System/TcpListener.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpListener.h
+        echo '    void start() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    void stop() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    bool isListening() const { return false; }' >> cryptonote/src/System/TcpListener.h
+        echo '};' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpListener.h
+
+    - name: Fix Serialization Conflicts
+      run: |
+        # Comment out conflicting serialization functions more carefully
+        sed -i '' '/template.*flat_hash_map/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
+        sed -i '' '/template.*parallel_flat_hash_map/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
+
+    - name: Build Fuego Wallet (qmake)
+      run: |
+        # Clean build directory on macOS due to SDK version changes
+        rm -rf .qmake.stash Makefile* *.o
+        # Use qmake instead of cmake for better compatibility
+        qmake Fuego-GUI.pro
+        make -j$(sysctl -n hw.ncpu) || make -j2
+
+    - name: Test STARK CLI Integration
+      run: |
+        ls -la xfgwin/target/release/xfg-stark-cli
+        chmod +x scripts/auto_stark_proof.sh
+        ./scripts/auto_stark_proof.sh --test || echo "STARK test failed but continuing"
+      shell: bash
+
+    - name: Create Release Package
+      if: github.event_name == 'release'
+      run: |
+        ls -la fuego-desktop.app/Contents/MacOS/fuego-desktop || echo "macOS app not found"
+        ls -la fuego-desktop || echo "Linux binary not found"
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: fuego-wallet-macos
+        path: |
+          fuego-desktop.app/Contents/MacOS/fuego-desktop
+          fuego-desktop
+          xfgwin/target/release/xfg-stark-cli
+          scripts/auto_stark_proof.sh
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Fuego Wallet
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Checkout STARK CLI
+      uses: actions/checkout@v4
+      with:
+        repository: colinritman/xfgwin
+        path: xfgwin
+        ref: complete-xfgwin-system
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Build STARK CLI
+      run: |
+        cd xfgwin
+        git checkout complete-xfgwin-system
+        cargo build --bin xfg-stark-cli --release
+        dir target\\release\\xfg-stark-cli.exe
+      shell: bash
+
+    - name: Setup Qt (Windows)
+      run: |
+        choco install qt5 boost cmake --yes
+        echo "QT_DIR=C:\Qt\5.15.2\msvc2019_64" >> $env:GITHUB_ENV
+        echo "PATH=C:\Qt\5.15.2\msvc2019_64\bin;C:\Program Files\CMake\bin;$env:PATH" >> $env:GITHUB_ENV
+
+    - name: Fix Submodules
+      run: |
+        git submodule update --init --recursive
+        if [ ! -d "cryptonote/.git" ]; then
+          git clone https://github.com/colinritman/fuego.git cryptonote
+        fi
+        if [ ! -d "libqrencode/.git" ]; then
+          git clone https://github.com/fukuchi/libqrencode.git libqrencode
+        fi
+
+    - name: Create Missing Headers
+      run: |
+        # Create CryptoNoteWalletConfig.h
+        mkdir -p src
+        echo '#ifndef CRYPTONOTEWALLETCONFIG_H' > src/CryptoNoteWalletConfig.h
+        echo '#define CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        echo '// Wallet configuration constants' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MAJOR 1' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_MINOR 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_VERSION_PATCH 0' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_DISPLAY_NAME "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#define WALLET_CURRENCY_TICKER "XFG"' >> src/CryptoNoteWalletConfig.h
+        echo '#endif // CRYPTONOTEWALLETCONFIG_H' >> src/CryptoNoteWalletConfig.h
+        
+        # Create phmap.h
+        mkdir -p cryptonote/external/parallel_hashmap
+        echo '// Minimal phmap.h header for compatibility' > cryptonote/external/parallel_hashmap/phmap.h
+        echo '#ifndef PHMAP_H' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#define PHMAP_H' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#include <unordered_map>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#include <unordered_set>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo 'namespace phmap {' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K, typename V, typename Hash = std::hash<K>>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using flat_hash_map = std::unordered_map<K, V, Hash>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using flat_hash_set = std::unordered_set<K>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    template<typename K, typename V, typename Hash = std::hash<K>>' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '    using parallel_flat_hash_map = std::unordered_map<K, V, Hash>;' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '}' >> cryptonote/external/parallel_hashmap/phmap.h
+        echo '#endif' >> cryptonote/external/parallel_hashmap/phmap.h
+        
+        # Create TcpConnection.h stub
+        mkdir -p cryptonote/src/System
+        echo '#pragma once' > cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'class TcpConnection {' >> cryptonote/src/System/TcpConnection.h
+        echo 'public:' >> cryptonote/src/System/TcpConnection.h
+        echo '    TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    virtual ~TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    ' >> cryptonote/src/System/TcpConnection.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpConnection.h
+        echo '    void close() {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    bool isConnected() const { return false; }' >> cryptonote/src/System/TcpConnection.h
+        echo '    void write(const void* data, size_t size) {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    size_t read(void* data, size_t size) { return 0; }' >> cryptonote/src/System/TcpConnection.h
+        echo '};' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpConnection.h
+        
+        # Create TcpListener.h stub
+        echo '#pragma once' > cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo 'class TcpListener {' >> cryptonote/src/System/TcpListener.h
+        echo 'public:' >> cryptonote/src/System/TcpListener.h
+        echo '    TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    virtual ~TcpListener() = default;' >> cryptonote/src/System/TcpListener.h
+        echo '    ' >> cryptonote/src/System/TcpListener.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpListener.h
+        echo '    void start() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    void stop() {}' >> cryptonote/src/System/TcpListener.h
+        echo '    bool isListening() const { return false; }' >> cryptonote/src/System/TcpListener.h
+        echo '};' >> cryptonote/src/System/TcpListener.h
+        echo '' >> cryptonote/src/System/TcpListener.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpListener.h
+
+    - name: Fix Serialization Conflicts
+      run: |
+        # Comment out conflicting serialization functions more carefully
+        sed -i 's/^template.*flat_hash_map/\/\/ &/' cryptonote/src/Serialization/SerializationOverloads.h
+        sed -i 's/^template.*parallel_flat_hash_map/\/\/ &/' cryptonote/src/Serialization/SerializationOverloads.h
+
+    - name: Build Fuego Wallet (qmake)
+      run: |
+        # Use qmake instead of cmake for better compatibility
+        qmake Fuego-GUI.pro
+        nmake || make -j2
+
+    - name: Test STARK CLI Integration
+      run: |
+        dir target\\release\\xfg-stark-cli.exe
+        chmod +x scripts/auto_stark_proof.sh
+        ./scripts/auto_stark_proof.sh --test || echo "STARK test failed but continuing"
+      shell: bash
+
+    - name: Create Release Package
+      if: github.event_name == 'release'
+      run: |
+        ls -la fuego-desktop.app/Contents/MacOS/fuego-desktop || echo "macOS app not found"
+        ls -la fuego-desktop || echo "Linux binary not found"
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: fuego-wallet-windows
         path: |
           fuego-desktop.app/Contents/MacOS/fuego-desktop
           fuego-desktop
