@@ -212,9 +212,8 @@ jobs:
       - name: Fix Serialization Conflicts
         run: |
           # Comment out conflicting serialization functions and using statements
-          sed -i 's|^using phmap::flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i 's|^using phmap::parallel_flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-          sed -i '/template <typename K, typename V, typename Hash>/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
+          perl -pi -e 's/^using phmap::flat_hash_map;/\/\/ using phmap::flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
+          perl -pi -e 's/^using phmap::parallel_flat_hash_map;/\/\/ using phmap::parallel_flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
 
     - name: Build Fuego Wallet (qmake)
       run: |
@@ -367,10 +366,8 @@ jobs:
     - name: Fix Serialization Conflicts
       run: |
         # Comment out conflicting serialization functions and using statements
-        sed -i '' 's|^using phmap::flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i '' 's|^using phmap::parallel_flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i '' '/template.*flat_hash_map/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i '' '/template.*parallel_flat_hash_map/,/^}/s/^/\/\/ /' cryptonote/src/Serialization/SerializationOverloads.h
+        perl -pi -e 's/^using phmap::flat_hash_map;/\/\/ using phmap::flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
+        perl -pi -e 's/^using phmap::parallel_flat_hash_map;/\/\/ using phmap::parallel_flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
 
     - name: Build Fuego Wallet (qmake)
       run: |
@@ -526,10 +523,8 @@ jobs:
     - name: Fix Serialization Conflicts
       run: |
         # Comment out conflicting serialization functions and using statements
-        sed -i 's|^using phmap::flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i 's|^using phmap::parallel_flat_hash_map;|// &|' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i 's/^template.*flat_hash_map/\/\/ &/' cryptonote/src/Serialization/SerializationOverloads.h
-        sed -i 's/^template.*parallel_flat_hash_map/\/\/ &/' cryptonote/src/Serialization/SerializationOverloads.h
+        perl -pi -e 's/^using phmap::flat_hash_map;/\/\/ using phmap::flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
+        perl -pi -e 's/^using phmap::parallel_flat_hash_map;/\/\/ using phmap::parallel_flat_hash_map;/' cryptonote/src/Serialization/SerializationOverloads.h
 
     - name: Build Fuego Wallet (qmake)
       run: |
