@@ -204,27 +204,25 @@ jobs:
         
         # Create TcpConnection.h stub
         mkdir -p cryptonote/src/System
-        cat > cryptonote/src/System/TcpConnection.h << 'EOF'
-#pragma once
-
-#include "Dispatcher.h"
-
-namespace System {
-
-class TcpConnection {
-public:
-    TcpConnection() = default;
-    virtual ~TcpConnection() = default;
-    
-    // Stub methods
-    void close() {}
-    bool isConnected() const { return false; }
-    void write(const void* data, size_t size) {}
-    size_t read(void* data, size_t size) { return 0; }
-};
-
-} // namespace System
-EOF
+        echo '#pragma once' > cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '#include "Dispatcher.h"' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'namespace System {' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo 'class TcpConnection {' >> cryptonote/src/System/TcpConnection.h
+        echo 'public:' >> cryptonote/src/System/TcpConnection.h
+        echo '    TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    virtual ~TcpConnection() = default;' >> cryptonote/src/System/TcpConnection.h
+        echo '    ' >> cryptonote/src/System/TcpConnection.h
+        echo '    // Stub methods' >> cryptonote/src/System/TcpConnection.h
+        echo '    void close() {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    bool isConnected() const { return false; }' >> cryptonote/src/System/TcpConnection.h
+        echo '    void write(const void* data, size_t size) {}' >> cryptonote/src/System/TcpConnection.h
+        echo '    size_t read(void* data, size_t size) { return 0; }' >> cryptonote/src/System/TcpConnection.h
+        echo '};' >> cryptonote/src/System/TcpConnection.h
+        echo '' >> cryptonote/src/System/TcpConnection.h
+        echo '} // namespace System' >> cryptonote/src/System/TcpConnection.h
 
     - name: Fix Serialization Conflicts
       run: |
