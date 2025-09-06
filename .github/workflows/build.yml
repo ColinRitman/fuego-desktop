@@ -10,26 +10,35 @@ jobs:
   build-windows:
     name: Windows
     runs-on: windows-2022
-    env:
-      BOOST_ROOT: C:\hostedtoolcache\windows\Boost\1.72.0\x86_64
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Setup msbuild
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Install dependencies using vcpkg
+        shell: powershell
         run: |
-          # Install CMake
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          # Install vcpkg
+          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
           
-          # Install Qt5
-          choco install qt5 --version=5.15.2
+          # Install Boost components and qrencode
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic qrencode --triplet=x64-windows
           
-          # Verify Boost is available (pre-installed on GitHub Actions)
-          if (Test-Path "$env:BOOST_ROOT") {
-            Write-Output "✅ Boost is available at $env:BOOST_ROOT"
-          } else {
-            Write-Error "❌ Boost not found at $env:BOOST_ROOT"
-            exit 1
-          }
+          # Set environment variables
+          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
+          
+          Write-Output "✅ Dependencies installed via vcpkg"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          host: "windows"
+          target: "desktop"
+          modules: "qtcharts"
+          install-deps: "true"
 
       - name: Clone fuego
         run: |
@@ -64,7 +73,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           New-Item -ItemType Directory -Path "build\release" -Force
           Set-Location "build\release"
-          cmake ..\..
+          cmake -G "Visual Studio 17 2022" ..\.. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
           cmake --build . --config Release --parallel 4
           Set-Location ..\..
           

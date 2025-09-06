@@ -13,31 +13,37 @@ include_directories(${CRYPTONOTE_SOURCE_DIR})
 cmake_policy(SET CMP0167 NEW)
 
 # Find required libraries
-# Handle different Boost versions and CMake configurations
-if(APPLE)
-    # macOS with Boost 1.89.0+ uses individual component packages
-    find_package(boost_system REQUIRED)
-    find_package(boost_filesystem REQUIRED)
-    find_package(boost_thread REQUIRED)
+# Use consistent Boost configuration across all platforms
+set(Boost_NO_BOOST_CMAKE ON)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+# Try to find Boost with components first
+find_package(Boost QUIET COMPONENTS system filesystem thread)
+
+# If that fails, try without components (for newer Boost versions)
+if(NOT Boost_FOUND)
+    find_package(Boost REQUIRED)
     
-    # Create a unified Boost target
-    add_library(Boost::boost INTERFACE IMPORTED)
-    target_link_libraries(Boost::boost INTERFACE 
-        boost::system 
-        boost::filesystem 
-        boost::thread
-    )
+    # Create individual component targets if they don't exist
+    if(NOT TARGET Boost::system)
+        add_library(Boost::system INTERFACE IMPORTED)
+        target_link_libraries(Boost::system INTERFACE ${Boost_LIBRARIES})
+        target_include_directories(Boost::system INTERFACE ${Boost_INCLUDE_DIRS})
+    endif()
     
-    # Set Boost variables for compatibility
-    set(Boost_LIBRARIES boost::system boost::filesystem boost::thread)
-    set(Boost_INCLUDE_DIRS ${boost_system_INCLUDE_DIRS})
-else()
-    # Linux/Windows use traditional Boost configuration
-    set(Boost_NO_BOOST_CMAKE ON)
-    set(Boost_USE_STATIC_LIBS OFF)
-    set(Boost_USE_MULTITHREADED ON)
-    set(Boost_USE_STATIC_RUNTIME OFF)
-    find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+    if(NOT TARGET Boost::filesystem)
+        add_library(Boost::filesystem INTERFACE IMPORTED)
+        target_link_libraries(Boost::filesystem INTERFACE ${Boost_LIBRARIES})
+        target_include_directories(Boost::filesystem INTERFACE ${Boost_INCLUDE_DIRS})
+    endif()
+    
+    if(NOT TARGET Boost::thread)
+        add_library(Boost::thread INTERFACE IMPORTED)
+        target_link_libraries(Boost::thread INTERFACE ${Boost_LIBRARIES})
+        target_include_directories(Boost::thread INTERFACE ${Boost_INCLUDE_DIRS})
+    endif()
 endif()
 
 # CryptoNote library is already created in main CMakeLists.txt

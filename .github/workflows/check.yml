@@ -18,21 +18,21 @@ jobs:
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Install Boost using vcpkg
+      - name: Install dependencies using vcpkg
         shell: powershell
         run: |
           # Install vcpkg
           git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
           C:\vcpkg\bootstrap-vcpkg.bat
           
-          # Install Boost components
-          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic --triplet=x64-windows
+          # Install Boost components and qrencode
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic qrencode --triplet=x64-windows
           
           # Set environment variables
           echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
           echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
           
-          Write-Output "✅ Boost installed via vcpkg"
+          Write-Output "✅ Dependencies installed via vcpkg"
           
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -137,7 +137,27 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools "$xfg_version"
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
+
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli-linux.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux.tar.gz
+          tar -xzf xfg-stark-cli-linux.tar.gz
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
+
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Build
+        id: build
+        run: |
+          xfg_version=${GITHUB_SHA::7}
+          release_name=fuego-desktop-ubuntu-2404-dev-"$xfg_version"
 
           # Clean up any existing CMake cache files
           rm -f CMakeCache.txt CMakeCache.txt.*
@@ -177,7 +197,27 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools "$xfg_version"
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev git
+
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          wget -O xfg-stark-cli-linux.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux.tar.gz
+          tar -xzf xfg-stark-cli-linux.tar.gz
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
+
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Build
+        id: build
+        run: |
+          xfg_version=${GITHUB_SHA::7}
+          release_name=fuego-desktop-ubuntu-2204-dev-"$xfg_version"
 
           # Clean up any existing CMake cache files
           rm -f CMakeCache.txt CMakeCache.txt.*
