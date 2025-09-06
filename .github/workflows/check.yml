@@ -18,12 +18,22 @@ jobs:
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1.0.2
 
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
       - name: Install dependencies using vcpkg
         shell: powershell
         run: |
-          # Install vcpkg
-          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
-          C:\vcpkg\bootstrap-vcpkg.bat
+          # Install vcpkg if not cached
+          if (-not (Test-Path "C:\vcpkg")) {
+            git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+            C:\vcpkg\bootstrap-vcpkg.bat
+          }
           
           # Install Boost components and libqrencode
           C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode --triplet=x64-windows
@@ -133,6 +143,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: apt-${{ runner.os }}-${{ hashFiles('**/apt-packages.txt') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
 
       - name: Install dependencies
         run: |
@@ -258,6 +276,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew/Library/Caches/Homebrew
+          key: homebrew-${{ runner.os }}-${{ hashFiles('**/brew-packages.txt') }}
+          restore-keys: |
+            homebrew-${{ runner.os }}-
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -324,6 +352,16 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache Homebrew packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew/Library/Caches/Homebrew
+          key: homebrew-${{ runner.os }}-${{ hashFiles('**/brew-packages.txt') }}
+          restore-keys: |
+            homebrew-${{ runner.os }}-
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
