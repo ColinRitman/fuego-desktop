@@ -40,7 +40,8 @@ jobs:
         shell: powershell
         run: |
           # Download pre-built xfg-stark-cli binary from releases
-          Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows-x86_64.exe" -OutFile "xfg-stark-cli.exe"
+          Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows.tar.gz" -OutFile "xfg-stark-cli-windows.tar.gz"
+          tar -xzf xfg-stark-cli-windows.tar.gz
           New-Item -ItemType Directory -Path "bin" -Force
           Move-Item "xfg-stark-cli.exe" "bin/"
           
@@ -116,7 +117,8 @@ jobs:
       - name: Download XFG STARK CLI
         run: |
           # Download pre-built xfg-stark-cli binary from releases
-          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
+          wget -O xfg-stark-cli-linux.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux.tar.gz
+          tar -xzf xfg-stark-cli-linux.tar.gz
           chmod +x xfg-stark-cli
           mkdir -p bin
           mv xfg-stark-cli bin/
@@ -192,7 +194,8 @@ jobs:
       - name: Download XFG STARK CLI
         run: |
           # Download pre-built xfg-stark-cli binary from releases
-          wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64
+          wget -O xfg-stark-cli-linux.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux.tar.gz
+          tar -xzf xfg-stark-cli-linux.tar.gz
           chmod +x xfg-stark-cli
           mkdir -p bin
           mv xfg-stark-cli bin/
@@ -267,7 +270,8 @@ jobs:
       - name: Download XFG STARK CLI
         run: |
           # Download pre-built xfg-stark-cli binary from releases
-          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-x86_64
+          curl -L -o xfg-stark-cli-macos.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos.tar.gz
+          tar -xzf xfg-stark-cli-macos.tar.gz
           chmod +x xfg-stark-cli
           mkdir -p bin
           mv xfg-stark-cli bin/

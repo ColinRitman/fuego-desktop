@@ -266,6 +266,69 @@ class BuildFixer:
                 
         return True
     
+    def fix_stark_cli_issue(self, job_name: str) -> bool:
+        """Fix STARK CLI issues"""
+        self.log(f"Fixing STARK CLI issue for {job_name}")
+        
+        # Update all workflow files
+        workflow_files = list(self.workflows_dir.glob("*.yml"))
+        
+        for workflow_file in workflow_files:
+            try:
+                content = workflow_file.read_text()
+                updated = False
+                
+                # Check if it's using incorrect direct binary downloads
+                if "xfg-stark-cli-linux-x86_64" in content:
+                    # Replace direct download with tar.gz download and extraction
+                    new_content = content.replace(
+                        "wget -O xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux-x86_64",
+                        "wget -O xfg-stark-cli-linux.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-linux.tar.gz\ntar -xzf xfg-stark-cli-linux.tar.gz"
+                    )
+                    workflow_file.write_text(new_content)
+                    self.log(f"Updated Linux STARK CLI download in {workflow_file.name}")
+                    self.fixes_applied.append(f"Updated Linux STARK CLI download in {workflow_file.name}")
+                    updated = True
+                    
+                if "xfg-stark-cli-windows-x86_64.exe" in content:
+                    # Replace direct download with tar.gz download and extraction
+                    new_content = content.replace(
+                        'Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows-x86_64.exe" -OutFile "xfg-stark-cli.exe"',
+                        'Invoke-WebRequest -Uri "https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-windows.tar.gz" -OutFile "xfg-stark-cli-windows.tar.gz"\ntar -xzf xfg-stark-cli-windows.tar.gz'
+                    )
+                    workflow_file.write_text(new_content)
+                    self.log(f"Updated Windows STARK CLI download in {workflow_file.name}")
+                    self.fixes_applied.append(f"Updated Windows STARK CLI download in {workflow_file.name}")
+                    updated = True
+                    
+                if "xfg-stark-cli-macos-x86_64" in content:
+                    # Replace direct download with tar.gz download and extraction
+                    new_content = content.replace(
+                        "curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-x86_64",
+                        "curl -L -o xfg-stark-cli-macos.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos.tar.gz\ntar -xzf xfg-stark-cli-macos.tar.gz"
+                    )
+                    workflow_file.write_text(new_content)
+                    self.log(f"Updated macOS STARK CLI download in {workflow_file.name}")
+                    self.fixes_applied.append(f"Updated macOS STARK CLI download in {workflow_file.name}")
+                    updated = True
+                    
+                if "xfg-stark-cli-macos-aarch64" in content:
+                    # Replace direct download with tar.gz download and extraction
+                    new_content = content.replace(
+                        "curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-aarch64",
+                        "curl -L -o xfg-stark-cli-macos.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos.tar.gz\ntar -xzf xfg-stark-cli-macos.tar.gz"
+                    )
+                    workflow_file.write_text(new_content)
+                    self.log(f"Updated macOS Apple Silicon STARK CLI download in {workflow_file.name}")
+                    self.fixes_applied.append(f"Updated macOS Apple Silicon STARK CLI download in {workflow_file.name}")
+                    updated = True
+                    
+            except Exception as e:
+                self.log(f"Failed to update {workflow_file.name}: {e}", "ERROR")
+                return False
+                
+        return True
+    
     def apply_fixes(self, issues: List[str]) -> bool:
         """Apply fixes for detected issues"""
         success = True
@@ -286,7 +349,7 @@ class BuildFixer:
             elif issue_type == "cryptonote":
                 self.log(f"Cryptonote issue detected for {job_name} - manual fix required")
             elif issue_type == "stark_cli":
-                self.log(f"STARK CLI issue detected for {job_name} - manual fix required")
+                success &= self.fix_stark_cli_issue(job_name)
                 
         return success
     
