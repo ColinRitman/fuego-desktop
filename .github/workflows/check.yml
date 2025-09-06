@@ -135,6 +135,10 @@ jobs:
           xfg_version=${GITHUB_SHA::7}
           release_name=fuego-desktop-ubuntu-2404-dev-"$xfg_version"
 
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
@@ -182,6 +186,10 @@ jobs:
           xfg_version=${GITHUB_SHA::7}
           release_name=fuego-desktop-ubuntu-2204-dev-"$xfg_version"
 
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
@@ -235,6 +243,10 @@ jobs:
           release_name="fuego-desktop-macOS-dev-$xfg_ver"
           app_name="Fuego-Wallet.app"
 
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
@@ -285,6 +297,10 @@ jobs:
           release_name="fuego-desktop-macOS11-$xfg_ver"
           app_name="Fuego-Wallet.app"
 
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
