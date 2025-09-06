@@ -53,10 +53,31 @@ StarkProofService::~StarkProofService() {
 }
 
 bool StarkProofService::isBurnTransaction(const QString& transactionHash, quint64 amount) {
-  // Check if this is a burn transaction
-  // For now, we'll consider any transaction with amount > 0 as a potential burn
-  // In a real implementation, you'd check the transaction type/extra data
-  return amount > 0 && !transactionHash.isEmpty();
+  // Check if this is a burn transaction by looking for tx-extra tag 0x08
+  // Tag 0x08 indicates a burn transaction for cross-chain operations
+  
+  // Get the transaction details from the wallet
+  CryptoNote::TransactionId txId = WalletAdapter::instance().getTransactionId(transactionHash);
+  if (txId == CryptoNote::WALLET_INVALID_TRANSACTION_ID) {
+    return false;
+  }
+  
+  // Get transaction info
+  CryptoNote::TransactionInfo txInfo;
+  if (!WalletAdapter::instance().getTransaction(txId, txInfo)) {
+    return false;
+  }
+  
+  // Check tx-extra for burn tag 0x08
+  const std::vector<uint8_t>& extra = txInfo.extra;
+  for (size_t i = 0; i < extra.size(); ++i) {
+    if (extra[i] == 0x08) {
+      // Found burn tag 0x08
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 void StarkProofService::generateStarkProof(const QString& transactionHash, 
@@ -137,73 +158,6 @@ QString StarkProofService::getProofStatus(const QString& transactionHash) {
   return m_statusMap.value(transactionHash, "none");
 }
 
-// ProofGenerationWorker implementation
-void ProofGenerationWorker::generateProof(const QString& transactionHash, 
-                                         const QString& recipientAddress,
-                                         quint64 burnAmount) {
-  
-  // Get the path to the auto-stark-proof script
-  QString scriptPath = QCoreApplication::applicationDirPath() + "/auto_stark_proof.sh";
-  
-  // Check if script exists in different locations
-  if (!QFile::exists(scriptPath)) {
-    scriptPath = QCoreApplication::applicationDirPath() + "/scripts/auto_stark_proof.sh";
-  }
-  
-  if (!QFile::exists(scriptPath)) {
-    scriptPath = QCoreApplication::applicationDirPath() + "/../scripts/auto_stark_proof.sh";
-  }
-  
-  // For development/testing
-  if (!QFile::exists(scriptPath)) {
-    scriptPath = QCoreApplication::applicationDirPath() + "/../scripts/auto_stark_proof.sh";
-  }
-  
-  // For submodule setup
-  if (!QFile::exists(scriptPath)) {
-    scriptPath = QCoreApplication::applicationDirPath() + "/xfgwin/scripts/auto_stark_proof.sh";
-  }
-  
-  if (!QFile::exists(scriptPath)) {
-    Q_EMIT proofGenerationCompleted(transactionHash, false, "Auto STARK proof script not found");
-    return;
-  }
-  
-  // Make script executable
-  QFile scriptFile(scriptPath);
-  scriptFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | 
-                           QFile::ReadGroup | QFile::ExeGroup | 
-                           QFile::ReadOther | QFile::ExeOther);
-  
-  // Run the auto-stark-proof script with transaction details
-  QProcess process;
-  
-  QStringList arguments;
-  arguments << transactionHash << recipientAddress << QString::number(burnAmount);
-  
-  // Set environment variables for the script
-  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  env.insert("FUEGO_AUTO_STARK_PROOF", "true");
-  env.insert("FUEGO_ELDERNODE_VERIFICATION", "true");
-  env.insert("FUEGO_ELDERNODE_TIMEOUT", "300");
-  process.setProcessEnvironment(env);
-  
-  process.start(scriptPath, arguments);
-  
-  if (process.waitForFinished(300000)) { // 5 minute timeout
-    if (process.exitCode() == 0) {
-      Q_EMIT proofGenerationCompleted(transactionHash, true, "");
-    } else {
-      QString error = QString::fromUtf8(process.readAllStandardError());
-      Q_EMIT proofGenerationCompleted(transactionHash, false, error);
-    }
-  } else {
-    process.kill();
-    Q_EMIT proofGenerationCompleted(transactionHash, false, "Proof generation timed out");
-  }
-}
-
 } // namespace WalletGui
 
 #include "StarkProofService.moc"
-#include "ProofGenerationWorker.moc"
