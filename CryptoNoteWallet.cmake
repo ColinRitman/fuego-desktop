@@ -13,6 +13,8 @@ include_directories(${CRYPTONOTE_SOURCE_DIR})
 cmake_policy(SET CMP0167 NEW)
 
 # Find required libraries
+# Handle different Boost versions and CMake configurations
+set(Boost_NO_BOOST_CMAKE ON)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 
 # CryptoNote source files
