@@ -1,6 +1,7 @@
 name: Build Fuego Wallet with STARK CLI
 
 # Trigger workflow on push, PR, manual dispatch, and schedule
+# Fix YAML syntax issues with sed commands
 on:
   push:
     branches: [ main, develop, master ]
