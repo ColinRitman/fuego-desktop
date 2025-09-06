@@ -221,9 +221,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-macos:
-    name: macOS
-    runs-on: macos-latest
+  build-macos-intel:
+    name: macOS Intel
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -279,9 +279,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   
-  build-macos-15:
-    name: macOS-15
-    runs-on: macos-15
+  build-macos-apple-silicon:
+    name: macOS Apple Silicon
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
