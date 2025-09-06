@@ -9,6 +9,9 @@ set(CRYPTONOTE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cryptonote/include)
 include_directories(${CRYPTONOTE_INCLUDE_DIR})
 include_directories(${CRYPTONOTE_SOURCE_DIR})
 
+# Set CMake policy to suppress Boost warning
+cmake_policy(SET CMP0167 NEW)
+
 # Find required libraries
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 

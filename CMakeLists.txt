@@ -3,14 +3,15 @@ cmake_minimum_required(VERSION 3.10)
 # Set project name before including other files
 set(CN_PROJECT_NAME "FuegoWallet")
 
-include(CryptoNoteWallet.cmake)
-include(QREncode.cmake)
-
 if(APPLE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version")  
 endif(APPLE)
 
-project(${CN_PROJECT_NAME})
+# Enable C++ language before including other files that need it
+project(${CN_PROJECT_NAME} CXX)
+
+include(CryptoNoteWallet.cmake)
+include(QREncode.cmake)
 
 execute_process(COMMAND git log -1 --pretty=format:%h
 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
