@@ -1,5 +1,5 @@
 <img height="800px" width="800px" src="https://github.com/usexfg/fuego-data/blob/90b6ca4eda30018eeb053eccea330e2117b4396d/fuego-images/fuegovlyria.png"><img/>
-#  Fuego🔥Wallet
+# Fuego 🔥 Wallet
 
 ##  Desktop Privacy Banking App 
 
