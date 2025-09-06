@@ -24,6 +24,25 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/usexfg/fuego.git cryptonote
 
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
+          
+          echo "Downloading STARK CLI from: $RELEASE_URL"
+          
+          # Download and extract the binary
+          curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
+          tar -xzf xfg-stark-cli-linux.tar.gz
+          
+          # Make binary executable
+          chmod +x xfg-stark-cli
+          
+          # Verify the binary works
+          ./xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
       - name: Build
         run: |
           export PATH="/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH"
@@ -32,9 +51,15 @@ jobs:
           make -j$(nproc) build-release
           mkdir $release_name
           mkdir -p $release_name/icon
+          mkdir -p $release_name/tools
           mv build/release/Fuego-Wallet $release_name
           cp fuego-desktop.desktop $release_name
           cp src/images/fuego.png $release_name/icon
+          # Include STARK CLI in release
+          cp xfg-stark-cli $release_name/tools/
+          cp download-stark-cli.sh $release_name/tools/
+          cp scripts/auto_stark_proof.sh $release_name/tools/
+          cp STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name/
           tar -czf "$release_name".tar.gz "$release_name"
 
       - name: Upload artifact
@@ -61,6 +86,25 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/usexfg/fuego.git cryptonote
 
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-macos.tar.gz") | .browser_download_url')
+          
+          echo "Downloading STARK CLI from: $RELEASE_URL"
+          
+          # Download and extract the binary
+          curl -L -o xfg-stark-cli-macos.tar.gz "$RELEASE_URL"
+          tar -xzf xfg-stark-cli-macos.tar.gz
+          
+          # Make binary executable
+          chmod +x xfg-stark-cli
+          
+          # Verify the binary works
+          ./xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
       - name: Build
         run: |
           export PATH="/usr/local/opt/qt@5/bin:$PATH"
@@ -69,7 +113,13 @@ jobs:
           qmake Fuego-GUI.pro
           make -j$(sysctl -n hw.ncpu)
           mkdir $release_name
+          mkdir -p $release_name/tools
           mv Fuego-Wallet.app $release_name
+          # Include STARK CLI in release
+          cp xfg-stark-cli $release_name/tools/
+          cp download-stark-cli.sh $release_name/tools/
+          cp scripts/auto_stark_proof.sh $release_name/tools/
+          cp STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name/
           tar -czf "$release_name".tar.gz "$release_name"
 
       - name: Upload artifact
@@ -97,6 +147,25 @@ jobs:
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
           git clone https://github.com/usexfg/fuego.git cryptonote
 
+      - name: Download STARK CLI from colinritman/xfgwin release
+        run: |
+          # Get the latest release info
+          $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/ColinRitman/xfgwin/releases/latest"
+          $downloadUrl = ($releaseInfo.assets | Where-Object { $_.name -eq "xfg-stark-cli-windows.tar.gz" }).browser_download_url
+          
+          Write-Host "Downloading STARK CLI from: $downloadUrl"
+          
+          # Download and extract the binary
+          Invoke-WebRequest -Uri $downloadUrl -OutFile "xfg-stark-cli-windows.tar.gz"
+          
+          # Extract using tar (available in Windows 10+)
+          tar -xzf xfg-stark-cli-windows.tar.gz
+          
+          # Verify the binary works
+          .\xfg-stark-cli.exe --version
+          
+          Write-Host "✅ STARK CLI downloaded and verified successfully"
+
       - name: Build
         run: |
           xfg_version=$(echo "$GITHUB_REF" | sed 's|refs/tags/v||')
@@ -104,7 +173,13 @@ jobs:
           qmake Fuego-GUI.pro "CONFIG+=release"
           nmake -f Makefile.Release
           mkdir $release_name
+          mkdir $release_name\tools
           mv release/Fuego-Wallet.exe $release_name
+          # Include STARK CLI in release
+          copy xfg-stark-cli.exe $release_name\tools\
+          copy download-stark-cli.sh $release_name\tools\
+          copy scripts\auto_stark_proof.sh $release_name\tools\
+          copy STARK_CLI_INTEGRATION_OPTIMIZATION.md $release_name\
           powershell Compress-Archive -Path "$release_name" -DestinationPath "$release_name.zip"
 
       - name: Upload artifact

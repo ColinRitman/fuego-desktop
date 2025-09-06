@@ -19,30 +19,24 @@ jobs:
         submodules: recursive
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Checkout STARK CLI
-      uses: actions/checkout@v4
-      with:
-        repository: colinritman/xfgwin
-        path: xfgwin
-        ref: complete-xfgwin-system
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-
-    - name: Build STARK CLI
+    - name: Download STARK CLI from colinritman/xfgwin release
       run: |
-        cd xfgwin
-        git checkout complete-xfgwin-system
-        cargo build --bin xfg-stark-cli --release
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          dir target\\release\\xfg-stark-cli.exe
-        else
-          ls -la target/release/xfg-stark-cli
-        fi
+        # Get the latest release info
+        RELEASE_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r '.assets[] | select(.name=="xfg-stark-cli-linux.tar.gz") | .browser_download_url')
+        
+        echo "Downloading STARK CLI from: $RELEASE_URL"
+        
+        # Download and extract the binary
+        curl -L -o xfg-stark-cli-linux.tar.gz "$RELEASE_URL"
+        tar -xzf xfg-stark-cli-linux.tar.gz
+        
+        # Make binary executable
+        chmod +x xfg-stark-cli
+        
+        # Verify the binary works
+        ./xfg-stark-cli --version
+        
+        echo "✅ STARK CLI downloaded and verified successfully"
       shell: bash
 
     - name: Setup Qt (Ubuntu)
