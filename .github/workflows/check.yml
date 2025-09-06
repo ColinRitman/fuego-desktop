@@ -39,7 +39,7 @@ jobs:
         with:
           host: "windows"
           target: "desktop"
-          modules: "qttools5 qtcharts"
+          modules: "qtcharts"
           install-deps: "true"
 
       - name: Clone fuego
