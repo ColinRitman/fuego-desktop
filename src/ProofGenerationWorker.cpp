@@ -1,4 +1,5 @@
 #include "ProofGenerationWorker.h"
+#include "StarkProofService.h"
 
 #include <QCoreApplication>
 #include <QDir>

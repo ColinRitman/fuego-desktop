@@ -667,7 +667,7 @@ namespace WalletGui
 
   // STARK Proof settings implementation
   bool Settings::isStarkProofEnabled() const {
-    return m_settings.value(OPTION_STARK_PROOF_ENABLED, true).toBool();
+    return m_settings.value(OPTION_STARK_PROOF_ENABLED).toBool(true);
   }
 
   void Settings::setStarkProofEnabled(bool enabled) {
@@ -678,7 +678,7 @@ namespace WalletGui
   }
 
   QString Settings::getDefaultRecipientAddress() const {
-    return m_settings.value(OPTION_DEFAULT_RECIPIENT_ADDRESS, "").toString();
+    return m_settings.value(OPTION_DEFAULT_RECIPIENT_ADDRESS).toString("");
   }
 
   void Settings::setDefaultRecipientAddress(const QString& address) {
@@ -689,7 +689,7 @@ namespace WalletGui
   }
 
   bool Settings::isAutoGenerateProofs() const {
-    return m_settings.value(OPTION_AUTO_GENERATE_PROOFS, true).toBool();
+    return m_settings.value(OPTION_AUTO_GENERATE_PROOFS).toBool(true);
   }
 
   void Settings::setAutoGenerateProofs(bool enabled) {
@@ -700,7 +700,7 @@ namespace WalletGui
   }
 
   bool Settings::isEldernodeVerificationEnabled() const {
-    return m_settings.value(OPTION_ELDERNODE_VERIFICATION_ENABLED, true).toBool();
+    return m_settings.value(OPTION_ELDERNODE_VERIFICATION_ENABLED).toBool(true);
   }
 
   void Settings::setEldernodeVerificationEnabled(bool enabled) {
@@ -711,7 +711,7 @@ namespace WalletGui
   }
 
   int Settings::getEldernodeTimeout() const {
-    return m_settings.value(OPTION_ELDERNODE_TIMEOUT, 300).toInt(); // 5 minutes default
+    return m_settings.value(OPTION_ELDERNODE_TIMEOUT).toInt(300); // 5 minutes default
   }
 
   void Settings::setEldernodeTimeout(int seconds) {

@@ -9,7 +9,7 @@ class ProofGenerationWorker : public QObject {
   Q_OBJECT
 
 public:
-  ProofGenerationWorker() : QObject() {}
+  ProofGenerationWorker();
 
 public slots:
   void generateProof(const QString& transactionHash, 

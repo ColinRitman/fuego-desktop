@@ -63,7 +63,7 @@ bool StarkProofService::isBurnTransaction(const QString& transactionHash, quint6
   }
   
   // Get transaction info
-  CryptoNote::TransactionInfo txInfo;
+  CryptoNote::WalletLegacyTransaction txInfo;
   if (!WalletAdapter::instance().getTransaction(txId, txInfo)) {
     return false;
   }
@@ -97,12 +97,6 @@ void StarkProofService::generateStarkProof(const QString& transactionHash,
                           Q_ARG(QString, transactionHash),
                           Q_ARG(QString, recipientAddress),
                           Q_ARG(quint64, burnAmount));
-}
-
-QString StarkProofService::getProofStatus(const QString& transactionHash) {
-  // Return the current status of proof generation for this transaction
-  // This would be stored in a map or database
-  return "pending"; // Placeholder
 }
 
 bool StarkProofService::isEnabled() const {

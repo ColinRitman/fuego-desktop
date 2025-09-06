@@ -10,6 +10,8 @@
 
 namespace WalletGui {
 
+class ProofGenerationWorker;
+
 class StarkProofService : public QObject {
   Q_OBJECT
   Q_DISABLE_COPY(StarkProofService)
