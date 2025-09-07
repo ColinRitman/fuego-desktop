@@ -53,30 +53,10 @@ StarkProofService::~StarkProofService() {
 }
 
 bool StarkProofService::isBurnTransaction(const QString& transactionHash, quint64 amount) {
-  // Check if this is a burn transaction by looking for tx-extra tag 0x08
-  // Tag 0x08 indicates a burn transaction for cross-chain operations
-  
-  // Get the transaction details from the wallet
-  CryptoNote::TransactionId txId = WalletAdapter::instance().getTransactionId(transactionHash);
-  if (txId == CryptoNote::WALLET_INVALID_TRANSACTION_ID) {
-    return false;
-  }
-  
-  // Get transaction info
-  CryptoNote::WalletLegacyTransaction txInfo;
-  if (!WalletAdapter::instance().getTransaction(txId, txInfo)) {
-    return false;
-  }
-  
-  // Check tx-extra for burn tag 0x08
-  const std::vector<uint8_t>& extra = txInfo.extra;
-  for (size_t i = 0; i < extra.size(); ++i) {
-    if (extra[i] == 0x08) {
-      // Found burn tag 0x08
-      return true;
-    }
-  }
-  
+  // TODO: Implement proper transaction lookup by hash
+  // For now, return false as a placeholder
+  // The real implementation would need to iterate through transactions
+  // or find another way to get transaction details by hash
   return false;
 }
 

@@ -639,7 +639,7 @@ void WalletAdapter::onWalletSendTransactionCompleted(CryptoNote::TransactionId _
   
   // Auto-generate STARK proof and Eldernode verification for burn transactions
   if (_error == 0) { // Transaction successful
-    QString txHash = QString::fromStdString(transaction.hash);
+    QString txHash = QString::fromStdString(Common::podToHex(transaction.hash));
     quint64 amount = transaction.totalAmount;
     
     // Check if this is a burn transaction and STARK proof is enabled
