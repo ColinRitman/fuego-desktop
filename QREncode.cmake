@@ -3,8 +3,21 @@
 
 if(WIN32)
     # On Windows, use vcpkg to find libqrencode
-    find_package(QREncode CONFIG REQUIRED)
-    add_library(qrencode ALIAS QREncode::QREncode)
+    find_package(QREncode CONFIG QUIET)
+    if(QREncode_FOUND)
+        add_library(qrencode ALIAS QREncode::QREncode)
+    else()
+        # Fallback to manual configuration
+        find_library(QRENCODE_LIBRARIES qrencode)
+        find_path(QRENCODE_INCLUDE_DIRS qrencode.h)
+        if(QRENCODE_LIBRARIES AND QRENCODE_INCLUDE_DIRS)
+            add_library(qrencode INTERFACE IMPORTED)
+            target_link_libraries(qrencode INTERFACE ${QRENCODE_LIBRARIES})
+            target_include_directories(qrencode INTERFACE ${QRENCODE_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR "libqrencode not found")
+        endif()
+    endif()
 else()
     # On Unix systems, use PkgConfig
     find_package(PkgConfig REQUIRED)

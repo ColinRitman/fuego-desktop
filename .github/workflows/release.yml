@@ -16,6 +16,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -59,7 +63,7 @@ jobs:
           mkdir -p "$release_name/tools"
           cp "$app_name" "$release_name/"
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -81,6 +85,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -124,7 +132,7 @@ jobs:
           mkdir -p "$release_name/tools"
           cp "$app_name" "$release_name/"
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -146,6 +154,10 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           modules: "qtcharts"
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -195,7 +207,7 @@ jobs:
           mkdir -p "$release_name/tools"
           mv *.dmg "$release_name".dmg
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -217,6 +229,10 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           modules: "qtcharts"
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -265,7 +281,7 @@ jobs:
           mkdir -p "$release_name/tools"
           mv *.dmg "$release_name".dmg
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -280,26 +296,40 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-2022
-    env:
-      BOOST_ROOT: C:\hostedtoolcache\windows\Boost\1.72.0\x86_64
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Setup msbuild
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Install dependencies using vcpkg
+        shell: powershell
         run: |
-          # Install CMake
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          # Install vcpkg
+          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
           
-          # Install Qt5
-          choco install qt5 --version=5.15.2
+          # Install Boost components and libqrencode
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode --triplet=x64-windows
           
-          # Verify Boost is available (pre-installed on GitHub Actions)
-          if (Test-Path "$env:BOOST_ROOT") {
-            Write-Output "✅ Boost is available at $env:BOOST_ROOT"
-          } else {
-            Write-Error "❌ Boost not found at $env:BOOST_ROOT"
-            exit 1
-          }
+          # Set environment variables
+          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $env:GITHUB_ENV
+          
+          Write-Output "✅ Dependencies installed via vcpkg"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          host: "windows"
+          target: "desktop"
+          modules: "qtcharts"
+          install-deps: "true"
+          
+      - name: Set Qt environment variables
+        shell: powershell
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $env:GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -333,7 +363,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           New-Item -ItemType Directory -Path "build\release" -Force
           Set-Location "build\release"
-          cmake ..\..
+          cmake ..\.. -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
           cmake --build . --config Release --parallel 4
           Set-Location ..\..
           
@@ -344,7 +374,7 @@ jobs:
           New-Item -ItemType Directory -Path "$releaseName\tools" -Force
           Move-Item "*.exe" "$releaseName\"
           # Include STARK CLI in release
-          Copy-Item "..\..\xfg-stark-cli.exe" "$releaseName\tools\"
+          Copy-Item "..\..\bin\xfg-stark-cli.exe" "$releaseName\tools\"
           Copy-Item "..\..\download-stark-cli.sh" "$releaseName\tools\"
           Copy-Item "..\..\scripts\auto_stark_proof.sh" "$releaseName\tools\"
           Copy-Item "..\..\STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$releaseName\"

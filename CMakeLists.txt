@@ -27,7 +27,7 @@ WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 OUTPUT_VARIABLE GIT_REVISION)
 
 set(CRYPTONOTE_LIB cryptonote)
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.11.0\\msvc2017_64\\lib\\cmake\\")
+set(CMAKE_PREFIX_PATH "$ENV{Qt5_DIR}")
 
 include_directories(${CMAKE_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -219,6 +219,23 @@ set(CRYPTONOTE_SOURCES
   cryptonote/src/BlockchainExplorer/BlockchainExplorerErrors.cpp
 )
 
+# Create the cryptonote library
+add_library(${CRYPTONOTE_LIB} STATIC ${CRYPTONOTE_SOURCES})
+
+# Set target properties for cryptonote library
+set_target_properties(${CRYPTONOTE_LIB} PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+)
+
+# Link cryptonote library with required libraries
+target_link_libraries(${CRYPTONOTE_LIB} ${Boost_LIBRARIES})
+
+# Add platform-specific sources to cryptonote library
+if(UNIX AND NOT APPLE)
+  target_sources(${CRYPTONOTE_LIB} PRIVATE cryptonote/external/miniupnpc/minissdpc.c)
+endif()
+
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS src/*.h)
 file(GLOB_RECURSE FORMS src/gui/ui/*.ui)
@@ -247,7 +264,6 @@ if (WIN32)
   set(QTMAIN Qt5::WinMain)
 
 elseif (UNIX)
-  set(CRYPTONOTE_SOURCES ${CRYPTONOTE_SOURCES} cryptonote/external/miniupnpc/minissdpc.c)
   if (APPLE)
     enable_language(ASM)
     file(GLOB_RECURSE OBJC_SOURCES src/*.mm)
@@ -285,10 +301,11 @@ endif ()
 
 include_directories(cryptonote/src/Platform/${PLATFORM_DIR})
 file(GLOB PLATFORM_SOURCES cryptonote/src/Platform/${PLATFORM_DIR}/System/*)
-set(CRYPTONOTE_SOURCES ${CRYPTONOTE_SOURCES} ${PLATFORM_SOURCES})
 
-# Cryptonote library is already created in CryptoNoteWallet.cmake
-# No need to create it again here
+# Add platform-specific sources to cryptonote library
+if(PLATFORM_SOURCES)
+  target_sources(${CRYPTONOTE_LIB} PRIVATE ${PLATFORM_SOURCES})
+endif()
 
 
 add_executable(${PROJECT_NAME} ${BUILD_PLATFORM} ${BUILD_RESOURCES} ${SOURCES} ${HEADERS} ${UIS} ${RCC})

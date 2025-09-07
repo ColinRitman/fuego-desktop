@@ -1,89 +1,152 @@
-# STARK CLI Integration Optimization
+# XFG STARK CLI Integration Optimization
 
-## 🎯 **Problem Solved**
+## Overview
 
-Instead of building `xfg-stark-cli` from source in CI (which is slow and unnecessary), we now link to the existing `colinritman/xfgwin` release v0.8.8.
+This document provides optimization guidelines for integrating the XFG STARK CLI with the Fuego Desktop wallet.
 
-## ✅ **Changes Made**
+## STARK CLI Binary
 
-### **1. Removed Local Build Workflow**
-- **Deleted**: `xfgwin/.github/workflows/release-stark-cli.yml`
-- **Reason**: No need to build when pre-built binaries are available
+The STARK CLI binary is automatically downloaded during the build process and included in the release packages. The binary is platform-specific:
 
-### **2. Created Download Workflow**
-- **Added**: `.github/workflows/download-stark-cli.yml`
-- **Purpose**: Downloads pre-built binaries from `colinritman/xfgwin` releases
-- **Benefits**: Faster CI, no Rust compilation needed
+- **Windows**: `bin/xfg-stark-cli.exe`
+- **macOS**: `bin/xfg-stark-cli`
+- **Linux**: `bin/xfg-stark-cli`
 
-### **3. Updated Integration Scripts**
-- **Modified**: `scripts/auto_stark_proof.sh`
-- **Changes**:
-  - Updated CLI path detection to look for downloaded binary
-  - Added `check_stark_cli()` function with helpful error messages
-  - Provides download instructions if CLI not found
+## Integration Scripts
 
-### **4. Created Download Script**
-- **Added**: `download-stark-cli.sh`
-- **Purpose**: Easy one-command download of STARK CLI
-- **Features**:
-  - Auto-detects platform (Linux, macOS, Windows)
-  - Downloads latest release from `colinritman/xfgwin`
-  - Verifies binary works correctly
-  - Provides usage instructions
+### Auto STARK Proof Script
 
-## 🚀 **Benefits**
+The `auto_stark_proof.sh` script provides automated STARK proof generation:
 
-### **Performance**
-- ✅ **Faster CI**: No Rust compilation (saves ~5-10 minutes)
-- ✅ **Smaller artifacts**: Only downloads binary, not source
-- ✅ **Less resource usage**: No cargo dependencies
-
-### **Reliability**
-- ✅ **Pre-tested binaries**: Uses official releases
-- ✅ **Version consistency**: Always uses latest stable release
-- ✅ **Cross-platform**: Works on Linux, macOS, Windows
-
-### **Maintenance**
-- ✅ **No build maintenance**: Don't need to maintain Rust build config
-- ✅ **Automatic updates**: Can easily update to newer releases
-- ✅ **Simpler CI**: Fewer moving parts
-
-## 📋 **Usage**
-
-### **For Developers**
 ```bash
-# Download STARK CLI
-./download-stark-cli.sh
+#!/bin/bash
+# Auto STARK Proof Generation Script
 
-# Use with integration script
-./scripts/auto_stark_proof.sh <tx_hash> <recipient> <amount>
+CLI_PATH="./bin/xfg-stark-cli"
+
+if [ ! -f "$CLI_PATH" ]; then
+    echo "❌ STARK CLI binary not found at $CLI_PATH"
+    exit 1
+fi
+
+echo "✅ STARK CLI found at $CLI_PATH"
+echo "Version: $($CLI_PATH --version)"
+
+# Generate STARK proof
+$CLI_PATH --generate-proof --input-file input.json --output-file proof.json
+
+echo "🚀 STARK proof generation complete!"
 ```
 
-### **For CI/CD**
-The `download-stark-cli.yml` workflow automatically:
-1. Downloads the appropriate binary for the platform
-2. Verifies it works correctly
-3. Uploads as artifact for use in other jobs
+### Download Script
 
-## 🔗 **Release Information**
+The `download-stark-cli.sh` script allows users to update the STARK CLI binary:
 
-- **Repository**: `colinritman/xfgwin`
-- **Latest Release**: `v0.8.8`
-- **Available Platforms**: Linux, macOS, Windows
-- **Asset Format**: `.tar.gz` and `.zip`
+```bash
+#!/bin/bash
+# Download XFG STARK CLI from colinritman/xfgwin releases
 
-## 📁 **Files Modified**
+PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')
+if [[ "$PLATFORM" == "darwin" ]]; then
+  PLATFORM="macos"
+elif [[ "$PLATFORM" == "linux" ]]; then
+  PLATFORM="linux"
+else
+  echo "❌ Unsupported platform: $PLATFORM"
+  exit 1
+fi
 
-1. **`.github/workflows/download-stark-cli.yml`** - New download workflow
-2. **`scripts/auto_stark_proof.sh`** - Updated to use downloaded binary
-3. **`download-stark-cli.sh`** - New download script
-4. **`xfgwin/.github/workflows/release-stark-cli.yml`** - Removed (no longer needed)
+ASSET_NAME="xfg-stark-cli-$PLATFORM.tar.gz"
+BINARY_NAME="xfg-stark-cli"
 
-## 🎉 **Result**
+echo "📥 Downloading STARK CLI for $PLATFORM..."
 
-- ✅ **CI builds faster** (no Rust compilation)
-- ✅ **Uses official releases** (more reliable)
-- ✅ **Easy to update** (just change version number)
-- ✅ **Better user experience** (clear error messages and instructions)
+# Get download URL
+DOWNLOAD_URL=$(curl -s https://api.github.com/repos/ColinRitman/xfgwin/releases/latest | jq -r ".assets[] | select(.name==\"$ASSET_NAME\") | .browser_download_url")
 
-The STARK CLI integration is now **optimized and efficient**! 🚀
+if [ -z "$DOWNLOAD_URL" ]; then
+  echo "❌ Could not find download URL for $ASSET_NAME"
+  exit 1
+fi
+
+# Download and extract
+curl -L -o "$ASSET_NAME" "$DOWNLOAD_URL"
+tar -xzf "$ASSET_NAME"
+chmod +x "$BINARY_NAME"
+
+echo "✅ STARK CLI downloaded successfully"
+echo "Binary: $BINARY_NAME"
+echo "Version: $($BINARY_NAME --version)"
+```
+
+## Build Integration
+
+The STARK CLI is automatically integrated into the build process:
+
+1. **Download**: Binary is downloaded during CI/CD
+2. **Verification**: Binary is tested to ensure it works
+3. **Packaging**: Binary is included in release packages
+4. **Installation**: Binary is installed alongside the wallet
+
+## Usage
+
+### Command Line
+
+```bash
+# Check version
+./bin/xfg-stark-cli --version
+
+# Generate proof
+./bin/xfg-stark-cli --generate-proof --input input.json --output proof.json
+
+# Verify proof
+./bin/xfg-stark-cli --verify-proof --proof proof.json
+```
+
+### Integration with Wallet
+
+The STARK CLI can be integrated with the wallet through:
+
+1. **Automatic Proof Generation**: Generate proofs for transactions
+2. **Proof Verification**: Verify proofs from other users
+3. **Privacy Enhancement**: Enable privacy-preserving transactions
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Binary Not Found**: Ensure the binary is in the correct path
+2. **Permission Denied**: Make sure the binary has execute permissions
+3. **Version Mismatch**: Update to the latest version if needed
+
+### Debug Commands
+
+```bash
+# Check binary location
+ls -la bin/xfg-stark-cli*
+
+# Check permissions
+ls -la bin/xfg-stark-cli
+
+# Test binary
+./bin/xfg-stark-cli --help
+```
+
+## Updates
+
+The STARK CLI is automatically updated during the build process. Users can also manually update using the download script.
+
+## Support
+
+For issues with STARK CLI integration:
+
+1. Check the binary is correctly downloaded
+2. Verify permissions are set correctly
+3. Test with the provided scripts
+4. Check the GitHub repository for updates
+
+## Version Information
+
+- **Current Version**: v0.8.8
+- **Repository**: https://github.com/colinritman/xfgwin
+- **Release URL**: https://github.com/colinritman/xfgwin/releases/latest

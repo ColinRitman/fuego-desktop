@@ -20,7 +20,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # Try to find Boost with components first
-find_package(Boost QUIET COMPONENTS system filesystem thread)
+find_package(Boost QUIET COMPONENTS system filesystem thread chrono atomic)
 
 # If that fails, try without components (for newer Boost versions)
 if(NOT Boost_FOUND)
@@ -43,6 +43,18 @@ if(NOT Boost_FOUND)
         add_library(Boost::thread INTERFACE IMPORTED)
         target_link_libraries(Boost::thread INTERFACE ${Boost_LIBRARIES})
         target_include_directories(Boost::thread INTERFACE ${Boost_INCLUDE_DIRS})
+    endif()
+    
+    if(NOT TARGET Boost::chrono)
+        add_library(Boost::chrono INTERFACE IMPORTED)
+        target_link_libraries(Boost::chrono INTERFACE ${Boost_LIBRARIES})
+        target_include_directories(Boost::chrono INTERFACE ${Boost_INCLUDE_DIRS})
+    endif()
+    
+    if(NOT TARGET Boost::atomic)
+        add_library(Boost::atomic INTERFACE IMPORTED)
+        target_link_libraries(Boost::atomic INTERFACE ${Boost_LIBRARIES})
+        target_include_directories(Boost::atomic INTERFACE ${Boost_INCLUDE_DIRS})
     endif()
 endif()
 

@@ -39,6 +39,11 @@ jobs:
           target: "desktop"
           modules: "qtcharts"
           install-deps: "true"
+          
+      - name: Set Qt environment variables
+        shell: powershell
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $env:GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -84,7 +89,7 @@ jobs:
           New-Item -ItemType Directory -Path "$releaseName\tools" -Force
           Move-Item "*.exe" "$releaseName\"
           # Include STARK CLI in release
-          Copy-Item "..\..\xfg-stark-cli.exe" "$releaseName\tools\"
+          Copy-Item "..\..\bin\xfg-stark-cli.exe" "$releaseName\tools\"
           Copy-Item "..\..\download-stark-cli.sh" "$releaseName\tools\"
           Copy-Item "..\..\scripts\auto_stark_proof.sh" "$releaseName\tools\"
           Copy-Item "..\..\STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$releaseName\"
@@ -117,6 +122,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -161,7 +170,7 @@ jobs:
           mkdir -p "$release_name/tools"
           cp "$app_name" "$release_name/"
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -194,6 +203,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -238,7 +251,7 @@ jobs:
           mkdir -p "$release_name/tools"
           cp "$app_name" "$release_name/"
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -271,6 +284,10 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           modules: "qtcharts"
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -321,7 +338,7 @@ jobs:
           mkdir -p "$release_name/tools"
           mv *.dmg "$release_name".dmg
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
@@ -354,6 +371,10 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           modules: "qtcharts"
+          
+      - name: Set Qt environment variables
+        run: |
+          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -403,7 +424,7 @@ jobs:
           mkdir -p "$release_name/tools"
           mv *.dmg "$release_name".dmg
           # Include STARK CLI in release
-          cp ../../xfg-stark-cli "$release_name/tools/"
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
