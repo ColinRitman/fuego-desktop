@@ -79,6 +79,30 @@ else()
     endif()
 endif()
 
+# Find Boost program_options library
+find_package(Boost REQUIRED COMPONENTS program_options)
+if(Boost_FOUND)
+    message(STATUS "Found Boost program_options: ${Boost_LIBRARIES}")
+else()
+    message(FATAL_ERROR "Boost program_options library not found")
+endif()
+
+# Find QR code library
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(QRENCODE QREncode)
+if(QRENCODE_FOUND)
+    message(STATUS "Found QREncode via pkg-config: ${QRENCODE_LIBRARIES}")
+    set(QRENCODE_LIB ${QRENCODE_LIBRARIES})
+else()
+    find_library(QRENCODE_LIB qrencode)
+    if(QRENCODE_LIB)
+        message(STATUS "Found QREncode library: ${QRENCODE_LIB}")
+    else()
+        message(WARNING "QREncode library not found - QR code functionality may not work")
+        set(QRENCODE_LIB "")
+    endif()
+endif()
+
 # Handle OpenGL on macOS
 if(APPLE)
     find_library(OPENGL_LIBRARY OpenGL)
