@@ -26,6 +26,12 @@ jobs:
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
 
+      - name: Apply cryptonote fix
+        run: |
+          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
+          git -C cryptonote apply ../cryptonote-fix.patch
+          echo "✅ Applied cryptonote compilation fix"
+
       - name: Download XFG STARK CLI
         run: |
           # Download pre-built xfg-stark-cli binary from releases
@@ -94,6 +100,12 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Apply cryptonote fix
+        run: |
+          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
+          git -C cryptonote apply ../cryptonote-fix.patch
+          echo "✅ Applied cryptonote compilation fix"
 
       - name: Download XFG STARK CLI
         run: |
@@ -167,6 +179,12 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Apply cryptonote fix
+        run: |
+          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
+          git -C cryptonote apply ../cryptonote-fix.patch
+          echo "✅ Applied cryptonote compilation fix"
 
       - name: Download XFG STARK CLI
         run: |
@@ -242,6 +260,12 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Apply cryptonote fix
+        run: |
+          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
+          git -C cryptonote apply ../cryptonote-fix.patch
+          echo "✅ Applied cryptonote compilation fix"
 
       - name: Download XFG STARK CLI
         run: |
@@ -335,6 +359,13 @@ jobs:
         run: |
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
           git clone https://github.com/colinritman/fuego.git cryptonote
+
+      - name: Apply cryptonote fix
+        shell: powershell
+        run: |
+          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
+          git -C cryptonote apply ../cryptonote-fix.patch
+          Write-Host "✅ Applied cryptonote compilation fix"
 
       - name: Download XFG STARK CLI
         shell: powershell

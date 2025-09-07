@@ -1,0 +1,100 @@
+--- a/cryptonote/src/CryptoNoteCore/TransactionExtra.h
++++ b/cryptonote/src/CryptoNoteCore/TransactionExtra.h
+@@ -33,6 +33,7 @@
+ #define TX_EXTRA_MESSAGE_TAG                0x04
+ #define TX_EXTRA_TTL                        0x05
++#define TX_EXTRA_ELDERFIER_DEPOSIT          0x06
+ #define TX_EXTRA_YIELD_COMMITMENT           0x07
+ #define TX_EXTRA_HEAT_COMMITMENT            0x08
+ #define TX_EXTRA_CD_DEPOSIT_SECRET          0x09
+@@ -94,6 +95,15 @@ struct TransactionExtraCDDepositSecret {
+   bool serialize(ISerializer& serializer);
+ };
+ 
++struct TransactionExtraElderfierDeposit {
++  Crypto::Hash commitment;          // Commitment hash for elderfier deposit
++  uint64_t amount;                  // Deposit amount
++  uint32_t term_months;             // Term in months
++  std::string deposit_scheme;       // Deposit scheme identifier
++  std::vector<uint8_t> metadata;    // Additional metadata
++  
++  bool serialize(ISerializer& serializer);
++};
++
+ // tx_extra_field format, except tx_extra_padding and tx_extra_pub_key:
+ //   varint tag;
+ //   varint size;
+ //   varint data[];
+-typedef boost::variant<TransactionExtraPadding, TransactionExtraPublicKey, TransactionExtraNonce, TransactionExtraMergeMiningTag, tx_extra_message, TransactionExtraTTL, TransactionExtraHeatCommitment, TransactionExtraYieldCommitment, TransactionExtraCDDepositSecret> TransactionExtraField;
++typedef boost::variant<TransactionExtraPadding, TransactionExtraPublicKey, TransactionExtraNonce, TransactionExtraMergeMiningTag, tx_extra_message, TransactionExtraTTL, TransactionExtraElderfierDeposit, TransactionExtraHeatCommitment, TransactionExtraYieldCommitment, TransactionExtraCDDepositSecret> TransactionExtraField;
+ 
+--- a/cryptonote/src/CryptoNoteCore/TransactionExtra.cpp
++++ b/cryptonote/src/CryptoNoteCore/TransactionExtra.cpp
+@@ -175,6 +175,11 @@ struct ExtraSerializerVisitor : public boost::static_visitor<bool>
+       return true;
+     }
+ 
++    bool operator()(const TransactionExtraElderfierDeposit &t)
++    {
++      return addElderfierDepositToExtra(extra, t);
++    }
++
+     bool operator()(const TransactionExtraHeatCommitment &t)
+     {
+       return addHeatCommitmentToExtra(extra, t);
+@@ -490,6 +495,11 @@ bool TransactionExtraYieldCommitment::serialize(ISerializer &s)
+   return true;
+ }
+ 
++bool TransactionExtraElderfierDeposit::serialize(ISerializer &s)
++{
++  s(commitment, "commitment");
++  s(amount, "amount");
++  s(term_months, "term_months");
++  s(deposit_scheme, "deposit_scheme");
++  s(metadata, "metadata");
++  return true;
++}
++
++// Elderfier deposit helper functions
++bool addElderfierDepositToExtra(std::vector<uint8_t> &tx_extra, const TransactionExtraElderfierDeposit &deposit)
++{
++  tx_extra.push_back(TX_EXTRA_ELDERFIER_DEPOSIT);
++  
++  // Serialize commitment hash (32 bytes)
++  tx_extra.insert(tx_extra.end(), deposit.commitment.data, deposit.commitment.data + sizeof(deposit.commitment.data));
++  
++  // Serialize amount (8 bytes, little-endian)
++  uint64_t amount = deposit.amount;
++  for (int i = 0; i < 8; ++i) {
++    tx_extra.push_back(static_cast<uint8_t>(amount & 0xFF));
++    amount >>= 8;
++  }
++  
++  // Serialize term_months (4 bytes, little-endian)
++  uint32_t termMonths = deposit.term_months;
++  for (int i = 0; i < 4; ++i) {
++    tx_extra.push_back(static_cast<uint8_t>(termMonths & 0xFF));
++    termMonths >>= 8;
++  }
++  
++  // Serialize deposit_scheme length and data
++  uint8_t schemeLength = static_cast<uint8_t>(deposit.deposit_scheme.length());
++  tx_extra.push_back(schemeLength);
++  
++  if (schemeLength > 0) {
++    tx_extra.insert(tx_extra.end(), deposit.deposit_scheme.begin(), deposit.deposit_scheme.end());
++  }
++  
++  // Serialize metadata size and data
++  uint8_t metadataSize = static_cast<uint8_t>(deposit.metadata.size());
++  tx_extra.push_back(metadataSize);
++  
++  if (metadataSize > 0) {
++    tx_extra.insert(tx_extra.end(), deposit.metadata.begin(), deposit.metadata.end());
++  }
++  
++  return true;
++}
++
+ // HEAT commitment helper functions
