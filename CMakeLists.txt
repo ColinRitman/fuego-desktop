@@ -79,12 +79,12 @@ else()
     endif()
 endif()
 
-# Find Boost program_options library
-find_package(Boost REQUIRED COMPONENTS program_options)
+# Find Boost libraries (program_options and filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 if(Boost_FOUND)
-    message(STATUS "Found Boost program_options: ${Boost_LIBRARIES}")
+    message(STATUS "Found Boost libraries: ${Boost_LIBRARIES}")
 else()
-    message(FATAL_ERROR "Boost program_options library not found")
+    message(FATAL_ERROR "Boost libraries not found")
 endif()
 
 # Find QR code library
