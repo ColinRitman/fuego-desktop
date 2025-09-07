@@ -51,7 +51,22 @@ elseif(DEFINED ENV{CMAKE_PREFIX_PATH})
     set(CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
     message(STATUS "Using CMAKE_PREFIX_PATH: $ENV{CMAKE_PREFIX_PATH}")
 else()
-    message(WARNING "Qt5_DIR, Qt5_Dir, or CMAKE_PREFIX_PATH environment variable not set")
+    # Try to find Qt5 automatically
+    find_path(QT5_CMAKE_DIR Qt5Config.cmake
+        PATHS
+        /usr/local/lib/cmake/Qt5
+        /opt/homebrew/lib/cmake/Qt5
+        /usr/lib/cmake/Qt5
+        /Applications/Qt/5.15.2/macos/lib/cmake/Qt5
+        /Users/runner/Qt/5.15.2/macos/lib/cmake/Qt5
+        NO_DEFAULT_PATH
+    )
+    if(QT5_CMAKE_DIR)
+        set(CMAKE_PREFIX_PATH "${QT5_CMAKE_DIR}")
+        message(STATUS "Found Qt5 automatically at: ${QT5_CMAKE_DIR}")
+    else()
+        message(WARNING "Qt5_DIR, Qt5_Dir, CMAKE_PREFIX_PATH not set and Qt5 not found automatically")
+    endif()
 endif()
 
 include_directories(${CMAKE_BINARY_DIR}

@@ -436,38 +436,34 @@ jobs:
 
       - name: Install Qt
         run: |
-          # Install Qt5 via Homebrew instead of using the action
+          # Install Qt5 via Homebrew with explicit components
           brew install qt@5
-          echo "Qt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5" >> $GITHUB_ENV
+          # Find the actual Qt5 installation path
+          QT_PREFIX=$(brew --prefix qt@5)
+          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
+          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
+
       - name: Verify Qt installation
         run: |
           echo "Qt5_DIR: $Qt5_DIR"
           echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
           ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
           find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
-              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
-              echo "Found Qt at: $QT_PATH"
-            else
-              echo "Warning: Could not find Qt installation path"
-            fi
-          fi
-
-      - name: Install dependencies
+          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
+      - name: Verify Qt installation
         run: |
-          brew install boost libqrencode miniupnpc
-
-      - name: Clone fuego
-        run: |
-          rm -rf cryptonote
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
-
-      - name: Download XFG STARK CLI
-        run: |
-          # Download pre-built xfg-stark-cli binary from releases
-          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-aarch64
-          chmod +x xfg-stark-cli
-          mkdir -p bin
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
+          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
+          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
+          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
+          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
+          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
           mv xfg-stark-cli bin/
           
           # Verify the binary works
