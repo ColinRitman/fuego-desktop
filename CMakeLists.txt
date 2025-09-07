@@ -153,24 +153,16 @@ set(CRYPTONOTE_SOURCES
   cryptonote/src/crypto/random.c
   cryptonote/src/crypto/tree-hash.c
   cryptonote/src/crypto/blake256.c
-  cryptonote/src/crypto/chacha8.c
-  cryptonote/src/crypto/crypto-ops-data.c
-  cryptonote/src/crypto/crypto-ops.c
-  cryptonote/src/crypto/crypto.cpp
   cryptonote/src/crypto/groestl.c
   cryptonote/src/crypto/hash-extra-blake.c
   cryptonote/src/crypto/hash-extra-groestl.c
   cryptonote/src/crypto/hash-extra-jh.c
   cryptonote/src/crypto/hash-extra-skein.c
-  cryptonote/src/crypto/hash.c
   cryptonote/src/crypto/jh.c
-  cryptonote/src/crypto/keccak.c
   cryptonote/src/crypto/oaes_lib.c
-  cryptonote/src/crypto/random.c
   cryptonote/src/crypto/skein.c
   cryptonote/src/crypto/slow-hash.c
   cryptonote/src/crypto/slow-hash.cpp
-  cryptonote/src/crypto/tree-hash.c
   cryptonote/src/crypto/aesb.c
   cryptonote/src/CryptoNoteCore/BlockchainIndices.cpp
   cryptonote/src/CryptoNoteCore/BlockchainMessages.cpp
