@@ -48,12 +48,9 @@ jobs:
       - name: Clone fuego
         run: |
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
-          # Try to use a specific commit or branch that doesn't have the compilation error
-          git clone --depth 1 --branch master https://github.com/colinritman/fuego.git cryptonote
-          # If master fails, try without specifying branch
-          if ($LASTEXITCODE -ne 0) {
-            git clone --depth 1 https://github.com/colinritman/fuego.git cryptonote
-          }
+          # Use specific commit that doesn't have compilation errors
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         shell: powershell
@@ -135,7 +132,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -216,7 +214,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -301,7 +300,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -388,7 +388,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |

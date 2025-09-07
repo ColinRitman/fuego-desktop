@@ -70,7 +70,8 @@ jobs:
         shell: powershell
         run: |
           Remove-Item cryptonote -Recurse -Force -ErrorAction Ignore
-          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Pre-build setup
         shell: powershell
@@ -178,7 +179,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
 
 
@@ -245,7 +247,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
 
 
@@ -328,7 +331,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
 
 
@@ -411,7 +415,8 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone -b master https://github.com/colinritman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
 
 
