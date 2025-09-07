@@ -453,16 +453,6 @@ jobs:
           ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
           find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
           find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
-          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
-          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
-          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
-          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
-          mv xfg-stark-cli bin/
-          
-          # Verify the binary works
-          ./bin/xfg-stark-cli --version
-          
-          echo "✅ STARK CLI downloaded and verified successfully"
 
       - name: Build
         id: build
