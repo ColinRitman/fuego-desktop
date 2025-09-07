@@ -47,8 +47,11 @@ if(DEFINED ENV{Qt5_DIR})
 elseif(DEFINED ENV{Qt5_Dir})
     set(CMAKE_PREFIX_PATH "$ENV{Qt5_Dir}")
     message(STATUS "Using Qt5_Dir: $ENV{Qt5_Dir}")
+elseif(DEFINED ENV{CMAKE_PREFIX_PATH})
+    set(CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+    message(STATUS "Using CMAKE_PREFIX_PATH: $ENV{CMAKE_PREFIX_PATH}")
 else()
-    message(WARNING "Qt5_DIR or Qt5_Dir environment variable not set")
+    message(WARNING "Qt5_DIR, Qt5_Dir, or CMAKE_PREFIX_PATH environment variable not set")
 endif()
 
 include_directories(${CMAKE_BINARY_DIR}
