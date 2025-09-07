@@ -435,16 +435,51 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          modules: 'qtcharts'
+          install-deps: true
+          
+      - name: Set Qt environment variables
         run: |
-          # Install Qt5 via Homebrew with explicit components
-          brew install qt@5
-          # Find the actual Qt5 installation path
-          QT_PREFIX=$(brew --prefix qt@5)
-          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
-          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
-          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
-          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
+          # Debug: Show all Qt-related environment variables
+          echo "=== Qt Environment Debug ==="
+          env | grep -i qt || echo "No Qt environment variables found"
+          echo "Qt5_Dir: $Qt5_Dir"
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "Qt6_DIR: $Qt6_DIR"
+          echo "=========================="
+          
+          # Set Qt5_DIR to the Qt installation path
+          if [ -n "$Qt5_Dir" ]; then
+            echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$Qt5_Dir" >> $GITHUB_ENV
+            echo "Using Qt5_Dir: $Qt5_Dir"
+          elif [ -n "$Qt5_DIR" ]; then
+            echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$Qt5_DIR" >> $GITHUB_ENV
+            echo "Using Qt5_DIR: $Qt5_DIR"
+          else
+            # Fallback: try to find Qt in common locations
+            echo "Searching for Qt installation..."
+            QT_PATH=$(find /usr/local -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            if [ -z "$QT_PATH" ]; then
+              QT_PATH=$(find /opt -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            fi
+            if [ -z "$QT_PATH" ]; then
+              QT_PATH=$(find /Applications -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            fi
+            if [ -n "$QT_PATH" ]; then
+              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
+              echo "CMAKE_PREFIX_PATH=$QT_PATH" >> $GITHUB_ENV
+              echo "Found Qt at: $QT_PATH"
+            else
+              echo "Warning: Could not find Qt installation path"
+              echo "Available Qt installations:"
+              find /usr/local /opt /Applications -name "*Qt*" -type d 2>/dev/null | head -10
+            fi
+          fi
 
       - name: Verify Qt installation
         run: |
