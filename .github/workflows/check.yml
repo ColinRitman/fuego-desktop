@@ -35,8 +35,8 @@ jobs:
             C:\vcpkg\bootstrap-vcpkg.bat
           }
           
-          # Install Boost components and libqrencode
-          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode --triplet=x64-windows
+          # Install Boost components and libqrencode miniupnpc
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode miniupnpc --triplet=x64-windows
           
           # Set environment variables
           echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV
@@ -161,7 +161,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev libqrencode-dev git
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev libqrencode miniupnpc-dev libminiupnpc-dev git
           
       - name: Set Qt environment variables
         run: |
@@ -229,7 +229,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev libqrencode-dev git
+          sudo apt install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qttools5-dev qttools5-dev-tools libqt5charts5-dev libboost-all-dev libqrencode miniupnpc-dev libminiupnpc-dev git
           
       - name: Set Qt environment variables
         run: |
@@ -317,7 +317,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode
+          brew install boost libqrencode miniupnpc
 
       - name: Download XFG STARK CLI
         run: |
@@ -401,7 +401,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode
+          brew install boost libqrencode miniupnpc
 
       - name: Download XFG STARK CLI
         run: |

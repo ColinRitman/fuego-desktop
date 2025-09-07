@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode miniupnpc-dev libminiupnpc-dev
           
       - name: Set Qt environment variables
         run: |
@@ -86,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev
+          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode miniupnpc-dev libminiupnpc-dev
           
       - name: Set Qt environment variables
         run: |
@@ -165,7 +165,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode
+          brew install boost libqrencode miniupnpc
 
       - name: Clone fuego
         run: |
@@ -242,7 +242,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode
+          brew install boost libqrencode miniupnpc
 
       - name: Clone fuego
         run: |
@@ -317,8 +317,8 @@ jobs:
           git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
           C:\vcpkg\bootstrap-vcpkg.bat
           
-          # Install Boost components and libqrencode
-          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode --triplet=x64-windows
+          # Install Boost components and libqrencode miniupnpc
+          C:\vcpkg\vcpkg install boost-system boost-filesystem boost-thread boost-chrono boost-atomic libqrencode miniupnpc --triplet=x64-windows
           
           # Set environment variables
           echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows" >> $env:GITHUB_ENV

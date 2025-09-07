@@ -63,6 +63,22 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Charts)
 
+# Find miniupnpc library for UPNP functionality
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MINIUPNPC miniupnpc)
+if(MINIUPNPC_FOUND)
+    message(STATUS "Found miniupnpc via pkg-config: ${MINIUPNPC_LIBRARIES}")
+    set(MINIUPNPC_LIB ${MINIUPNPC_LIBRARIES})
+else()
+    find_library(MINIUPNPC_LIB miniupnpc)
+    if(MINIUPNPC_LIB)
+        message(STATUS "Found miniupnpc library: ${MINIUPNPC_LIB}")
+    else()
+        message(WARNING "miniupnpc library not found - UPNP functionality may not work")
+        set(MINIUPNPC_LIB "")
+    endif()
+endif()
+
 # Handle OpenGL on macOS
 if(APPLE)
     find_library(OPENGL_LIBRARY OpenGL)
@@ -332,7 +348,7 @@ endif()
 
 add_executable(${PROJECT_NAME} ${BUILD_PLATFORM} ${BUILD_RESOURCES} ${SOURCES} ${HEADERS} ${UIS} ${RCC})
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS _GNU_SOURCE)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${QTMAIN} ${CRYPTONOTE_LIB} ${QRENCODE_LIB})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${QTMAIN} ${CRYPTONOTE_LIB} ${QRENCODE_LIB} ${MINIUPNPC_LIB})
 
 if (APPLE)
   qt5_use_modules(${PROJECT_NAME} PrintSupport)
