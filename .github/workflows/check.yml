@@ -430,21 +430,16 @@ jobs:
             homebrew-${{ runner.os }}-
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          modules: "qtcharts"
-          
-      - name: Set Qt environment variables
         run: |
-          # Find Qt5 installation path
-          QT5_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
-          if [ -n "$QT5_PATH" ]; then
-            echo "Qt5_DIR=$QT5_PATH/lib/cmake/Qt5" >> $GITHUB_ENV
-            echo "CMAKE_PREFIX_PATH=$QT5_PATH" >> $GITHUB_ENV
-            echo "Found Qt5 at: $QT5_PATH"
-          else
-            echo "Warning: Could not find Qt5 installation"
-          fi
+          # Install Qt5 via Homebrew directly
+          brew install qt@5
+          # Set Qt paths manually
+          QT_PREFIX=$(brew --prefix qt@5)
+          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
+          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
 
       - name: Install dependencies
         run: |
