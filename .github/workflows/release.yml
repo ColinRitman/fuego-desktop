@@ -19,7 +19,15 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+          # Find Qt5 installation path
+          QT5_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+          if [ -n "$QT5_PATH" ]; then
+            echo "Qt5_DIR=$QT5_PATH/lib/cmake/Qt5" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$QT5_PATH" >> $GITHUB_ENV
+            echo "Found Qt5 at: $QT5_PATH"
+          else
+            echo "Warning: Could not find Qt5 installation"
+          fi
 
       - name: Clone fuego
         run: |
@@ -56,7 +64,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt5_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           make -j4
           cd ../..
           
@@ -90,7 +98,15 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+          # Find Qt5 installation path
+          QT5_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+          if [ -n "$QT5_PATH" ]; then
+            echo "Qt5_DIR=$QT5_PATH/lib/cmake/Qt5" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$QT5_PATH" >> $GITHUB_ENV
+            echo "Found Qt5 at: $QT5_PATH"
+          else
+            echo "Warning: Could not find Qt5 installation"
+          fi
 
       - name: Clone fuego
         run: |
@@ -127,7 +143,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt5_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           make -j4
           cd ../..
           
@@ -161,7 +177,15 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+          # Find Qt5 installation path
+          QT5_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+          if [ -n "$QT5_PATH" ]; then
+            echo "Qt5_DIR=$QT5_PATH/lib/cmake/Qt5" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$QT5_PATH" >> $GITHUB_ENV
+            echo "Found Qt5 at: $QT5_PATH"
+          else
+            echo "Warning: Could not find Qt5 installation"
+          fi
 
       - name: Install dependencies
         run: |
@@ -202,7 +226,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt5_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           make -j4
           cd ../..
           
@@ -238,7 +262,15 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+          # Find Qt5 installation path
+          QT5_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+          if [ -n "$QT5_PATH" ]; then
+            echo "Qt5_DIR=$QT5_PATH/lib/cmake/Qt5" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$QT5_PATH" >> $GITHUB_ENV
+            echo "Found Qt5 at: $QT5_PATH"
+          else
+            echo "Warning: Could not find Qt5 installation"
+          fi
 
       - name: Install dependencies
         run: |
@@ -278,7 +310,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$Qt5_DIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           make -j4
           cd ../..
           
