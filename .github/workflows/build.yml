@@ -442,9 +442,22 @@ jobs:
       - name: Set Qt environment variables
         run: |
           # Set Qt5_DIR to the Qt installation path
+          # Debug: Show all Qt-related environment variables
+          echo "=== Qt Environment Debug ==="
+          env | grep -i qt || echo "No Qt environment variables found"
+          echo "Qt5_Dir: $Qt5_Dir"
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "Qt6_DIR: $Qt6_DIR"
+          echo "=========================="
           if [ -n "$Qt5_Dir" ]; then
             echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
             echo "Using Qt5_Dir: $Qt5_Dir"
+            if [ -z "$QT_PATH" ]; then
+              QT_PATH=$(find /opt -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            fi
+            if [ -z "$QT_PATH" ]; then
+              QT_PATH=$(find /Applications -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            fi
           elif [ -n "$Qt5_DIR" ]; then
             echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
             echo "Using Qt5_DIR: $Qt5_DIR"
