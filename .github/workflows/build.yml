@@ -43,7 +43,21 @@ jobs:
       - name: Set Qt environment variables
         shell: powershell
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $env:GITHUB_ENV
+          # Set Qt5_DIR to the Qt installation path
+          $qtPath = "$env:Qt5_Dir"
+          if (-not $qtPath) {
+            $qtPath = "$env:Qt5_DIR"
+          }
+          if (-not $qtPath) {
+            # Fallback: try to find Qt in common locations
+            $qtPath = Get-ChildItem -Path "C:\Qt" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          }
+          if ($qtPath) {
+            echo "Qt5_DIR=$qtPath" >> $env:GITHUB_ENV
+            Write-Host "Set Qt5_DIR to: $qtPath"
+          } else {
+            Write-Host "Warning: Could not find Qt installation path"
+          }
 
       - name: Clone fuego
         run: |
@@ -127,7 +141,23 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          # Set Qt5_DIR to the Qt installation path
+          if [ -n "$Qt5_Dir" ]; then
+            echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+            echo "Using Qt5_Dir: $Qt5_Dir"
+          elif [ -n "$Qt5_DIR" ]; then
+            echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
+            echo "Using Qt5_DIR: $Qt5_DIR"
+          else
+            # Fallback: try to find Qt in common locations
+            QT_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            if [ -n "$QT_PATH" ]; then
+              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
+              echo "Found Qt at: $QT_PATH"
+            else
+              echo "Warning: Could not find Qt installation path"
+            fi
+          fi
 
       - name: Clone fuego
         run: |
@@ -209,7 +239,23 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          # Set Qt5_DIR to the Qt installation path
+          if [ -n "$Qt5_Dir" ]; then
+            echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+            echo "Using Qt5_Dir: $Qt5_Dir"
+          elif [ -n "$Qt5_DIR" ]; then
+            echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
+            echo "Using Qt5_DIR: $Qt5_DIR"
+          else
+            # Fallback: try to find Qt in common locations
+            QT_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            if [ -n "$QT_PATH" ]; then
+              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
+              echo "Found Qt at: $QT_PATH"
+            else
+              echo "Warning: Could not find Qt installation path"
+            fi
+          fi
 
       - name: Clone fuego
         run: |
@@ -291,7 +337,23 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          # Set Qt5_DIR to the Qt installation path
+          if [ -n "$Qt5_Dir" ]; then
+            echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+            echo "Using Qt5_Dir: $Qt5_Dir"
+          elif [ -n "$Qt5_DIR" ]; then
+            echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
+            echo "Using Qt5_DIR: $Qt5_DIR"
+          else
+            # Fallback: try to find Qt in common locations
+            QT_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            if [ -n "$QT_PATH" ]; then
+              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
+              echo "Found Qt at: $QT_PATH"
+            else
+              echo "Warning: Could not find Qt installation path"
+            fi
+          fi
 
       - name: Install dependencies
         run: |
@@ -379,7 +441,23 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          # Set Qt5_DIR to the Qt installation path
+          if [ -n "$Qt5_Dir" ]; then
+            echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
+            echo "Using Qt5_Dir: $Qt5_Dir"
+          elif [ -n "$Qt5_DIR" ]; then
+            echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
+            echo "Using Qt5_DIR: $Qt5_DIR"
+          else
+            # Fallback: try to find Qt in common locations
+            QT_PATH=$(find /usr -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
+            if [ -n "$QT_PATH" ]; then
+              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
+              echo "Found Qt at: $QT_PATH"
+            else
+              echo "Warning: Could not find Qt installation path"
+            fi
+          fi
 
       - name: Install dependencies
         run: |

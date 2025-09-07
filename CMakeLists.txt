@@ -40,7 +40,16 @@ WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 OUTPUT_VARIABLE GIT_REVISION)
 
 set(CRYPTONOTE_LIB cryptonote)
-set(CMAKE_PREFIX_PATH "$ENV{Qt5_DIR}")
+# Set Qt5 path from environment variable
+if(DEFINED ENV{Qt5_DIR})
+    set(CMAKE_PREFIX_PATH "$ENV{Qt5_DIR}")
+    message(STATUS "Using Qt5_DIR: $ENV{Qt5_DIR}")
+elseif(DEFINED ENV{Qt5_Dir})
+    set(CMAKE_PREFIX_PATH "$ENV{Qt5_Dir}")
+    message(STATUS "Using Qt5_Dir: $ENV{Qt5_Dir}")
+else()
+    message(WARNING "Qt5_DIR or Qt5_Dir environment variable not set")
+endif()
 
 include_directories(${CMAKE_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}

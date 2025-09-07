@@ -55,7 +55,7 @@ jobs:
       - name: Set Qt environment variables
         shell: powershell
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $env:GITHUB_ENV
+          echo "Qt5_DIR=$Qt5_Dir" >> $env:GITHUB_ENV
 
       - name: Download XFG STARK CLI
         shell: powershell
@@ -165,7 +165,7 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
 
       - name: Download XFG STARK CLI
         run: |
@@ -233,7 +233,7 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
 
       - name: Download XFG STARK CLI
         run: |
@@ -313,7 +313,7 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -397,7 +397,7 @@ jobs:
           
       - name: Set Qt environment variables
         run: |
-          echo "Qt5_DIR=${{ env.Qt5_Dir }}" >> $GITHUB_ENV
+          echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
