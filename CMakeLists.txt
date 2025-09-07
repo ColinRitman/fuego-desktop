@@ -342,7 +342,19 @@ qt5_add_resources(RCC ${QRC})
 if("${ARCH}" STREQUAL "default")
     set(ARCH_FLAG "")
   else()
-    set(ARCH_FLAG "-march=x86-64")
+    # Set appropriate architecture flag based on platform
+    if(APPLE)
+      # For Apple Silicon (ARM64), use arm64 architecture
+      if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(ARCH_FLAG "-march=arm64")
+      else()
+        # For Intel Macs, use x86-64
+        set(ARCH_FLAG "-march=x86-64")
+      endif()
+    else()
+      # For other platforms, use x86-64
+      set(ARCH_FLAG "-march=x86-64")
+    endif()
   endif()
 
 if (WIN32)
