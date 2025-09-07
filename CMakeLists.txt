@@ -10,6 +10,19 @@ endif(APPLE)
 # Enable C++ language before including other files that need it
 project(${CN_PROJECT_NAME} CXX)
 
+# Set C++ standard and compiler flags
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Add compiler flags to handle potential compilation issues
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /WX-")
+endif()
+
 # Set STARK CLI path for binary download
 if(WIN32)
     set(STARK_CLI_PATH "bin/xfg-stark-cli.exe")

@@ -72,13 +72,6 @@ jobs:
           Remove-Item cryptonote -Recurse -Force -ErrorAction Ignore
           git clone -b master https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Apply cryptonote fix
-        shell: powershell
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          Write-Host "✅ Applied cryptonote compilation fix"
-
       - name: Pre-build setup
         shell: powershell
         run: |
@@ -187,17 +180,7 @@ jobs:
           rm -rf cryptonote
           git clone -b master https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
       - name: Build
         id: build
@@ -264,17 +247,7 @@ jobs:
           rm -rf cryptonote
           git clone -b master https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
       - name: Build
         id: build
@@ -357,17 +330,7 @@ jobs:
           rm -rf cryptonote
           git clone -b master https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
       - name: Build
         id: build
@@ -450,17 +413,7 @@ jobs:
           rm -rf cryptonote
           git clone -b master https://github.com/colinritman/fuego.git cryptonote
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
-      - name: Apply cryptonote fix
-        run: |
-          # Apply the patch to fix TransactionExtraElderfierDeposit compilation error
-          git -C cryptonote apply ../cryptonote-fix.patch
-          echo "✅ Applied cryptonote compilation fix"
 
       - name: Build
         id: build
