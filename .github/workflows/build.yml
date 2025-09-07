@@ -451,6 +451,25 @@ jobs:
           echo "Qt6_DIR: $Qt6_DIR"
           echo "=========================="
           
+          # Try to find Qt5 installation manually
+          echo "Searching for Qt5 installation..."
+          QT_PREFIX=""
+          
+          # Check common Qt5 installation paths
+          for path in "/usr/local/Qt" "/opt/homebrew/Qt" "/Applications/Qt" "/Users/runner/Qt"; do
+            if [ -d "$path" ]; then
+              echo "Found Qt directory: $path"
+              QT_VERSION=$(find "$path" -maxdepth 1 -type d -name "5.*" | head -1)
+              if [ -n "$QT_VERSION" ]; then
+                QT_PREFIX="$QT_VERSION/macos"
+                if [ -d "$QT_PREFIX" ]; then
+                  echo "Found Qt5 at: $QT_PREFIX"
+                  break
+                fi
+              fi
+            fi
+          done
+          
           # Set Qt5_DIR to the Qt installation path
           if [ -n "$Qt5_Dir" ]; then
             echo "Qt5_DIR=$Qt5_Dir" >> $GITHUB_ENV
@@ -460,25 +479,14 @@ jobs:
             echo "Qt5_DIR=$Qt5_DIR" >> $GITHUB_ENV
             echo "CMAKE_PREFIX_PATH=$Qt5_DIR" >> $GITHUB_ENV
             echo "Using Qt5_DIR: $Qt5_DIR"
+          elif [ -n "$QT_PREFIX" ]; then
+            echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+            echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+            echo "Using found Qt5: $QT_PREFIX"
           else
-            # Fallback: try to find Qt in common locations
-            echo "Searching for Qt installation..."
-            QT_PATH=$(find /usr/local -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
-            if [ -z "$QT_PATH" ]; then
-              QT_PATH=$(find /opt -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
-            fi
-            if [ -z "$QT_PATH" ]; then
-              QT_PATH=$(find /Applications -name "Qt5Config.cmake" 2>/dev/null | head -1 | xargs dirname | xargs dirname | xargs dirname)
-            fi
-            if [ -n "$QT_PATH" ]; then
-              echo "Qt5_DIR=$QT_PATH" >> $GITHUB_ENV
-              echo "CMAKE_PREFIX_PATH=$QT_PATH" >> $GITHUB_ENV
-              echo "Found Qt at: $QT_PATH"
-            else
-              echo "Warning: Could not find Qt installation path"
-              echo "Available Qt installations:"
-              find /usr/local /opt /Applications -name "*Qt*" -type d 2>/dev/null | head -10
-            fi
+            echo "Warning: Could not find Qt installation path"
+            echo "Available Qt installations:"
+            find /usr/local /opt /Applications -name "*Qt*" -type d 2>/dev/null | head -10
           fi
 
       - name: Verify Qt installation

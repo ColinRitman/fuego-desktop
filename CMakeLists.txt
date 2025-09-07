@@ -41,6 +41,12 @@ OUTPUT_VARIABLE GIT_REVISION)
 
 set(CRYPTONOTE_LIB cryptonote)
 # Set Qt5 path from environment variable
+message(STATUS "=== Qt5 Detection Debug ===")
+message(STATUS "Qt5_DIR env: $ENV{Qt5_DIR}")
+message(STATUS "Qt5_Dir env: $ENV{Qt5_Dir}")
+message(STATUS "CMAKE_PREFIX_PATH env: $ENV{CMAKE_PREFIX_PATH}")
+message(STATUS "Current CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+
 if(DEFINED ENV{Qt5_DIR})
     set(CMAKE_PREFIX_PATH "$ENV{Qt5_DIR}")
     message(STATUS "Using Qt5_DIR: $ENV{Qt5_DIR}")
@@ -52,6 +58,7 @@ elseif(DEFINED ENV{CMAKE_PREFIX_PATH})
     message(STATUS "Using CMAKE_PREFIX_PATH: $ENV{CMAKE_PREFIX_PATH}")
 else()
     # Try to find Qt5 automatically
+    message(STATUS "No Qt environment variables found, searching automatically...")
     find_path(QT5_CMAKE_DIR Qt5Config.cmake
         PATHS
         /usr/local/lib/cmake/Qt5
@@ -68,6 +75,9 @@ else()
         message(WARNING "Qt5_DIR, Qt5_Dir, CMAKE_PREFIX_PATH not set and Qt5 not found automatically")
     endif()
 endif()
+
+message(STATUS "Final CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "=== End Qt5 Detection Debug ===")
 
 include_directories(${CMAKE_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
