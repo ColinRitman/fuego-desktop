@@ -402,43 +402,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and fix Boost math compatibility
+      - name: Install compatible Boost version for macOS Apple Silicon
         run: |
-          # Install dependencies
-          brew install boost libqrencode miniupnpc
+          # Remove any existing Boost installations
+          brew uninstall --ignore-dependencies boost || true
           
-          # Show current state
-          echo "=== BEFORE FIX ==="
-          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
-          grep -n "boost::math::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost::math::round found"
+          # Install compatible Boost 1.76 that doesn't have C++17 type traits issues
+          brew install boost@1.76 libqrencode miniupnpc
           
-          # Replace boost::math::round with std::round using multiple approaches
-          echo "=== APPLYING FIX ==="
+          # Set environment variables to use the compatible Boost version
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost@1.76" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost@1.76/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost@1.76/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost@1.76:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
           
-          # Method 1: Direct sed replacement
-          sed -i '' 's|#include <boost/math/special_functions/round.hpp>|#include <cmath>|' cryptonote/src/CryptoNoteCore/Currency.cpp
-          sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
+          # Verify Boost version
+          echo "Installed Boost version:"
+          brew list boost@1.76
+          echo "Boost headers location:"
+          ls -la /opt/homebrew/opt/boost@1.76/include/boost/math/special_functions/round.hpp || echo "Boost 1.76 round.hpp not found"
           
-          # Method 2: Python replacement as backup
-          python3 -c "
-import re
-with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'r') as f:
-    content = f.read()
-content = re.sub(r'#include <boost/math/special_functions/round\.hpp>', '#include <cmath>', content)
-content = re.sub(r'boost::math::round', 'std::round', content)
-with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'w') as f:
-    f.write(content)
-print('Python replacement completed')
-"
-          
-          # Method 3: Direct file manipulation
-          awk 'gsub(/#include <boost\/math\/special_functions\/round\.hpp>/, "#include <cmath>") {print; next} gsub(/boost::math::round/, "std::round") {print; next} {print}' cryptonote/src/CryptoNoteCore/Currency.cpp > temp_file && mv temp_file cryptonote/src/CryptoNoteCore/Currency.cpp
-          
-          echo "=== AFTER FIX ==="
-          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
-          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round found"
-          
-          echo "Applied multiple methods to replace boost::math::round with std::round"
+          echo "Installed compatible Boost 1.76 for macOS Apple Silicon"
 
       - name: Install Qt
         run: |
@@ -476,8 +460,8 @@ print('Python replacement completed')
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with patched source
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
+          # Use system compiler with compatible Boost 1.76
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
           
