@@ -402,9 +402,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies and rebuild Boost with libc++
         run: |
-          brew install boost libqrencode miniupnpc
+          # Install dependencies
+          brew install libqrencode miniupnpc
+          
+          # ULTIMATE SOLUTION: Rebuild Boost with libc++ to match our compiler
+          echo "=== ULTIMATE SOLUTION: Rebuilding Boost with libc++ ==="
+          
+          # Download and build Boost from source with libc++
+          cd /tmp
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
+          tar -xzf boost_1_76_0.tar.gz
+          cd boost_1_76_0
+          
+          # Configure Boost to use libc++
+          ./bootstrap.sh --with-toolset=clang
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+          
+          # Set environment variables to use our custom Boost
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          
+          echo "ULTIMATE SOLUTION: Rebuilt Boost with libc++"
 
       - name: Install Qt
         run: |
@@ -444,7 +466,7 @@ jobs:
           
           # Use system compiler with compatible Boost 1.76
           # ABSOLUTE FINAL NUCLEAR OPTION: Force include path to prioritize our local wrapper
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
           
