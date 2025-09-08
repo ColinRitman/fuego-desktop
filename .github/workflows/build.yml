@@ -187,7 +187,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
@@ -277,7 +277,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
@@ -371,7 +371,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
@@ -411,6 +411,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install modern clang
+        run: |
+          # Install modern LLVM/Clang via Homebrew
+          brew install llvm
+          # Set modern Clang as compiler
+          echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
+          echo "CXX=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
+          echo "PATH=/opt/homebrew/opt/llvm/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed modern Clang:"
+          /opt/homebrew/opt/llvm/bin/clang++ --version
+
       - name: Install Qt
         run: |
           # Install Qt5 via Homebrew directly
@@ -446,7 +457,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           

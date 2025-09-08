@@ -13,6 +13,7 @@ project(${CN_PROJECT_NAME} CXX)
 # Set C++ standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add compiler flags to handle potential compilation issues
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
