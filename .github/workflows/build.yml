@@ -402,17 +402,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install compatible dependencies for macOS Apple Silicon
+      - name: Install dependencies and create Boost math wrapper
         run: |
-          # Install compatible Boost version that works with system libc++
-          brew install boost@1.76 libqrencode miniupnpc
+          # Install dependencies
+          brew install boost libqrencode miniupnpc
           
-          # Set environment variables for compatible Boost
-          echo "BOOST_ROOT=/opt/homebrew/opt/boost@1.76" >> $GITHUB_ENV
-          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost@1.76/include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost@1.76/lib" >> $GITHUB_ENV
+          # Create a simple wrapper that avoids problematic Boost math headers
+          mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
+          cat > cryptonote/src/CryptoNoteCore/boost/math/special_functions/round.hpp << 'EOF'
+#pragma once
+#include <cmath>
+namespace boost { namespace math {
+    inline double round(double x) { return std::round(x); }
+    inline float round(float x) { return std::round(x); }
+    inline long double round(long double x) { return std::round(x); }
+}}
+EOF
           
-          echo "Installed compatible Boost 1.76 for macOS Apple Silicon"
+          echo "Created Boost math wrapper to avoid C++17 type traits errors"
 
       - name: Install Qt
         run: |
@@ -450,8 +457,8 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with compatible Boost 1.76
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          # Use system compiler with Boost math wrapper
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-I$(pwd)/cryptonote/src/CryptoNoteCore"
           make -j4
           cd ../..
           
