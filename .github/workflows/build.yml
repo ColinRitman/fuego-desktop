@@ -419,6 +419,8 @@ jobs:
           echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
           echo "CXX=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
           echo "PATH=/opt/homebrew/opt/llvm/bin:$PATH" >> $GITHUB_ENV
+          echo "CMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
+          echo "CMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
           echo "Installed modern Clang:"
           /opt/homebrew/opt/llvm/bin/clang++ --version
 
