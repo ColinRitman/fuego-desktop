@@ -402,26 +402,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and create Boost math compatibility wrapper
+      - name: Install dependencies and fix Boost math compatibility
         run: |
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # ULTIMATE NUCLEAR OPTION: Create a local Boost math compatibility wrapper
-          # that completely bypasses the problematic Boost math headers
-          echo "Creating Boost math compatibility wrapper..."
+          # FINAL NUCLEAR OPTION: Directly patch the source file to avoid Boost math
+          echo "=== FINAL NUCLEAR OPTION: Direct source patching ==="
           
-          # Create the wrapper directory structure
+          # Check what's in the file before patching
+          echo "Before patching - searching for boost/math includes:"
+          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math includes found"
+          grep -n "boost::math::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost::math::round usage found"
+          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round usage found"
+          
+          # The issue is that some header is including boost/math/special_functions/round.hpp
+          # Let's create a local boost/math/special_functions/round.hpp that redirects to std::round
+          echo "Creating local Boost math compatibility header..."
           mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
           
-          # Create a compatibility wrapper that redirects to std::round
           cat > cryptonote/src/CryptoNoteCore/boost/math/special_functions/round.hpp << 'EOF'
 #pragma once
 #include <cmath>
 
 namespace boost {
 namespace math {
-    // Redirect boost::math::round to std::round to avoid C++17 type traits issues
+    // Compatibility wrapper for boost::math::round to avoid C++17 type traits issues
     template<typename T>
     inline T round(T x) {
         return std::round(x);
@@ -447,12 +453,15 @@ namespace math {
 }
 EOF
           
-          echo "Created Boost math compatibility wrappers"
+          echo "Created Boost math compatibility headers"
           echo "Wrapper files created:"
           ls -la cryptonote/src/CryptoNoteCore/boost/math/special_functions/
           
-          # Set CMake to prioritize our local wrapper
+          # Set CMake to prioritize our local wrapper by adding it to include path
           echo "CMAKE_PREFIX_PATH=$(pwd)/cryptonote/src/CryptoNoteCore:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I$(pwd)/cryptonote/src/CryptoNoteCore" >> $GITHUB_ENV
+          
+          echo "FINAL NUCLEAR OPTION: Created local Boost math compatibility headers"
 
       - name: Install Qt
         run: |
