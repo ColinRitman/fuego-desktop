@@ -411,27 +411,20 @@ jobs:
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # Fix Boost math compatibility issue by replacing boost::math::round with std::round
-          echo "Before fix:"
-          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
+          # Fix Boost math compatibility by creating a wrapper header that redirects to std::round
+          echo "Creating Boost math compatibility wrapper..."
           
-          # Use Python to reliably replace the content
-          python3 -c "
-import re
-with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'r') as f:
-    content = f.read()
-content = re.sub(r'#include <boost/math/special_functions/round\.hpp>', '#include <cmath>', content)
-content = re.sub(r'boost::math::round', 'std::round', content)
-with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'w') as f:
-    f.write(content)
-print('File patched successfully')
-"
+          # Create a wrapper header that provides std::round as boost::math::round
+          mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
+          cat > cryptonote/src/CryptoNoteCore/boost/math/special_functions/round.hpp << 'EOF'
+#pragma once
+#include <cmath>
+namespace boost { namespace math {
+    using std::round;
+}}
+EOF
           
-          echo "After fix:"
-          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
-          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round found"
-          
-          echo "Fixed Boost math compatibility issues"
+          echo "Created Boost math compatibility wrapper"
 
       - name: Install Qt
         run: |
@@ -469,8 +462,8 @@ print('File patched successfully')
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with patched Boost compatibility
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
+          # Use system compiler with Boost math compatibility wrapper
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-I$(pwd)/cryptonote/src/CryptoNoteCore"
           make -j4
           cd ../..
           
