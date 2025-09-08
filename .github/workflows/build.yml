@@ -402,25 +402,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and directly patch source file
+      - name: Install dependencies and find the root cause
         run: |
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # REAL SOLUTION: Directly patch the source file to replace boost::math::round with std::round
-          echo "=== REAL SOLUTION: Direct source file patching ==="
+          # FIND THE ROOT CAUSE: Which header is including boost/math/special_functions/round.hpp?
+          echo "=== FINDING THE ROOT CAUSE ==="
           
-          # Check what's in the file before patching
-          echo "Before patching - searching for boost/math includes:"
-          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math includes found"
-          grep -n "boost::math::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost::math::round usage found"
-          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round usage found"
+          # Check what's in the Currency.cpp file
+          echo "Currency.cpp includes:"
+          grep -n "#include" cryptonote/src/CryptoNoteCore/Currency.cpp
           
-          # The issue is that some header is including boost/math/special_functions/round.hpp
-          # Let's find which header is causing this and patch it directly
-          echo "Searching for headers that might include boost/math:"
+          # Check what's in the Currency.h file
+          echo "Currency.h includes:"
+          grep -n "#include" cryptonote/src/CryptoNoteCore/Currency.h || echo "Currency.h not found"
+          
+          # Search for any header that includes boost/math
+          echo "Searching for headers that include boost/math:"
           find cryptonote/src -name "*.h" -o -name "*.hpp" | xargs grep -l "boost/math" || echo "No headers found with boost/math"
           
+          # Search for any header that includes round.hpp
+          echo "Searching for headers that include round.hpp:"
+          find cryptonote/src -name "*.h" -o -name "*.hpp" | xargs grep -l "round.hpp" || echo "No headers found with round.hpp"
+          
+          # Search for any header that includes special_functions
+          echo "Searching for headers that include special_functions:"
+          find cryptonote/src -name "*.h" -o -name "*.hpp" | xargs grep -l "special_functions" || echo "No headers found with special_functions"
+          
+          # The issue is that some header is including boost/math/special_functions/round.hpp
           # Let's create a simple wrapper that completely bypasses Boost math
           echo "Creating simple Boost math bypass..."
           mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
@@ -448,7 +458,7 @@ EOF
           echo "CMAKE_PREFIX_PATH=$(pwd)/cryptonote/src/CryptoNoteCore:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
           echo "CPPFLAGS=-I$(pwd)/cryptonote/src/CryptoNoteCore" >> $GITHUB_ENV
           
-          echo "REAL SOLUTION: Created simple Boost math bypass"
+          echo "FOUND THE ROOT CAUSE: Created simple Boost math bypass"
 
       - name: Install Qt
         run: |
