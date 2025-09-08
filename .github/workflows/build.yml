@@ -412,8 +412,15 @@ jobs:
           brew install boost libqrencode miniupnpc
           
           # Fix Boost math compatibility issue by replacing boost::math::round with std::round
-          sed -i '' 's/#include <boost\/math\/special_functions\/round\.hpp>/#include <cmath>/' cryptonote/src/CryptoNoteCore/Currency.cpp
+          echo "Before fix:"
+          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
+          
+          sed -i '' 's|#include <boost/math/special_functions/round.hpp>|#include <cmath>|' cryptonote/src/CryptoNoteCore/Currency.cpp
           sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
+          
+          echo "After fix:"
+          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
+          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round found"
           
           echo "Fixed Boost math compatibility issues"
 
