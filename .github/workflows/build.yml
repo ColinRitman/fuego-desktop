@@ -406,14 +406,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install compatible Boost and dependencies
+      - name: Install dependencies and fix Boost compatibility
         run: |
-          # Install compatible Boost version (1.76.0) that works with system libc++
-          brew install boost@1.76
-          # Install other dependencies
-          brew install libqrencode miniupnpc
-          echo "Installed compatible Boost version:"
-          brew list boost@1.76
+          # Install dependencies
+          brew install boost libqrencode miniupnpc
+          
+          # Fix Boost math compatibility issue by replacing boost::math::round with std::round
+          sed -i '' 's/#include <boost\/math\/special_functions\/round\.hpp>/#include <cmath>/' cryptonote/src/CryptoNoteCore/Currency.cpp
+          sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
+          
+          echo "Fixed Boost math compatibility issues"
 
       - name: Install Qt
         run: |
@@ -451,13 +453,8 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # Set Boost path for compatible version
-          export BOOST_ROOT="/opt/homebrew/opt/boost@1.76"
-          export BOOST_INCLUDEDIR="/opt/homebrew/opt/boost@1.76/include"
-          export BOOST_LIBRARYDIR="/opt/homebrew/opt/boost@1.76/lib"
-          
-          # Use system compiler with compatible Boost
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          # Use system compiler with patched Boost compatibility
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
