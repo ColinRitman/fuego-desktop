@@ -407,8 +407,13 @@ jobs:
           # Install dependencies
           brew install libqrencode miniupnpc
           
-          # ULTIMATE SOLUTION: Rebuild Boost with libc++ to match our compiler
-          echo "=== ULTIMATE SOLUTION: Rebuilding Boost with libc++ ==="
+          # FINAL SOLUTION: Completely remove system Boost and rebuild with libc++
+          echo "=== FINAL SOLUTION: Removing system Boost and rebuilding with libc++ ==="
+          
+          # Remove system Boost completely
+          brew uninstall --ignore-dependencies boost || true
+          sudo rm -rf /opt/homebrew/include/boost || true
+          sudo rm -rf /opt/homebrew/lib/libboost* || true
           
           # Download and build Boost from source with libc++
           cd /tmp
@@ -426,7 +431,13 @@ jobs:
           echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
           
-          echo "ULTIMATE SOLUTION: Rebuilt Boost with libc++"
+          # Verify system Boost is gone and our custom Boost is present
+          echo "System Boost headers (should be empty):"
+          ls -la /opt/homebrew/include/boost/math/special_functions/round.hpp || echo "System Boost headers removed"
+          echo "Custom Boost headers:"
+          ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
+          
+          echo "FINAL SOLUTION: Removed system Boost and rebuilt with libc++"
 
       - name: Install Qt
         run: |
