@@ -344,9 +344,9 @@ if("${ARCH}" STREQUAL "default")
   else()
     # Set appropriate architecture flag based on platform
     if(APPLE)
-      # For Apple Silicon (ARM64), use arm64 architecture
+      # For Apple Silicon (ARM64), don't use -march flag as it's not needed
       if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(ARCH_FLAG "-march=arm64")
+        set(ARCH_FLAG "")
       else()
         # For Intel Macs, use x86-64
         set(ARCH_FLAG "-march=x86-64")
