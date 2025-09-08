@@ -404,25 +404,39 @@ jobs:
 
       - name: Install compatible Boost version for macOS Apple Silicon
         run: |
-          # Remove any existing Boost installations
-          brew uninstall --ignore-dependencies boost || true
+          # NUCLEAR OPTION: Remove ALL Boost installations and force Boost 1.76
+          brew uninstall --ignore-dependencies boost boost@1.76 || true
+          brew uninstall --ignore-dependencies boost@1.76 || true
           
-          # Install compatible Boost 1.76 that doesn't have C++17 type traits issues
+          # Remove system Boost headers that might interfere
+          sudo rm -rf /opt/homebrew/include/boost || true
+          sudo rm -rf /opt/homebrew/lib/libboost* || true
+          
+          # Install ONLY Boost 1.76
           brew install boost@1.76 libqrencode miniupnpc
           
-          # Set environment variables to use the compatible Boost version
-          echo "BOOST_ROOT=/opt/homebrew/opt/boost@1.76" >> $GITHUB_ENV
-          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost@1.76/include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost@1.76/lib" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost@1.76:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          # Force CMake to use ONLY Boost 1.76 by removing system paths
+          export BOOST_ROOT="/opt/homebrew/opt/boost@1.76"
+          export BOOST_INCLUDEDIR="/opt/homebrew/opt/boost@1.76/include"
+          export BOOST_LIBRARYDIR="/opt/homebrew/opt/boost@1.76/lib"
+          export CMAKE_PREFIX_PATH="/opt/homebrew/opt/boost@1.76"
           
-          # Verify Boost version
-          echo "Installed Boost version:"
+          # Set environment variables for CMake
+          echo "BOOST_ROOT=$BOOST_ROOT" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=$BOOST_INCLUDEDIR" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=$BOOST_LIBRARYDIR" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          
+          # Verify ONLY Boost 1.76 is available
+          echo "=== BOOST VERIFICATION ==="
+          echo "Boost 1.76 installation:"
           brew list boost@1.76
-          echo "Boost headers location:"
+          echo "Boost 1.76 headers:"
           ls -la /opt/homebrew/opt/boost@1.76/include/boost/math/special_functions/round.hpp || echo "Boost 1.76 round.hpp not found"
+          echo "System Boost headers (should be empty):"
+          ls -la /opt/homebrew/include/boost/math/special_functions/round.hpp || echo "System Boost headers removed"
           
-          echo "Installed compatible Boost 1.76 for macOS Apple Silicon"
+          echo "NUCLEAR OPTION: Forced Boost 1.76 installation"
 
       - name: Install Qt
         run: |
