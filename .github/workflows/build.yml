@@ -402,24 +402,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and create Boost math wrapper
+      - name: Install dependencies and fix Boost math compatibility
         run: |
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # Create a simple wrapper that avoids problematic Boost math headers
-          mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
-          cat > cryptonote/src/CryptoNoteCore/boost/math/special_functions/round.hpp << 'EOF'
-#pragma once
-#include <cmath>
-namespace boost { namespace math {
-    inline double round(double x) { return std::round(x); }
-    inline float round(float x) { return std::round(x); }
-    inline long double round(long double x) { return std::round(x); }
-}}
-EOF
+          # Replace boost::math::round with std::round directly in the source file
+          sed -i '' 's|#include <boost/math/special_functions/round.hpp>|#include <cmath>|' cryptonote/src/CryptoNoteCore/Currency.cpp
+          sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
           
-          echo "Created Boost math wrapper to avoid C++17 type traits errors"
+          echo "Replaced boost::math::round with std::round in Currency.cpp"
 
       - name: Install Qt
         run: |
@@ -457,8 +449,8 @@ EOF
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with Boost math wrapper
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-I$(pwd)/cryptonote/src/CryptoNoteCore"
+          # Use system compiler with patched source
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
