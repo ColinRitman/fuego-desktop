@@ -397,9 +397,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-  macos-apple-silicon:
-    name: macOS Apple Silicon (DISABLED - Boost math compatibility issues)
+    name: macOS Apple Silicon
     runs-on: macos-14  # Apple Silicon runner
-    if: false  # Temporarily disabled due to C++17 type traits errors
     steps:
       - uses: actions/checkout@v4
 
@@ -408,11 +407,38 @@ jobs:
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # Replace boost::math::round with std::round directly in the source file
+          # Show current state
+          echo "=== BEFORE FIX ==="
+          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
+          grep -n "boost::math::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost::math::round found"
+          
+          # Replace boost::math::round with std::round using multiple approaches
+          echo "=== APPLYING FIX ==="
+          
+          # Method 1: Direct sed replacement
           sed -i '' 's|#include <boost/math/special_functions/round.hpp>|#include <cmath>|' cryptonote/src/CryptoNoteCore/Currency.cpp
           sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
           
-          echo "Replaced boost::math::round with std::round in Currency.cpp"
+          # Method 2: Python replacement as backup
+          python3 -c "
+import re
+with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'r') as f:
+    content = f.read()
+content = re.sub(r'#include <boost/math/special_functions/round\.hpp>', '#include <cmath>', content)
+content = re.sub(r'boost::math::round', 'std::round', content)
+with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'w') as f:
+    f.write(content)
+print('Python replacement completed')
+"
+          
+          # Method 3: Direct file manipulation
+          awk 'gsub(/#include <boost\/math\/special_functions\/round\.hpp>/, "#include <cmath>") {print; next} gsub(/boost::math::round/, "std::round") {print; next} {print}' cryptonote/src/CryptoNoteCore/Currency.cpp > temp_file && mv temp_file cryptonote/src/CryptoNoteCore/Currency.cpp
+          
+          echo "=== AFTER FIX ==="
+          grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
+          grep -n "std::round" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No std::round found"
+          
+          echo "Applied multiple methods to replace boost::math::round with std::round"
 
       - name: Install Qt
         run: |
