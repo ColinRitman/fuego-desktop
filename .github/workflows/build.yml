@@ -406,22 +406,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install modern clang
+      - name: Install compatible Boost and dependencies
         run: |
-          # Install modern LLVM/Clang via Homebrew
-          brew install llvm
-          # Set modern Clang as compiler with modern libc++
-          echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
-          echo "CXX=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
-          echo "PATH=/opt/homebrew/opt/llvm/bin:$PATH" >> $GITHUB_ENV
-          echo "CMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
-          echo "CMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
-          # Use modern libc++ from Homebrew
-          echo "CMAKE_CXX_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
-          echo "CMAKE_EXE_LINKER_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
-          echo "CMAKE_SHARED_LINKER_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
-          echo "Installed modern Clang:"
-          /opt/homebrew/opt/llvm/bin/clang++ --version
+          # Install compatible Boost version (1.76.0) that works with system libc++
+          brew install boost@1.76
+          # Install other dependencies
+          brew install libqrencode miniupnpc
+          echo "Installed compatible Boost version:"
+          brew list boost@1.76
 
       - name: Install Qt
         run: |
@@ -459,15 +451,13 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # Verify environment variables
-          echo "CC: $CC"
-          echo "CXX: $CXX"
-          echo "CMAKE_C_COMPILER: $CMAKE_C_COMPILER"
-          echo "CMAKE_CXX_COMPILER: $CMAKE_CXX_COMPILER"
-          echo "CMAKE_CXX_FLAGS: $CMAKE_CXX_FLAGS"
+          # Set Boost path for compatible version
+          export BOOST_ROOT="/opt/homebrew/opt/boost@1.76"
+          export BOOST_INCLUDEDIR="/opt/homebrew/opt/boost@1.76/include"
+          export BOOST_LIBRARYDIR="/opt/homebrew/opt/boost@1.76/lib"
           
-          # Use environment variables for compiler and flags
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_C_COMPILER="$CMAKE_C_COMPILER" -DCMAKE_CXX_COMPILER="$CMAKE_CXX_COMPILER" -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CMAKE_EXE_LINKER_FLAGS" -DCMAKE_SHARED_LINKER_FLAGS="$CMAKE_SHARED_LINKER_FLAGS"
+          # Use system compiler with compatible Boost
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
           
