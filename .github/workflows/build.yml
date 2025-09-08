@@ -412,9 +412,9 @@ jobs:
           
           # Download and build Boost from source with libc++
           cd /tmp
-          wget https://boostorg.jfrog.io/artifactory/main/release/1.55.0/source/boost_1_55_0.tar.gz
-          tar -xzf boost_1_55_0.tar.gz
-          cd boost_1_55_0
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
+          tar -xzf boost_1_83_0.tar.gz
+          cd boost_1_83_0
           
           # Configure Boost to use libc++
           ./bootstrap.sh --with-toolset=clang
