@@ -415,8 +415,17 @@ jobs:
           echo "Before fix:"
           grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
           
-          sed -i '' 's|#include <boost/math/special_functions/round.hpp>|#include <cmath>|' cryptonote/src/CryptoNoteCore/Currency.cpp
-          sed -i '' 's/boost::math::round/std::round/g' cryptonote/src/CryptoNoteCore/Currency.cpp
+          # Use Python to reliably replace the content
+          python3 -c "
+import re
+with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'r') as f:
+    content = f.read()
+content = re.sub(r'#include <boost/math/special_functions/round\.hpp>', '#include <cmath>', content)
+content = re.sub(r'boost::math::round', 'std::round', content)
+with open('cryptonote/src/CryptoNoteCore/Currency.cpp', 'w') as f:
+    f.write(content)
+print('File patched successfully')
+"
           
           echo "After fix:"
           grep -n "boost/math" cryptonote/src/CryptoNoteCore/Currency.cpp || echo "No boost/math found"
