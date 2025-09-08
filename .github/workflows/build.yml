@@ -63,9 +63,8 @@ jobs:
       - name: Clone fuego
         run: |
           Remove-Item -Recurse -Force cryptonote -ErrorAction SilentlyContinue
-          # Use specific commit that doesn't have compilation errors
+          # Use master branch
           git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         shell: powershell
@@ -156,7 +155,6 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -246,7 +244,6 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -335,7 +332,6 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
 
       - name: Download XFG STARK CLI
         run: |
@@ -411,20 +407,7 @@ jobs:
           # Install dependencies
           brew install boost libqrencode miniupnpc
           
-          # Fix Boost math compatibility by creating a wrapper header that redirects to std::round
-          echo "Creating Boost math compatibility wrapper..."
-          
-          # Create a wrapper header that provides std::round as boost::math::round
-          mkdir -p cryptonote/src/CryptoNoteCore/boost/math/special_functions
-          cat > cryptonote/src/CryptoNoteCore/boost/math/special_functions/round.hpp << 'EOF'
-#pragma once
-#include <cmath>
-namespace boost { namespace math {
-    using std::round;
-}}
-EOF
-          
-          echo "Created Boost math compatibility wrapper"
+          echo "Using master branch of fuego repository"
 
       - name: Install Qt
         run: |
@@ -462,8 +445,8 @@ EOF
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with Boost math compatibility wrapper
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-I$(pwd)/cryptonote/src/CryptoNoteCore"
+          # Use system compiler with master branch
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           cd ../..
           
