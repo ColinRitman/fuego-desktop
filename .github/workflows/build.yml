@@ -402,12 +402,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and fix Boost compatibility
+      - name: Install compatible dependencies for macOS Apple Silicon
         run: |
-          # Install dependencies
-          brew install boost libqrencode miniupnpc
+          # Install compatible Boost version that works with system libc++
+          brew install boost@1.76 libqrencode miniupnpc
           
-          echo "Using master branch of fuego repository"
+          # Set environment variables for compatible Boost
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost@1.76" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost@1.76/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost@1.76/lib" >> $GITHUB_ENV
+          
+          echo "Installed compatible Boost 1.76 for macOS Apple Silicon"
 
       - name: Install Qt
         run: |
@@ -445,8 +450,8 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with master branch
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
+          # Use system compiler with compatible Boost 1.76
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
           
