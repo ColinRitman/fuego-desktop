@@ -410,12 +410,16 @@ jobs:
         run: |
           # Install modern LLVM/Clang via Homebrew
           brew install llvm
-          # Set modern Clang as compiler
+          # Set modern Clang as compiler with modern libc++
           echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
           echo "CXX=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
           echo "PATH=/opt/homebrew/opt/llvm/bin:$PATH" >> $GITHUB_ENV
           echo "CMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
           echo "CMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++" >> $GITHUB_ENV
+          # Use modern libc++ from Homebrew
+          echo "CMAKE_CXX_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
+          echo "CMAKE_EXE_LINKER_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
+          echo "CMAKE_SHARED_LINKER_FLAGS=-stdlib=libc++" >> $GITHUB_ENV
           echo "Installed modern Clang:"
           /opt/homebrew/opt/llvm/bin/clang++ --version
 
@@ -454,7 +458,7 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++" -DCMAKE_SHARED_LINKER_FLAGS="-stdlib=libc++"
           make -j4
           cd ../..
           
