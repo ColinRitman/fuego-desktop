@@ -407,13 +407,8 @@ jobs:
           # Install dependencies
           brew install libqrencode miniupnpc
           
-          # FINAL SOLUTION: Completely remove system Boost and rebuild with libc++
-          echo "=== FINAL SOLUTION: Removing system Boost and rebuilding with libc++ ==="
-          
-          # Remove system Boost completely
-          brew uninstall --ignore-dependencies boost || true
-          sudo rm -rf /opt/homebrew/include/boost || true
-          sudo rm -rf /opt/homebrew/lib/libboost* || true
+          # ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths
+          echo "=== ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths ==="
           
           # Download and build Boost from source with libc++
           cd /tmp
@@ -431,13 +426,16 @@ jobs:
           echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
           
-          # Verify system Boost is gone and our custom Boost is present
-          echo "System Boost headers (should be empty):"
-          ls -la /opt/homebrew/include/boost/math/special_functions/round.hpp || echo "System Boost headers removed"
+          # Override compiler include paths to force our custom Boost
+          echo "CPPFLAGS=-I/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "CXXFLAGS=-I/opt/homebrew/opt/boost-custom/include -stdlib=libc++" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/boost-custom/lib -stdlib=libc++" >> $GITHUB_ENV
+          
+          # Verify our custom Boost is present
           echo "Custom Boost headers:"
           ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
           
-          echo "FINAL SOLUTION: Removed system Boost and rebuilt with libc++"
+          echo "ULTIMATE FINAL SOLUTION: Built custom Boost and set compiler overrides"
 
       - name: Install Qt
         run: |
@@ -475,9 +473,8 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # Use system compiler with compatible Boost 1.76
-          # ABSOLUTE FINAL NUCLEAR OPTION: Force include path to prioritize our local wrapper
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          # ULTIMATE FINAL SOLUTION: Force compiler to use our custom Boost with explicit flags
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
           
