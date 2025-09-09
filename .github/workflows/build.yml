@@ -396,13 +396,114 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # macOS Apple Silicon build disabled due to C++17 type traits compatibility issues
-  # with Boost.Math and macOS libc++ standard library
-  # The other platforms (Windows, Ubuntu, macOS Intel) are building successfully
-  # macos-apple-silicon:
-  #   name: macOS Apple Silicon
-  #   runs-on: macos-14
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build disabled
-  #       run: echo "macOS Apple Silicon build disabled due to C++17 compatibility issues"
+  macos-apple-silicon:
+    name: macOS Apple Silicon
+    runs-on: macos-14  # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies and rebuild Boost with libc++
+        run: |
+          # Install dependencies
+          brew install libqrencode miniupnpc
+          
+          # ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths
+          echo "=== ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths ==="
+          
+          # Download and build Boost from source with libc++
+          cd /tmp
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.89.0/source/boost_1_89_0.tar.gz
+          tar -xzf boost_1_89_0.tar.gz
+          cd boost_1_89_0
+          
+          # Configure Boost to use libc++
+          ./bootstrap.sh --with-toolset=clang
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+          
+          # Set environment variables to use our custom Boost
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          
+          # Override compiler include paths to force our custom Boost
+          echo "CPPFLAGS=-I/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "CXXFLAGS=-I/opt/homebrew/opt/boost-custom/include -stdlib=libc++" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/boost-custom/lib -stdlib=libc++" >> $GITHUB_ENV
+          
+          # Verify our custom Boost is present
+          echo "Custom Boost headers:"
+          ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
+          
+          echo "ULTIMATE FINAL SOLUTION: Built custom Boost and set compiler overrides"
+
+      - name: Install Qt
+        run: |
+          # Install Qt5 via Homebrew directly
+          brew install qt@5
+          # Set Qt paths manually
+          QT_PREFIX=$(brew --prefix qt@5)
+          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
+          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
+          
+      - name: Verify Qt installation
+        run: |
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
+          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
+          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
+          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
+
+      - name: Build
+        id: build
+        run: |
+          build_folder="build/release"
+          xfg_ver=$(echo ${{ github.ref }} | sed 's|refs/tags/||')
+          release_name="fuego-desktop-macOS-apple-silicon-v$xfg_ver"
+          app_name="Fuego-Wallet.app"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          
+          # ULTIMATE FINAL SOLUTION: Force compiler to use our custom Boost with explicit flags
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          make -j4
+          cd ../..
+          
+          cd build/release
+          macdeployqt "$app_name"
+          cpack
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          mv *.dmg "$release_name".dmg
+          # Include STARK CLI in release
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
+          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md"
+          sha256=$(shasum -a 256 "$release_name".zip | awk '{ print toupper($1) }')
+
+          echo "sha256=${sha256}" >> $GITHUB_OUTPUT
+          echo "release_name=${release_name}.zip" >> $GITHUB_OUTPUT
+          echo "asset_path=build/release/${release_name}.zip" >> $GITHUB_OUTPUT
+          echo "xfg_version=${xfg_version}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v4
+        with:
+          files: ${{ steps.build.outputs.asset_path }}
+          name: Fuego Desktop v${{ steps.build.outputs.xfg_ver }}
+          body: |
+            <img src="https://camo.githubusercontent.com/db6daf7df2ad2d89a28c0916039d3b9ee6c97801425b6937c353139ebf630cb3/68747470733a2f2f63646e2d69636f6e732d706e672e666c617469636f6e2e636f6d2f3531322f3838322f3838323630322e706e67" width="16"> [Download for macOS Apple Silicon](../../releases/download/${{ steps.build.outputs.xfg_ver }}/${{ steps.build.outputs.release_name }}) ${{ steps.build.outputs.release_name }}
+            `SHA256 : ${{ steps.build.outputs.sha256 }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

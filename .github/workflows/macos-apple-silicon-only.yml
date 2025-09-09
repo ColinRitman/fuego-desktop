@@ -1,0 +1,135 @@
+name: macOS Apple Silicon Only
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*" # We don't want this to run on release
+  pull_request:
+
+jobs:
+  macos-apple-silicon-only:
+    name: macOS Apple Silicon Only
+    runs-on: macos-14  # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies and rebuild Boost with libc++
+        run: |
+          # Install dependencies
+          brew install libqrencode miniupnpc
+          
+          # ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths
+          echo "=== ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths ==="
+          
+          # Download and build Boost from source with libc++
+          cd /tmp
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.89.0/source/boost_1_89_0.tar.gz
+          tar -xzf boost_1_89_0.tar.gz
+          cd boost_1_89_0
+          
+          # Configure Boost to use libc++
+          ./bootstrap.sh --with-toolset=clang
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+          
+          # Set environment variables to use our custom Boost
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          
+          # Override compiler include paths to force our custom Boost
+          echo "CPPFLAGS=-I/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "CXXFLAGS=-I/opt/homebrew/opt/boost-custom/include -stdlib=libc++" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/boost-custom/lib -stdlib=libc++" >> $GITHUB_ENV
+          
+          # Verify our custom Boost is present
+          echo "Custom Boost headers:"
+          ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
+          
+          echo "ULTIMATE FINAL SOLUTION: Built custom Boost and set compiler overrides"
+
+      - name: Install Qt
+        run: |
+          # Install Qt5 via Homebrew directly
+          brew install qt@5
+          # Set Qt paths manually
+          QT_PREFIX=$(brew --prefix qt@5)
+          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
+          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
+          
+      - name: Verify Qt installation
+        run: |
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
+          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
+          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
+          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
+
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
+
+      - name: Download XFG STARK CLI
+        run: |
+          # Download pre-built xfg-stark-cli binary from releases
+          curl -L -o xfg-stark-cli https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos-aarch64
+          chmod +x xfg-stark-cli
+          mkdir -p bin
+          mv xfg-stark-cli bin/
+          
+          # Verify the binary works
+          ./bin/xfg-stark-cli --version
+          
+          echo "✅ STARK CLI downloaded and verified successfully"
+
+      - name: Build
+        id: build
+        run: |
+          build_folder="build/release"
+          xfg_ver=${GITHUB_SHA::7}
+          release_name="fuego-desktop-macOS-apple-silicon-dev-$xfg_ver"
+          app_name="Fuego-Wallet.app"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          
+          # ULTIMATE FINAL SOLUTION: Force compiler to use our custom Boost with explicit flags
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          make -j4
+          cd ../..
+          
+          cd build/release
+          macdeployqt "$app_name"
+          cpack
+          mkdir "$release_name"
+          mkdir -p "$release_name/tools"
+          mv *.dmg "$release_name".dmg
+          # Include STARK CLI in release
+          cp ../../bin/xfg-stark-cli "$release_name/tools/"
+          cp ../../download-stark-cli.sh "$release_name/tools/"
+          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
+          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
+          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md"
+
+          echo "release_name=${release_name}" >> $GITHUB_OUTPUT
+          echo "artifact_path=build/release/${release_name}.zip" >> $GITHUB_OUTPUT
+
+      - name: Upload To GH Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.release_name }}
+          path: ${{ steps.build.outputs.artifact_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
