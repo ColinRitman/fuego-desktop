@@ -38,6 +38,7 @@ jobs:
           echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
           echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
           echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          echo "Boost_DIR=/opt/homebrew/opt/boost-custom/lib/cmake/Boost-1.89.0" >> $GITHUB_ENV
           
           # Override compiler include paths to force our custom Boost
           echo "CPPFLAGS=-I/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
