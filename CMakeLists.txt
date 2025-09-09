@@ -321,6 +321,7 @@ set(CRYPTONOTE_SOURCES
   cryptonote/src/WalletLegacy/WalletTransactionSender.cpp
   cryptonote/src/WalletLegacy/WalletUnconfirmedTransactions.cpp
   cryptonote/src/WalletLegacy/WalletUserTransactionsCache.cpp
+  cryptonote/src/BurnTransactionHandler.cpp
   cryptonote/src/System/ContextGroup.cpp
   cryptonote/src/System/Event.cpp
   cryptonote/src/System/EventLock.cpp
