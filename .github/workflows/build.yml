@@ -1,10 +1,11 @@
 name: Build
 
-on:
-  push:
-    tags:
-      - "*"
-  workflow_dispatch:
+# DISABLED: Focus on macOS-only workflow for now
+# on:
+#   push:
+#     tags:
+#       - "*"
+#   workflow_dispatch:
 
 jobs:
   build-windows:
