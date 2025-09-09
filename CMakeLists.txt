@@ -462,6 +462,7 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${QTMAIN} ${CRYPTONOTE_
 if (APPLE)
   qt5_use_modules(${PROJECT_NAME} PrintSupport)
   add_definitions(/DHAVE_ROTR)
+  target_link_libraries(${PROJECT_NAME} -lpthread resolv)
 elseif (UNIX)
   target_link_libraries(${PROJECT_NAME} -lpthread resolv)
   add_definitions(/DHAVE_ROTR)
