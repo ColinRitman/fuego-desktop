@@ -119,50 +119,23 @@ jobs:
           echo "Code signing the app bundle..."
           codesign --force --deep --sign - "$app_name"
           
-          # Create DMG using CPack
-          echo "Creating DMG package..."
+          # Create ZIP package using CPack
+          echo "Creating ZIP package..."
           cpack
           
-          # Verify DMG was created successfully
-          if [ ! -f *.dmg ]; then
-            echo "Error: DMG file was not created!"
+          # Verify ZIP was created successfully
+          if [ ! -f *.zip ]; then
+            echo "Error: ZIP file was not created!"
             ls -la
             exit 1
           fi
           
-          # Get the actual DMG filename
-          dmg_file=$(ls *.dmg | head -1)
-          echo "Created DMG: $dmg_file"
+          # Get the actual ZIP filename
+          zip_file=$(ls *.zip | head -1)
+          echo "Created ZIP: $zip_file"
           
-          # Verify DMG is not corrupted
-          echo "Verifying DMG integrity..."
-          hdiutil verify "$dmg_file" || {
-            echo "Error: DMG verification failed!"
-            exit 1
-          }
-          
-          mkdir "$release_name"
-          mkdir -p "$release_name/tools"
-          mv "$dmg_file" "$release_name".dmg
-          # Include STARK CLI in release
-          cp ../../bin/xfg-stark-cli "$release_name/tools/"
-          cp ../../download-stark-cli.sh "$release_name/tools/"
-          cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
-          cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
-          
-          # Create README with installation instructions
-          echo "# Fuego Desktop Wallet - macOS Apple Silicon" > "$release_name/README.md"
-          echo "" >> "$release_name/README.md"
-          echo "## Installation Instructions" >> "$release_name/README.md"
-          echo "" >> "$release_name/README.md"
-          echo "1. Mount the DMG: Double-click the .dmg file to mount it" >> "$release_name/README.md"
-          echo "2. Drag to Applications: Drag FuegoWallet.app to your Applications folder" >> "$release_name/README.md"
-          echo "3. First Launch: If macOS shows a warning, right-click and select 'Open'" >> "$release_name/README.md"
-          echo "" >> "$release_name/README.md"
-          echo "## Alternative Method" >> "$release_name/README.md"
-          echo "Run: xattr -d com.apple.quarantine /Applications/FuegoWallet.app" >> "$release_name/README.md"
-          
-          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$release_name/README.md"
+          # The ZIP file already contains the app bundle, just rename it
+          mv "$zip_file" "$release_name".zip
 
           echo "release_name=${release_name}" >> $GITHUB_OUTPUT
           echo "artifact_path=build/release/${release_name}.zip" >> $GITHUB_OUTPUT
