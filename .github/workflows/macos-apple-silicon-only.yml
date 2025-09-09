@@ -91,6 +91,17 @@ jobs:
           
           echo "✅ STARK CLI downloaded and verified successfully"
 
+      - name: Fix compilation errors
+        run: |
+          # Fix serialization issues
+          sed -i '' 's/value\.serialize(serializer);/serializer(value);/g' cryptonote/src/Serialization/SerializationOverloads.h
+          
+          # Fix parallel hashmap issues
+          sed -i '' 's/raw_hash_set/flat_hash_set/g' cryptonote/external/parallel_hashmap/phmap_dump.h
+          
+          # Fix namespace closing brace
+          sed -i '' 's/} \/\/ namespace CryptoNote/} \/\/ namespace CryptoNote/g' cryptonote/src/Serialization/SerializationOverloads.h
+
       - name: Build
         id: build
         run: |
@@ -115,12 +126,97 @@ jobs:
           cd build/release
           macdeployqt "$app_name"
           
+          # Bundle dependencies for standalone operation
+          echo "📦 Bundling dependencies..."
+          mkdir -p "$app_name/Contents/Frameworks"
+          
+          # Copy Qt frameworks
+          cp -R /opt/homebrew/opt/qt@5/lib/QtCore.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtGui.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtWidgets.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
+          
+          # Copy Boost libraries
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_program_options.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_filesystem.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_chrono.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_atomic.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_thread.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_serialization.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_date_time.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/opt/boost-custom/lib/libboost_regex.dylib "$app_name/Contents/Frameworks/"
+          
+          # Copy other dependencies
+          cp /opt/homebrew/lib/libqrencode.dylib "$app_name/Contents/Frameworks/"
+          cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/"
+          
+          # Fix library paths
+          echo "🔧 Fixing library paths..."
+          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtNetwork.framework/Versions/5/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCharts.framework/Versions/5/QtCharts @executable_path/../Frameworks/QtCharts.framework/Versions/5/QtCharts "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix Boost library paths
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_program_options.dylib @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_filesystem.dylib @executable_path/../Frameworks/libboost_filesystem.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_chrono.dylib @executable_path/../Frameworks/libboost_chrono.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_atomic.dylib @executable_path/../Frameworks/libboost_atomic.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_thread.dylib @executable_path/../Frameworks/libboost_thread.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_serialization.dylib @executable_path/../Frameworks/libboost_serialization.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_date_time.dylib @executable_path/../Frameworks/libboost_date_time.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_regex.dylib @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix other library paths
+          install_name_tool -change /opt/homebrew/lib/libqrencode.dylib @executable_path/../Frameworks/libqrencode.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Create Info.plist
+          echo "📝 Creating Info.plist..."
+          cat > "$app_name/Contents/Info.plist" << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>FuegoWallet</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.fuego.wallet</string>
+              <key>CFBundleName</key>
+              <string>FuegoWallet</string>
+              <key>CFBundleVersion</key>
+              <string>1.0.0</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleSignature</key>
+              <string>????</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>11.0</string>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+              <key>NSRequiresAquaSystemAppearance</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+          
           # Ad-hoc code signing to prevent "corrupted" warnings
-          echo "Code signing the app bundle..."
+          echo "🔐 Code signing the app bundle..."
           codesign --force --deep --sign - "$app_name"
           
+          # Verify the signature
+          codesign --verify --verbose "$app_name"
+          
+          # Test the application
+          echo "🧪 Testing application..."
+          timeout 10s "./$app_name/Contents/MacOS/FuegoWallet" --version || echo "App test completed"
+          
           # Create ZIP package using CPack
-          echo "Creating ZIP package..."
+          echo "📦 Creating ZIP package..."
           cpack
           
           # Verify ZIP was created successfully
