@@ -129,7 +129,10 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(MINIUPNPC miniupnpc)
 if(MINIUPNPC_FOUND)
     message(STATUS "Found miniupnpc via pkg-config: ${MINIUPNPC_LIBRARIES}")
+    # Use the full library path from pkg-config
     set(MINIUPNPC_LIB ${MINIUPNPC_LIBRARIES})
+    # Also add the library directories
+    link_directories(${MINIUPNPC_LIBRARY_DIRS})
 else()
     find_library(MINIUPNPC_LIB miniupnpc)
     if(MINIUPNPC_LIB)
