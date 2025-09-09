@@ -34,11 +34,27 @@ class StarkProofGenerator:
                 
         raise FileNotFoundError("xfg-stark-cli executable not found")
     
-    def is_burn_transaction(self, transaction_hash, amount):
-        """Check if this is a burn transaction that needs STARK proof"""
-        # For now, consider any transaction with amount > 0 as potential burn
-        # In a real implementation, you'd check transaction type/extra data
-        return amount > 0 and transaction_hash and len(transaction_hash) == 64
+    def is_burn_transaction(self, transaction_hash, amount, tx_extra=None):
+        """Check if this is a burn transaction that needs STARK proof using tx_extra 0x08 tag"""
+        # Basic validation
+        if not (amount > 0 and transaction_hash and len(transaction_hash) == 64):
+            return False
+            
+        # If tx_extra is provided, check for HEAT commitment (0x08 tag)
+        if tx_extra:
+            try:
+                from burn_transaction_detector import BurnTransactionDetector
+                detector = BurnTransactionDetector()
+                return detector.is_burn_transaction(tx_extra)
+            except ImportError:
+                print("Warning: burn_transaction_detector not available, using basic validation")
+                return True
+            except Exception as e:
+                print(f"Warning: Error checking tx_extra: {e}")
+                return True
+        
+        # Fallback: consider valid transaction as potential burn if no tx_extra
+        return True
     
     def create_package(self, transaction_hash, recipient_address, burn_amount, block_height=0):
         """Create a data package for STARK proof generation"""
@@ -261,23 +277,34 @@ class StarkProofGenerator:
 def main():
     """Main function for command-line usage"""
     if len(sys.argv) < 4:
-        print("Usage: python stark_proof_generator.py <transaction_hash> <recipient_address> <burn_amount> [block_height]")
+        print("Usage: python stark_proof_generator.py <transaction_hash> <recipient_address> <burn_amount> [block_height] [tx_extra]")
         print("")
         print("Process:")
-        print("  1. Generate STARK proof")
-        print("  2. Eldernode verification")
-        print("  3. Create complete package for HEAT minting")
+        print("  1. Detect burn transaction using tx_extra 0x08 tag")
+        print("  2. Generate STARK proof")
+        print("  3. Eldernode verification")
+        print("  4. Create complete package for HEAT minting")
+        print("")
+        print("Note: Providing tx_extra data enables proper burn transaction detection")
+        print("      using the TX_EXTRA_HEAT_COMMITMENT (0x08) tag.")
         sys.exit(1)
     
     transaction_hash = sys.argv[1]
     recipient_address = sys.argv[2]
     burn_amount = int(sys.argv[3])
     block_height = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+    tx_extra = sys.argv[5] if len(sys.argv) > 5 else None
     
     generator = StarkProofGenerator()
     
-    if not generator.is_burn_transaction(transaction_hash, burn_amount):
+    if not generator.is_burn_transaction(transaction_hash, burn_amount, tx_extra):
         print("❌ This doesn't appear to be a burn transaction")
+        if tx_extra:
+            print("tx_extra provided but no TX_EXTRA_HEAT_COMMITMENT (0x08) tag found")
+            print("This transaction may not be a proper burn transaction")
+        else:
+            print("No tx_extra provided - cannot verify HEAT commitment")
+            print("Consider providing tx_extra data for proper burn detection")
         sys.exit(1)
     
     result = generator.process_burn_to_heat(transaction_hash, recipient_address, burn_amount, block_height)

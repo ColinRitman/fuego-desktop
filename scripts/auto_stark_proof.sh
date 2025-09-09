@@ -73,23 +73,54 @@ check_stark_cli() {
     print_success "STARK CLI found at: $CLI_PATH"
 }
 
-# Function to check if transaction is a burn
+# Function to check if transaction is a burn using tx_extra 0x08 tag
 is_burn_transaction() {
     local tx_hash="$1"
     local amount="$2"
+    local tx_extra="${3:-}"
     
     # Check if transaction hash is valid (64 hex chars)
     if [[ ! "$tx_hash" =~ ^[a-fA-F0-9]{64}$ ]]; then
+        print_warning "Invalid transaction hash format: $tx_hash"
         return 1
     fi
     
     # Check if amount is positive
     if [[ "$amount" -le 0 ]]; then
+        print_warning "Invalid amount: $amount"
         return 1
     fi
     
-    # For now, consider any valid transaction as potential burn
-    # In a real implementation, you'd check transaction type/extra data
+    # If tx_extra is provided, check for HEAT commitment (0x08 tag)
+    if [[ -n "$tx_extra" ]]; then
+        print_info "Checking tx_extra for HEAT commitment (0x08 tag)..."
+        
+        # Use Python script to detect burn transaction
+        if command -v python3 >/dev/null 2>&1; then
+            local detector_script="$SCRIPT_DIR/burn_transaction_detector.py"
+            if [[ -f "$detector_script" ]]; then
+                local burn_data=$(python3 "$detector_script" "$tx_extra" 2>/dev/null)
+                if [[ -n "$burn_data" ]]; then
+                    print_success "Burn transaction detected via tx_extra 0x08 tag"
+                    print_info "HEAT commitment found: $(echo "$burn_data" | grep -o '"commitment_hash":"[^"]*"' | cut -d'"' -f4)"
+                    return 0
+                else
+                    print_warning "No HEAT commitment found in tx_extra"
+                    return 1
+                fi
+            else
+                print_warning "Burn detector script not found, falling back to basic validation"
+            fi
+        else
+            print_warning "Python3 not available, falling back to basic validation"
+        fi
+    else
+        print_warning "No tx_extra provided, cannot verify HEAT commitment"
+        print_info "Consider providing tx_extra data for proper burn detection"
+    fi
+    
+    # Fallback: consider valid transaction as potential burn if no tx_extra
+    print_info "Using fallback validation (no tx_extra provided)"
     return 0
 }
 
@@ -361,19 +392,24 @@ main() {
     
     # Check arguments
     if [[ $# -lt 3 ]]; then
-        echo "Usage: $0 <transaction_hash> <recipient_address> <burn_amount> [block_height]"
+        echo "Usage: $0 <transaction_hash> <recipient_address> <burn_amount> [block_height] [tx_extra]"
         echo ""
         echo "Arguments:"
         echo "  transaction_hash  - 64-character hex transaction hash"
         echo "  recipient_address - Ethereum address to receive HEAT tokens"
         echo "  burn_amount       - Amount of XFG burned"
         echo "  block_height      - Block height (optional, defaults to 0)"
+        echo "  tx_extra          - Transaction extra data (optional, for 0x08 tag verification)"
         echo ""
         echo "Process:"
-        echo "  1. Generate STARK proof"
-        echo "  2. Eldernode verification"
-        echo "  3. Create complete package for HEAT minting"
-        echo "  4. Create copy-paste file for smart contract submission"
+        echo "  1. Detect burn transaction using tx_extra 0x08 tag"
+        echo "  2. Generate STARK proof"
+        echo "  3. Eldernode verification"
+        echo "  4. Create complete package for HEAT minting"
+        echo "  5. Create copy-paste file for smart contract submission"
+        echo ""
+        echo "Note: Providing tx_extra data enables proper burn transaction detection"
+        echo "      using the TX_EXTRA_HEAT_COMMITMENT (0x08) tag."
         exit 1
     fi
     
@@ -381,15 +417,23 @@ main() {
     local recipient="$2"
     local amount="$3"
     local block_height="${4:-0}"
+    local tx_extra="${5:-}"
     
     print_progress "Starting complete XFG burn to HEAT mint process..."
     print_info "Transaction: $tx_hash"
     print_info "Recipient: $recipient"
     print_info "Amount: $amount XFG"
     
-    # Validate transaction
-    if ! is_burn_transaction "$tx_hash" "$amount"; then
-        print_error "Invalid burn transaction parameters"
+    # Validate transaction using tx_extra 0x08 tag detection
+    if ! is_burn_transaction "$tx_hash" "$amount" "$tx_extra"; then
+        print_error "Invalid burn transaction parameters or no HEAT commitment found"
+        if [[ -n "$tx_extra" ]]; then
+            print_info "tx_extra provided but no TX_EXTRA_HEAT_COMMITMENT (0x08) tag found"
+            print_info "This transaction may not be a proper burn transaction"
+        else
+            print_info "No tx_extra provided - cannot verify HEAT commitment"
+            print_info "Consider providing tx_extra data for proper burn detection"
+        fi
         exit 1
     fi
     
