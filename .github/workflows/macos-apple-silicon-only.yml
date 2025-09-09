@@ -119,10 +119,31 @@ jobs:
           echo "Code signing the app bundle..."
           codesign --force --deep --sign - "$app_name"
           
+          # Create DMG using CPack
+          echo "Creating DMG package..."
           cpack
+          
+          # Verify DMG was created successfully
+          if [ ! -f *.dmg ]; then
+            echo "Error: DMG file was not created!"
+            ls -la
+            exit 1
+          fi
+          
+          # Get the actual DMG filename
+          dmg_file=$(ls *.dmg | head -1)
+          echo "Created DMG: $dmg_file"
+          
+          # Verify DMG is not corrupted
+          echo "Verifying DMG integrity..."
+          hdiutil verify "$dmg_file" || {
+            echo "Error: DMG verification failed!"
+            exit 1
+          }
+          
           mkdir "$release_name"
           mkdir -p "$release_name/tools"
-          mv *.dmg "$release_name".dmg
+          mv "$dmg_file" "$release_name".dmg
           # Include STARK CLI in release
           cp ../../bin/xfg-stark-cli "$release_name/tools/"
           cp ../../download-stark-cli.sh "$release_name/tools/"
