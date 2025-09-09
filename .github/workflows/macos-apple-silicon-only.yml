@@ -114,6 +114,11 @@ jobs:
           
           cd build/release
           macdeployqt "$app_name"
+          
+          # Ad-hoc code signing to prevent "corrupted" warnings
+          echo "Code signing the app bundle..."
+          codesign --force --deep --sign - "$app_name"
+          
           cpack
           mkdir "$release_name"
           mkdir -p "$release_name/tools"
@@ -123,7 +128,39 @@ jobs:
           cp ../../download-stark-cli.sh "$release_name/tools/"
           cp ../../scripts/auto_stark_proof.sh "$release_name/tools/"
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
-          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md"
+          
+          # Create README with installation instructions
+          cat > "$release_name/README.md" << 'EOF'
+# Fuego Desktop Wallet - macOS Apple Silicon
+
+## Installation Instructions
+
+1. **Mount the DMG**: Double-click the `.dmg` file to mount it
+2. **Drag to Applications**: Drag `FuegoWallet.app` to your Applications folder
+3. **First Launch**: If macOS shows a "corrupted" or "unidentified developer" warning:
+   - Right-click on `FuegoWallet.app` in Applications
+   - Select "Open" from the context menu
+   - Click "Open" in the dialog that appears
+   - The app will be added to your security exceptions
+
+## Alternative Method (if right-click doesn't work)
+
+1. Open Terminal
+2. Run: `xattr -d com.apple.quarantine /Applications/FuegoWallet.app`
+3. Launch the app normally
+
+## Tools Included
+
+- `xfg-stark-cli`: STARK proof generation tool
+- `download-stark-cli.sh`: Script to download latest STARK CLI
+- `auto_stark_proof.sh`: Automated STARK proof script
+
+## Support
+
+For issues or questions, please visit the project repository.
+EOF
+          
+          zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$release_name/README.md"
 
           echo "release_name=${release_name}" >> $GITHUB_OUTPUT
           echo "artifact_path=build/release/${release_name}.zip" >> $GITHUB_OUTPUT
