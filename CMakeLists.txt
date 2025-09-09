@@ -487,7 +487,7 @@ set(CPACK_PACKAGE_VENDOR "Fandom Gold Society")
 set(CPACK_PACKAGE_CONTACT "https://github.com/fandomgold/")
 set(CPACK_STRIP_FILES ON)
 if (APPLE)
-    set(CPACK_GENERATOR DragNDrop)
+    set(CPACK_GENERATOR ZIP)
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
     
     # Install STARK CLI and scripts
@@ -553,8 +553,6 @@ elseif (WIN32)
   install(FILES scripts/auto_stark_proof.sh DESTINATION .)
   install(FILES scripts/stark_proof_generator.py DESTINATION .)
   install(FILES scripts/progress_logger.py DESTINATION .)
-  
-  set(CPACK_GENERATOR ZIP)
 endif (APPLE)
 
 include(CPack)
