@@ -97,7 +97,7 @@ jobs:
           build_folder="build/release"
           xfg_ver=${GITHUB_SHA::7}
           release_name="fuego-desktop-macOS-apple-silicon-dev-$xfg_ver"
-          app_name="Fuego-Wallet.app"
+          app_name="FuegoWallet.app"
 
           # Clean up any existing CMake cache files
           rm -f CMakeCache.txt CMakeCache.txt.*
