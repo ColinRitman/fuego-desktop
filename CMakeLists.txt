@@ -346,6 +346,28 @@ set_target_properties(${CRYPTONOTE_LIB} PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
+# Set C compilation flags for C source files
+set_source_files_properties(
+    cryptonote/src/crypto/tree-hash.c
+    cryptonote/src/crypto/hash.c
+    cryptonote/src/crypto/keccak.c
+    cryptonote/src/crypto/random.c
+    cryptonote/src/crypto/blake256.c
+    cryptonote/src/crypto/groestl.c
+    cryptonote/src/crypto/hash-extra-blake.c
+    cryptonote/src/crypto/hash-extra-groestl.c
+    cryptonote/src/crypto/hash-extra-jh.c
+    cryptonote/src/crypto/hash-extra-skein.c
+    cryptonote/src/crypto/jh.c
+    cryptonote/src/crypto/oaes_lib.c
+    cryptonote/src/crypto/skein.c
+    cryptonote/src/crypto/aesb.c
+    cryptonote/src/crypto/crypto-ops.c
+    cryptonote/src/crypto/crypto-ops-data.c
+    cryptonote/src/crypto/chacha8.c
+    PROPERTIES COMPILE_FLAGS "-std=c99"
+)
+
 # Link cryptonote library with required libraries
 target_link_libraries(${CRYPTONOTE_LIB} ${Boost_LIBRARIES})
 
