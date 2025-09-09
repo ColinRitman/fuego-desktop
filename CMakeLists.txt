@@ -7,41 +7,56 @@ if(APPLE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version")  
 endif(APPLE)
 
-# Enable C++ language before including other files that need it
-project(${CN_PROJECT_NAME} CXX)
+# Enable both C and C++ languages before including other files that need it
+project(${CN_PROJECT_NAME} C CXX)
 
 # Force C++17 standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Force C99 standard for C files
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 # Force C++17 flag for all compilers
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-    message(STATUS "Using GNU compiler with C++17")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+    message(STATUS "Using GNU compiler with C++17 and C99")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-    message(STATUS "Using Clang compiler with C++17")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+    message(STATUS "Using Clang compiler with C++17 and C99")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-    message(STATUS "Using AppleClang compiler with C++17")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+    message(STATUS "Using AppleClang compiler with C++17 and C99")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-    message(STATUS "Using MSVC compiler with C++17")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /std:c99")
+    message(STATUS "Using MSVC compiler with C++17 and C99")
 endif()
 
 message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "C Standard: ${CMAKE_C_STANDARD}")
+message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
 
 # Add compiler flags to handle potential compilation issues
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error -Wno-deprecated-builtins")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error -Wno-deprecated-builtins -Wno-unused-command-line-argument")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error -Wno-unused-command-line-argument")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error -Wno-deprecated-builtins -Wno-unused-command-line-argument")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable -Wno-unused-function -Wno-error -Wno-unused-command-line-argument")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /WX-")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX-")
 endif()
 
 # Set STARK CLI path for binary download
@@ -346,27 +361,7 @@ set_target_properties(${CRYPTONOTE_LIB} PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
-# Set C compilation flags for C source files
-set_source_files_properties(
-    cryptonote/src/crypto/tree-hash.c
-    cryptonote/src/crypto/hash.c
-    cryptonote/src/crypto/keccak.c
-    cryptonote/src/crypto/random.c
-    cryptonote/src/crypto/blake256.c
-    cryptonote/src/crypto/groestl.c
-    cryptonote/src/crypto/hash-extra-blake.c
-    cryptonote/src/crypto/hash-extra-groestl.c
-    cryptonote/src/crypto/hash-extra-jh.c
-    cryptonote/src/crypto/hash-extra-skein.c
-    cryptonote/src/crypto/jh.c
-    cryptonote/src/crypto/oaes_lib.c
-    cryptonote/src/crypto/skein.c
-    cryptonote/src/crypto/aesb.c
-    cryptonote/src/crypto/crypto-ops.c
-    cryptonote/src/crypto/crypto-ops-data.c
-    cryptonote/src/crypto/chacha8.c
-    PROPERTIES COMPILE_FLAGS "-std=c99"
-)
+# C source files will be compiled with C99 standard automatically
 
 # Link cryptonote library with required libraries
 target_link_libraries(${CRYPTONOTE_LIB} ${Boost_LIBRARIES})
