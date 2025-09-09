@@ -25,7 +25,7 @@ jobs:
           
           # Download and build Boost from source with libc++
           cd /tmp
-          wget https://boostorg.jfrog.io/artifactory/main/release/1.89.0/source/boost_1_89_0.tar.gz
+          wget https://sourceforge.net/projects/boost/files/boost/1.89.0/boost_1_89_0.tar.gz/download -O boost_1_89_0.tar.gz
           tar -xzf boost_1_89_0.tar.gz
           cd boost_1_89_0
           
