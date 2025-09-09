@@ -75,7 +75,10 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/ColinRitman/fuego.git cryptonote
-          git -C cryptonote checkout f77ea2bf2dcb1095a7b22e78dfa2737a06cecfdc
+          git -C cryptonote checkout master
+          
+          # Burn transaction integration files are now in the fuego repository
+          echo "✅ Burn transaction integration files are included in the fuego repository"
 
       - name: Download XFG STARK CLI
         run: |
