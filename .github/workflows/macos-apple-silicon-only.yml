@@ -151,35 +151,16 @@ jobs:
           cp ../../STARK_CLI_INTEGRATION_OPTIMIZATION.md "$release_name/"
           
           # Create README with installation instructions
-          cat > "$release_name/README.md" << 'EOF'
-# Fuego Desktop Wallet - macOS Apple Silicon
-
-## Installation Instructions
-
-1. **Mount the DMG**: Double-click the `.dmg` file to mount it
-2. **Drag to Applications**: Drag `FuegoWallet.app` to your Applications folder
-3. **First Launch**: If macOS shows a "corrupted" or "unidentified developer" warning:
-   - Right-click on `FuegoWallet.app` in Applications
-   - Select "Open" from the context menu
-   - Click "Open" in the dialog that appears
-   - The app will be added to your security exceptions
-
-## Alternative Method (if right-click doesn't work)
-
-1. Open Terminal
-2. Run: `xattr -d com.apple.quarantine /Applications/FuegoWallet.app`
-3. Launch the app normally
-
-## Tools Included
-
-- `xfg-stark-cli`: STARK proof generation tool
-- `download-stark-cli.sh`: Script to download latest STARK CLI
-- `auto_stark_proof.sh`: Automated STARK proof script
-
-## Support
-
-For issues or questions, please visit the project repository.
-EOF
+          echo "# Fuego Desktop Wallet - macOS Apple Silicon" > "$release_name/README.md"
+          echo "" >> "$release_name/README.md"
+          echo "## Installation Instructions" >> "$release_name/README.md"
+          echo "" >> "$release_name/README.md"
+          echo "1. Mount the DMG: Double-click the .dmg file to mount it" >> "$release_name/README.md"
+          echo "2. Drag to Applications: Drag FuegoWallet.app to your Applications folder" >> "$release_name/README.md"
+          echo "3. First Launch: If macOS shows a warning, right-click and select 'Open'" >> "$release_name/README.md"
+          echo "" >> "$release_name/README.md"
+          echo "## Alternative Method" >> "$release_name/README.md"
+          echo "Run: xattr -d com.apple.quarantine /Applications/FuegoWallet.app" >> "$release_name/README.md"
           
           zip "$release_name".zip "$release_name".dmg "$release_name/tools" "$release_name/STARK_CLI_INTEGRATION_OPTIMIZATION.md" "$release_name/README.md"
 
