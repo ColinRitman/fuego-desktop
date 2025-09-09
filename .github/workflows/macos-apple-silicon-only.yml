@@ -31,7 +31,7 @@ jobs:
           
           # Configure Boost to use libc++
           ./bootstrap.sh --with-toolset=clang
-          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom --with-filesystem --with-thread --with-date_time --with-chrono --with-regex --with-serialization --with-program_options install
           
           # Set environment variables to use our custom Boost
           echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
