@@ -1,13 +1,13 @@
 <img height="800px" width="800px" src="https://github.com/usexfg/fuego-data/blob/90b6ca4eda30018eeb053eccea330e2117b4396d/fuego-images/fuegovlyria.png"><img/>
 # Fuego 🔥 Wallet
 
-##  Desktop Privacy Banking App 
+##  Desktop Decentralized Privacy Banking
 
 ### [Certificates Of Ledger Deposit](https://github.com/usexfg/COLD-DAO/blob/main/README.md) and Untraceable Messaging
 
 Latest Release: v4.2.0.1 (Godflame Point)
 
-<b><sub>Maintained by ElderFire Privacy Council</sub></b>
+<b><sub>Maintained by ElderFire Privacy Group</sub></b>
 
 [![macOS](https://github.com/usexfg/fuego-wallet/actions/workflows/macOS.yml/badge.svg)](https://github.com/usexfg/fuego-wallet/actions/workflows/macOS.yml)
 
