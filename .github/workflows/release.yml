@@ -15,7 +15,20 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev libminiupnpc-dev
+          sudo apt-get install -y build-essential cmake libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev libminiupnpc-dev
+
+          # Build Boost 1.82.0 from source
+          wget https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.gz/download -O boost_1_82_0.tar.gz
+          tar -xzf boost_1_82_0.tar.gz
+          cd boost_1_82_0
+          ./bootstrap.sh --prefix=/usr/local/boost-custom
+          ./b2 --prefix=/usr/local/boost-custom --with-filesystem --with-thread --with-date_time --with-chrono --with-regex --with-serialization --with-program_options install
+
+          echo "BOOST_ROOT=/usr/local/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/usr/local/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/usr/local/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/usr/local/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          echo "Boost_DIR=/usr/local/boost-custom/lib/cmake/Boost-1.82.0" >> $GITHUB_ENV
           
       - name: Set Qt environment variables
         run: |
@@ -60,14 +73,14 @@ jobs:
           # Clean up any existing CMake cache files
           rm -f CMakeCache.txt CMakeCache.txt.*
           rm -rf build/
-          
+
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
-          
+
           cd build/release
           mkdir "$release_name"
           mkdir -p "$release_name/tools"
@@ -94,7 +107,20 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev libminiupnpc-dev
+          sudo apt-get install -y build-essential cmake libssl-dev pkg-config libqt5widgets5 libqt5gui5 libqt5core5a libqt5charts5-dev libqt5svg5-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqrencode-dev libminiupnpc-dev
+
+          # Build Boost 1.82.0 from source
+          wget https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.gz/download -O boost_1_82_0.tar.gz
+          tar -xzf boost_1_82_0.tar.gz
+          cd boost_1_82_0
+          ./bootstrap.sh --prefix=/usr/local/boost-custom
+          ./b2 --prefix=/usr/local/boost-custom --with-filesystem --with-thread --with-date_time --with-chrono --with-regex --with-serialization --with-program_options install
+
+          echo "BOOST_ROOT=/usr/local/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/usr/local/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/usr/local/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/usr/local/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
+          echo "Boost_DIR=/usr/local/boost-custom/lib/cmake/Boost-1.82.0" >> $GITHUB_ENV
           
       - name: Set Qt environment variables
         run: |
@@ -143,10 +169,10 @@ jobs:
           # Build using CMake (main project, not cryptonote subdirectory)
           mkdir -p build/release
           cd build/release
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
           make -j4
           cd ../..
-          
+
           cd build/release
           mkdir "$release_name"
           mkdir -p "$release_name/tools"
@@ -189,7 +215,20 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode miniupnpc
+          brew install libqrencode miniupnpc
+
+          # Build Boost 1.82.0 from source
+          cd /tmp
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
+          tar -xzf boost_1_82_0.tar.gz
+          cd boost_1_82_0
+          ./bootstrap.sh --with-toolset=clang --prefix=/opt/homebrew/opt/boost-custom
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |

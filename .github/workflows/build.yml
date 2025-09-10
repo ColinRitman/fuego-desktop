@@ -359,7 +359,20 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost libqrencode miniupnpc
+          brew install libqrencode miniupnpc
+
+          # Build Boost 1.82.0 from source
+          cd /tmp
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
+          tar -xzf boost_1_82_0.tar.gz
+          cd boost_1_82_0
+          ./bootstrap.sh --with-toolset=clang --prefix=/opt/homebrew/opt/boost-custom
+          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom install
+
+          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
+          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
 
       - name: Clone fuego
         run: |
@@ -506,8 +519,14 @@ jobs:
           mkdir -p build/release
           cd build/release
           
+          # macOS Apple Silicon: Work around Xcode 16.4 libc++ compatibility issues
+          # Use older macOS SDK and add std namespace qualifiers for random headers
+          export CXXFLAGS="$CXXFLAGS -I/opt/homebrew/opt/boost-custom/include -stdlib=libc++"
+          export LDFLAGS="$LDFLAGS -L/opt/homebrew/opt/boost-custom/lib -stdlib=libc++"
+          export MACOSX_DEPLOYMENT_TARGET=13.0
+
           # ULTIMATE FINAL SOLUTION: Force compiler to use our custom Boost with explicit flags
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
           make -j4
           cd ../..
           
