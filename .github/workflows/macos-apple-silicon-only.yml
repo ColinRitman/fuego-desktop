@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies and rebuild Boost with libc++
         run: |
           # Install dependencies
-          brew install libqrencode miniupnpc
+          brew install libqrencode miniupnpc boost
           
           # ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths
           echo "=== ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths ==="
@@ -48,6 +48,14 @@ jobs:
           # Verify our custom Boost is present
           echo "Custom Boost headers:"
           ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
+          
+          # Verify Boost libraries were built
+          echo "Custom Boost libraries:"
+          ls -la /opt/homebrew/opt/boost-custom/lib/libboost_*.dylib || echo "Custom Boost libraries not found"
+          
+          # Also verify system Boost libraries as fallback
+          echo "System Boost libraries:"
+          ls -la /opt/homebrew/lib/libboost_*.dylib || echo "System Boost libraries not found"
           
           echo "ULTIMATE FINAL SOLUTION: Built custom Boost and set compiler overrides"
 
@@ -154,15 +162,24 @@ jobs:
           cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
           cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
           
-          # Copy Boost libraries
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_program_options.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_filesystem.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_chrono.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_atomic.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_thread.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_serialization.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_date_time.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/opt/boost-custom/lib/libboost_regex.dylib "$app_name/Contents/Frameworks/"
+          # Copy Boost libraries (try custom first, fallback to system)
+          echo "📦 Copying Boost libraries..."
+          BOOST_LIB_DIR="/opt/homebrew/opt/boost-custom/lib"
+          if [ ! -d "$BOOST_LIB_DIR" ] || [ ! -f "$BOOST_LIB_DIR/libboost_program_options.dylib" ]; then
+            echo "Custom Boost not found, using system Boost"
+            BOOST_LIB_DIR="/opt/homebrew/lib"
+          else
+            echo "Using custom Boost from $BOOST_LIB_DIR"
+          fi
+          
+          cp "$BOOST_LIB_DIR/libboost_program_options.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_program_options.dylib"
+          cp "$BOOST_LIB_DIR/libboost_filesystem.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_filesystem.dylib"
+          cp "$BOOST_LIB_DIR/libboost_chrono.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_chrono.dylib"
+          cp "$BOOST_LIB_DIR/libboost_atomic.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_atomic.dylib"
+          cp "$BOOST_LIB_DIR/libboost_thread.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_thread.dylib"
+          cp "$BOOST_LIB_DIR/libboost_serialization.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_serialization.dylib"
+          cp "$BOOST_LIB_DIR/libboost_date_time.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_date_time.dylib"
+          cp "$BOOST_LIB_DIR/libboost_regex.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_regex.dylib"
           
           # Copy other dependencies
           cp /opt/homebrew/lib/libqrencode.dylib "$app_name/Contents/Frameworks/"
@@ -176,15 +193,16 @@ jobs:
           install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtNetwork.framework/Versions/5/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork "$app_name/Contents/MacOS/FuegoWallet"
           install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCharts.framework/Versions/5/QtCharts @executable_path/../Frameworks/QtCharts.framework/Versions/5/QtCharts "$app_name/Contents/MacOS/FuegoWallet"
           
-          # Fix Boost library paths
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_program_options.dylib @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_filesystem.dylib @executable_path/../Frameworks/libboost_filesystem.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_chrono.dylib @executable_path/../Frameworks/libboost_chrono.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_atomic.dylib @executable_path/../Frameworks/libboost_atomic.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_thread.dylib @executable_path/../Frameworks/libboost_thread.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_serialization.dylib @executable_path/../Frameworks/libboost_serialization.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_date_time.dylib @executable_path/../Frameworks/libboost_date_time.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/boost-custom/lib/libboost_regex.dylib @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          # Fix Boost library paths (use the same directory we copied from)
+          echo "🔧 Fixing Boost library paths..."
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_program_options.dylib" @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_filesystem.dylib" @executable_path/../Frameworks/libboost_filesystem.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_chrono.dylib" @executable_path/../Frameworks/libboost_chrono.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_atomic.dylib" @executable_path/../Frameworks/libboost_atomic.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_thread.dylib" @executable_path/../Frameworks/libboost_thread.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_serialization.dylib" @executable_path/../Frameworks/libboost_serialization.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_date_time.dylib" @executable_path/../Frameworks/libboost_date_time.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          install_name_tool -change "$BOOST_LIB_DIR/libboost_regex.dylib" @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
           
           # Fix other library paths
           install_name_tool -change /opt/homebrew/lib/libqrencode.dylib @executable_path/../Frameworks/libqrencode.dylib "$app_name/Contents/MacOS/FuegoWallet"
