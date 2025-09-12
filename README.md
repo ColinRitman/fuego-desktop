@@ -128,3 +128,4 @@ cpack
 ## Special Thanks
 
 Special thanks to developers from Cryptonote, Bytecoin, Conceal, Karbo, Monero, Forknote, XDN, TurtleCoin, Ryo, and Masari.
+# Trigger new build after fuego memory header fix
