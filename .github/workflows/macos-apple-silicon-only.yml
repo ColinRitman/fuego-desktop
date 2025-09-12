@@ -111,6 +111,10 @@ jobs:
           mkdir -p bin
           mv xfg-stark-cli bin/
           
+          # Copy xfg-stark-cli icon
+          echo "🎨 Copying xfg-stark-cli icon..."
+          cp src/images/xfgcli.png bin/xfg-stark-cli.png
+          
           # Verify the binary works
           ./bin/xfg-stark-cli --version
           
@@ -190,6 +194,12 @@ jobs:
             echo "qrencode is statically linked, skipping dynamic library copy"
           fi
           cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libminiupnpc.dylib"
+          
+          # Copy xfg-stark-cli binary and icon
+          echo "📦 Copying xfg-stark-cli binary and icon..."
+          mkdir -p "$app_name/Contents/Resources/bin"
+          cp bin/xfg-stark-cli "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli binary"
+          cp bin/xfg-stark-cli.png "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli icon"
           
           # Fix library paths
           echo "🔧 Fixing library paths..."
