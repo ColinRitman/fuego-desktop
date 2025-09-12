@@ -74,7 +74,7 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone --no-cache https://github.com/ColinRitman/fuego.git cryptonote
+          git clone https://github.com/ColinRitman/fuego.git cryptonote
           git -C cryptonote checkout master
           git -C cryptonote log --oneline -3
           
