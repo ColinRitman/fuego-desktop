@@ -280,7 +280,7 @@ jobs:
               <key>CFBundleIdentifier</key>
               <string>com.fuego.wallet</string>
               <key>CFBundleName</key>
-              <string>FuegoWallet</string>
+              <string>Fuego Wallet</string>
               <key>CFBundleVersion</key>
               <string>1.0.0</string>
               <key>CFBundleShortVersionString</key>
