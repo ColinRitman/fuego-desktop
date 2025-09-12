@@ -182,8 +182,14 @@ jobs:
           cp "$BOOST_LIB_DIR/libboost_regex.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_regex.dylib"
           
           # Copy other dependencies
-          cp /opt/homebrew/lib/libqrencode.dylib "$app_name/Contents/Frameworks/"
-          cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/"
+          echo "📦 Copying other dependencies..."
+          # qrencode is statically linked, so no need to copy it
+          if [ -f "/opt/homebrew/lib/libqrencode.dylib" ]; then
+            cp /opt/homebrew/lib/libqrencode.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libqrencode.dylib"
+          else
+            echo "qrencode is statically linked, skipping dynamic library copy"
+          fi
+          cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libminiupnpc.dylib"
           
           # Fix library paths
           echo "🔧 Fixing library paths..."
@@ -205,7 +211,12 @@ jobs:
           install_name_tool -change "$BOOST_LIB_DIR/libboost_regex.dylib" @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
           
           # Fix other library paths
-          install_name_tool -change /opt/homebrew/lib/libqrencode.dylib @executable_path/../Frameworks/libqrencode.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          # qrencode is statically linked, so no need to fix its path
+          if [ -f "/opt/homebrew/lib/libqrencode.dylib" ]; then
+            install_name_tool -change /opt/homebrew/lib/libqrencode.dylib @executable_path/../Frameworks/libqrencode.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          else
+            echo "qrencode is statically linked, skipping install_name_tool"
+          fi
           install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
           
           # Create Info.plist
