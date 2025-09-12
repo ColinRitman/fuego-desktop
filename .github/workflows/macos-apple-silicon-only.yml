@@ -198,30 +198,52 @@ jobs:
           # Copy xfg-stark-cli binary and create proper icon
           echo "📦 Copying xfg-stark-cli binary and creating icon..."
           mkdir -p "$app_name/Contents/Resources/bin"
-          cp bin/xfg-stark-cli "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli binary"
+          
+          # Check if xfg-stark-cli binary exists
+          if [ -f "bin/xfg-stark-cli" ]; then
+            cp bin/xfg-stark-cli "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli binary"
+            echo "✅ xfg-stark-cli binary copied successfully"
+          else
+            echo "❌ xfg-stark-cli binary not found at bin/xfg-stark-cli"
+            echo "Current directory contents:"
+            ls -la
+            echo "bin directory contents:"
+            ls -la bin/ 2>/dev/null || echo "bin directory does not exist"
+          fi
           
           # Create proper .icns file for xfg-stark-cli
           echo "🎨 Creating xfg-stark-cli icon..."
-          # Create a temporary iconset directory
-          mkdir -p xfg-stark-cli.iconset
           
-          # Convert PNG to different sizes for iconset
-          sips -z 16 16 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16.png
-          sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16@2x.png
-          sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32.png
-          sips -z 64 64 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32@2x.png
-          sips -z 128 128 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128.png
-          sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128@2x.png
-          sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256.png
-          sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256@2x.png
-          sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512.png
-          sips -z 1024 1024 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512@2x.png
-          
-          # Convert iconset to icns
-          iconutil -c icns xfg-stark-cli.iconset -o "$app_name/Contents/Resources/bin/xfg-stark-cli.icns"
-          
-          # Clean up temporary directory
-          rm -rf xfg-stark-cli.iconset
+          # Check if xfg-stark-cli icon exists
+          if [ -f "bin/xfg-stark-cli.png" ]; then
+            # Create a temporary iconset directory
+            mkdir -p xfg-stark-cli.iconset
+            
+            # Convert PNG to different sizes for iconset
+            sips -z 16 16 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16.png
+            sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16@2x.png
+            sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32.png
+            sips -z 64 64 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32@2x.png
+            sips -z 128 128 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128.png
+            sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128@2x.png
+            sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256.png
+            sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256@2x.png
+            sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512.png
+            sips -z 1024 1024 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512@2x.png
+            
+            # Convert iconset to icns
+            iconutil -c icns xfg-stark-cli.iconset -o "$app_name/Contents/Resources/bin/xfg-stark-cli.icns"
+            
+            # Clean up temporary directory
+            rm -rf xfg-stark-cli.iconset
+            echo "✅ xfg-stark-cli icon created successfully"
+          else
+            echo "❌ xfg-stark-cli icon not found at bin/xfg-stark-cli.png"
+            echo "Current directory contents:"
+            ls -la
+            echo "bin directory contents:"
+            ls -la bin/ 2>/dev/null || echo "bin directory does not exist"
+          fi
           
           # Verify icons are in place
           echo "🔍 Verifying icons..."
