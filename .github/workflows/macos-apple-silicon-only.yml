@@ -113,7 +113,7 @@ jobs:
           
           # Copy xfg-stark-cli icon
           echo "🎨 Copying xfg-stark-cli icon..."
-          cp src/images/xfgcli.png bin/xfg-stark-cli.png
+          cp src/images/appicon/xfgcli.icns bin/xfg-stark-cli.icns
           
           # Verify the binary works
           ./bin/xfg-stark-cli --version
@@ -211,34 +211,15 @@ jobs:
             ls -la bin/ 2>/dev/null || echo "bin directory does not exist"
           fi
           
-          # Create proper .icns file for xfg-stark-cli
-          echo "🎨 Creating xfg-stark-cli icon..."
+          # Copy xfg-stark-cli icon
+          echo "🎨 Copying xfg-stark-cli icon..."
           
           # Check if xfg-stark-cli icon exists
-          if [ -f "bin/xfg-stark-cli.png" ]; then
-            # Create a temporary iconset directory
-            mkdir -p xfg-stark-cli.iconset
-            
-            # Convert PNG to different sizes for iconset
-            sips -z 16 16 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16.png
-            sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16@2x.png
-            sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32.png
-            sips -z 64 64 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32@2x.png
-            sips -z 128 128 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128.png
-            sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128@2x.png
-            sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256.png
-            sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256@2x.png
-            sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512.png
-            sips -z 1024 1024 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512@2x.png
-            
-            # Convert iconset to icns
-            iconutil -c icns xfg-stark-cli.iconset -o "$app_name/Contents/Resources/bin/xfg-stark-cli.icns"
-            
-            # Clean up temporary directory
-            rm -rf xfg-stark-cli.iconset
-            echo "✅ xfg-stark-cli icon created successfully"
+          if [ -f "bin/xfg-stark-cli.icns" ]; then
+            cp bin/xfg-stark-cli.icns "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli icon"
+            echo "✅ xfg-stark-cli icon copied successfully"
           else
-            echo "❌ xfg-stark-cli icon not found at bin/xfg-stark-cli.png"
+            echo "❌ xfg-stark-cli icon not found at bin/xfg-stark-cli.icns"
             echo "Current directory contents:"
             ls -la
             echo "bin directory contents:"
@@ -320,28 +301,9 @@ jobs:
           </plist>
           EOF
           
-          # Add entitlements to help with Gatekeeper
-          echo "📋 Adding entitlements..."
-          cat > entitlements.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>com.apple.security.cs.allow-jit</key>
-              <true/>
-              <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-              <true/>
-              <key>com.apple.security.cs.disable-executable-page-protection</key>
-              <true/>
-              <key>com.apple.security.cs.disable-library-validation</key>
-              <true/>
-          </dict>
-          </plist>
-          EOF
-          
-          # Ad-hoc code signing with entitlements (single operation to prevent signature invalidation)
-          echo "🔐 Code signing the app bundle with entitlements..."
-          codesign --force --deep --sign - --entitlements entitlements.plist "$app_name"
+          # Simple ad-hoc code signing (no entitlements to avoid signature issues)
+          echo "🔐 Code signing the app bundle..."
+          codesign --force --deep --sign - "$app_name"
           
           # Verify the signature
           codesign --verify --verbose "$app_name"
