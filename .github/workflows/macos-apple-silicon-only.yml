@@ -75,7 +75,9 @@ jobs:
         run: |
           rm -rf cryptonote
           git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git -C cryptonote fetch origin
           git -C cryptonote checkout master
+          git -C cryptonote pull origin master
           git -C cryptonote log --oneline -3
           echo "Current cryptonote commit: $(git -C cryptonote rev-parse HEAD)"
           
