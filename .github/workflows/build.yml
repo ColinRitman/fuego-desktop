@@ -508,6 +508,12 @@ git clone --branch master https://github.com/ColinRitman/fuego.git cryptonote
           find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
           find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
 
+      - name: Clone fuego
+        run: |
+          rm -rf cryptonote
+          # Clone cryptonote from ColinRitman/fuego master branch
+          git clone --branch master https://github.com/ColinRitman/fuego.git cryptonote
+
       - name: Build
         id: build
         run: |
