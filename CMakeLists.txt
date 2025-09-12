@@ -132,7 +132,8 @@ include_directories(${CMAKE_BINARY_DIR}
     src
     cryptonote/external
     cryptonote/include
-    cryptonote/src)
+    cryptonote/src
+    cryptonote/src/crypto)
 
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
