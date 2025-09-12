@@ -74,8 +74,9 @@ jobs:
       - name: Clone fuego
         run: |
           rm -rf cryptonote
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          git clone --no-cache https://github.com/ColinRitman/fuego.git cryptonote
           git -C cryptonote checkout master
+          git -C cryptonote log --oneline -3
           
           # Burn transaction integration files are now in the fuego repository
           echo "✅ Burn transaction integration files are included in the fuego repository"
