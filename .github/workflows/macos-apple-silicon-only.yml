@@ -73,8 +73,9 @@ jobs:
 
       - name: Clone fuego
         run: |
-          rm -rf cryptonote
-          git clone https://github.com/ColinRitman/fuego.git cryptonote
+          rm -rf cryptonote cryptonote-temp
+          git clone https://github.com/ColinRitman/fuego.git cryptonote-temp
+          mv cryptonote-temp cryptonote
           git -C cryptonote fetch origin
           git -C cryptonote checkout master
           git -C cryptonote pull origin master
