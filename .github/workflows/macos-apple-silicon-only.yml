@@ -195,11 +195,47 @@ jobs:
           fi
           cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libminiupnpc.dylib"
           
-          # Copy xfg-stark-cli binary and icon
-          echo "📦 Copying xfg-stark-cli binary and icon..."
+          # Copy xfg-stark-cli binary and create proper icon
+          echo "📦 Copying xfg-stark-cli binary and creating icon..."
           mkdir -p "$app_name/Contents/Resources/bin"
           cp bin/xfg-stark-cli "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli binary"
-          cp bin/xfg-stark-cli.png "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli icon"
+          
+          # Create proper .icns file for xfg-stark-cli
+          echo "🎨 Creating xfg-stark-cli icon..."
+          # Create a temporary iconset directory
+          mkdir -p xfg-stark-cli.iconset
+          
+          # Convert PNG to different sizes for iconset
+          sips -z 16 16 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16.png
+          sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_16x16@2x.png
+          sips -z 32 32 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32.png
+          sips -z 64 64 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_32x32@2x.png
+          sips -z 128 128 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128.png
+          sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_128x128@2x.png
+          sips -z 256 256 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256.png
+          sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_256x256@2x.png
+          sips -z 512 512 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512.png
+          sips -z 1024 1024 bin/xfg-stark-cli.png --out xfg-stark-cli.iconset/icon_512x512@2x.png
+          
+          # Convert iconset to icns
+          iconutil -c icns xfg-stark-cli.iconset -o "$app_name/Contents/Resources/bin/xfg-stark-cli.icns"
+          
+          # Clean up temporary directory
+          rm -rf xfg-stark-cli.iconset
+          
+          # Verify icons are in place
+          echo "🔍 Verifying icons..."
+          if [ -f "$app_name/Contents/Resources/fuego.icns" ]; then
+            echo "✅ Main app icon (fuego.icns) is present"
+          else
+            echo "❌ Main app icon (fuego.icns) is missing"
+          fi
+          
+          if [ -f "$app_name/Contents/Resources/bin/xfg-stark-cli.icns" ]; then
+            echo "✅ xfg-stark-cli icon is present"
+          else
+            echo "❌ xfg-stark-cli icon is missing"
+          fi
           
           # Fix library paths
           echo "🔧 Fixing library paths..."
@@ -250,6 +286,8 @@ jobs:
               <string>APPL</string>
               <key>CFBundleSignature</key>
               <string>????</string>
+              <key>CFBundleIconFile</key>
+              <string>fuego</string>
               <key>LSMinimumSystemVersion</key>
               <string>11.0</string>
               <key>NSHighResolutionCapable</key>
