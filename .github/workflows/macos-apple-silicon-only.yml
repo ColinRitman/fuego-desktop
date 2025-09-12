@@ -262,7 +262,7 @@ jobs:
           
           # Ad-hoc code signing to prevent "corrupted" warnings
           echo "🔐 Code signing the app bundle..."
-          codesign --force --deep --sign - --options runtime "$app_name"
+          codesign --force --deep --sign - "$app_name"
           
           # Verify the signature
           codesign --verify --verbose "$app_name"
@@ -287,7 +287,7 @@ jobs:
           EOF
           
           # Re-sign with entitlements
-          codesign --force --deep --sign - --options runtime --entitlements entitlements.plist "$app_name"
+          codesign --force --deep --sign - --entitlements entitlements.plist "$app_name"
           
           # Test the application
           echo "🧪 Testing application..."
