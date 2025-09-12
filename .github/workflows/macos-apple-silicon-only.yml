@@ -260,13 +260,6 @@ jobs:
           </plist>
           EOF
           
-          # Ad-hoc code signing to prevent "corrupted" warnings
-          echo "🔐 Code signing the app bundle..."
-          codesign --force --deep --sign - "$app_name"
-          
-          # Verify the signature
-          codesign --verify --verbose "$app_name"
-          
           # Add entitlements to help with Gatekeeper
           echo "📋 Adding entitlements..."
           cat > entitlements.plist << 'EOF'
@@ -286,8 +279,12 @@ jobs:
           </plist>
           EOF
           
-          # Re-sign with entitlements
+          # Ad-hoc code signing with entitlements (single operation to prevent signature invalidation)
+          echo "🔐 Code signing the app bundle with entitlements..."
           codesign --force --deep --sign - --entitlements entitlements.plist "$app_name"
+          
+          # Verify the signature
+          codesign --verify --verbose "$app_name"
           
           # Test the application
           echo "🧪 Testing application..."
