@@ -73,14 +73,23 @@ jobs:
 
       - name: Clone fuego
         run: |
+          echo "🔄 Starting fresh clone of fuego repository..."
           rm -rf cryptonote cryptonote-temp
-          git clone https://github.com/ColinRitman/fuego.git cryptonote-temp
+          echo "📥 Cloning from ColinRitman/fuego master branch..."
+          git clone --branch master --depth 1 https://github.com/ColinRitman/fuego.git cryptonote-temp
           mv cryptonote-temp cryptonote
-          git -C cryptonote fetch origin
-          git -C cryptonote checkout master
-          git -C cryptonote pull origin master
+          echo "📋 Verifying cloned repository..."
           git -C cryptonote log --oneline -3
           echo "Current cryptonote commit: $(git -C cryptonote rev-parse HEAD)"
+          
+          # Verify the memory header fix is present
+          if grep -q "#include <memory>" cryptonote/src/WalletLegacy/WalletLegacy.cpp; then
+            echo "✅ Memory header fix is present in cloned repository"
+          else
+            echo "❌ Memory header fix is MISSING in cloned repository"
+            echo "File contents:"
+            head -20 cryptonote/src/WalletLegacy/WalletLegacy.cpp
+          fi
           
           # Burn transaction integration files are now in the fuego repository
           echo "✅ Burn transaction integration files are included in the fuego repository"
