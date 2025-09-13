@@ -123,14 +123,18 @@ jobs:
         
         # Copy Boost libraries
         echo "📦 Copying Boost libraries..."
-        cp /opt/homebrew/lib/libboost_program_options.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_filesystem.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_chrono.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_atomic.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_thread.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_serialization.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_date_time.dylib "$app_name/Contents/Frameworks/"
-        cp /opt/homebrew/lib/libboost_regex.dylib "$app_name/Contents/Frameworks/"
+        cp /opt/homebrew/lib/libboost_program_options.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_program_options.dylib"
+        cp /opt/homebrew/lib/libboost_filesystem.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_filesystem.dylib"
+        cp /opt/homebrew/lib/libboost_chrono.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_chrono.dylib"
+        cp /opt/homebrew/lib/libboost_atomic.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_atomic.dylib"
+        cp /opt/homebrew/lib/libboost_thread.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_thread.dylib"
+        cp /opt/homebrew/lib/libboost_serialization.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_serialization.dylib"
+        cp /opt/homebrew/lib/libboost_date_time.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_date_time.dylib"
+        cp /opt/homebrew/lib/libboost_regex.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_regex.dylib"
+        
+        # Verify Boost libraries were copied
+        echo "🔍 Verifying Boost libraries..."
+        ls -la "$app_name/Contents/Frameworks/" | grep boost
         
         # Copy other dependencies
         cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/"
@@ -144,18 +148,32 @@ jobs:
         
         # macdeployqt already handled Qt framework paths, so we skip manual Qt path fixing
         
-        # Fix Boost library paths
-        install_name_tool -change /opt/homebrew/lib/libboost_program_options.dylib @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_filesystem.dylib @executable_path/../Frameworks/libboost_filesystem.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_chrono.dylib @executable_path/../Frameworks/libboost_chrono.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_atomic.dylib @executable_path/../Frameworks/libboost_atomic.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_thread.dylib @executable_path/../Frameworks/libboost_thread.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_serialization.dylib @executable_path/../Frameworks/libboost_serialization.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_date_time.dylib @executable_path/../Frameworks/libboost_date_time.dylib "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/lib/libboost_regex.dylib @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
+        # Fix Boost library paths - use dynamic path detection
+        echo "🔧 Fixing Boost library paths..."
         
-        # Fix other library paths
-        install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
+        # Get the actual library paths from the executable
+        BOOST_PATHS=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep boost | awk '{print $1}')
+        echo "Found Boost library paths: $BOOST_PATHS"
+        
+        # Fix each Boost library path dynamically
+        for lib in program_options filesystem chrono atomic thread serialization date_time regex; do
+          OLD_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep "libboost_${lib}.dylib" | awk '{print $1}')
+          if [ ! -z "$OLD_PATH" ]; then
+            echo "Changing $OLD_PATH to @executable_path/../Frameworks/libboost_${lib}.dylib"
+            install_name_tool -change "$OLD_PATH" "@executable_path/../Frameworks/libboost_${lib}.dylib" "$app_name/Contents/MacOS/FuegoWallet"
+          else
+            echo "No libboost_${lib}.dylib found in executable dependencies"
+          fi
+        done
+        
+        # Fix other library paths dynamically
+        MINIUPNPC_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep miniupnpc | awk '{print $1}')
+        if [ ! -z "$MINIUPNPC_PATH" ]; then
+          echo "Changing $MINIUPNPC_PATH to @executable_path/../Frameworks/libminiupnpc.dylib"
+          install_name_tool -change "$MINIUPNPC_PATH" "@executable_path/../Frameworks/libminiupnpc.dylib" "$app_name/Contents/MacOS/FuegoWallet"
+        else
+          echo "No miniupnpc library found in executable dependencies"
+        fi
         
         # Verify the library paths were updated correctly
         echo "Final library dependencies:"
@@ -212,6 +230,17 @@ jobs:
         # Test the application
         echo "🧪 Testing application..."
         timeout 10s "./$app_name/Contents/MacOS/FuegoWallet" --version || echo "App test completed"
+        
+        # Verify the app bundle structure
+        echo "🔍 Verifying app bundle structure..."
+        if [ -d "$app_name/Contents/MacOS" ] && [ -d "$app_name/Contents/Frameworks" ] && [ -d "$app_name/Contents/Resources" ]; then
+          echo "✅ App bundle structure is correct"
+          echo "📁 App bundle contents:"
+          ls -la "$app_name"
+        else
+          echo "❌ App bundle structure is incorrect!"
+          exit 1
+        fi
         
         echo "📦 Minimal app bundle ready: $app_name"
         echo "release_name=${release_name}" >> $GITHUB_OUTPUT
