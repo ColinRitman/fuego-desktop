@@ -53,6 +53,8 @@ jobs:
         
         # Install dependencies with caching
         brew install libqrencode miniupnpc qt@5 boost
+        # Link Boost to make it available system-wide
+        brew link boost --force
 
     - name: Fix compilation errors
       run: |
@@ -87,6 +89,8 @@ jobs:
               -DBoost_LIBRARY_DIR=/opt/homebrew/lib \
               -DBoost_NO_BOOST_CMAKE=ON \
               -DBoost_NO_CMAKE_PACKAGE_REGISTRY=ON \
+              -DBoost_USE_STATIC_LIBS=OFF \
+              -DBoost_USE_MULTITHREADED=ON \
               ../..
         
         # Build
