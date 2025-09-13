@@ -102,23 +102,10 @@ jobs:
           # Burn transaction integration files are now in the fuego repository
           echo "✅ Burn transaction integration files are included in the fuego repository"
 
-      - name: Download XFG STARK CLI
-        run: |
-          # Download pre-built xfg-stark-cli binary from releases
-          curl -L -o xfg-stark-cli-macos.tar.gz https://github.com/colinritman/xfgwin/releases/download/v0.8.8/xfg-stark-cli-macos.tar.gz
-          tar -xzf xfg-stark-cli-macos.tar.gz
-          chmod +x xfg-stark-cli
-          mkdir -p bin
-          mv xfg-stark-cli bin/
-          
-          # Copy xfg-stark-cli icon
-          echo "🎨 Copying xfg-stark-cli icon..."
-          cp src/images/appicon/xfgcli.icns bin/xfg-stark-cli.icns
-          
-          # Verify the binary works
-          ./bin/xfg-stark-cli --version
-          
-          echo "✅ STARK CLI downloaded and verified successfully"
+      # Temporarily disabled XFG STARK CLI to focus on main app
+      # - name: Download XFG STARK CLI
+      #   run: |
+      #     echo "Skipping XFG STARK CLI for now - focusing on main app"
 
       - name: Fix compilation errors
         run: |
@@ -195,36 +182,7 @@ jobs:
           fi
           cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libminiupnpc.dylib"
           
-          # Copy xfg-stark-cli binary and create proper icon
-          echo "📦 Copying xfg-stark-cli binary and creating icon..."
-          mkdir -p "$app_name/Contents/Resources/bin"
-          
-          # Check if xfg-stark-cli binary exists
-          if [ -f "bin/xfg-stark-cli" ]; then
-            cp bin/xfg-stark-cli "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli binary"
-            echo "✅ xfg-stark-cli binary copied successfully"
-          else
-            echo "❌ xfg-stark-cli binary not found at bin/xfg-stark-cli"
-            echo "Current directory contents:"
-            ls -la
-            echo "bin directory contents:"
-            ls -la bin/ 2>/dev/null || echo "bin directory does not exist"
-          fi
-          
-          # Copy xfg-stark-cli icon
-          echo "🎨 Copying xfg-stark-cli icon..."
-          
-          # Check if xfg-stark-cli icon exists
-          if [ -f "bin/xfg-stark-cli.icns" ]; then
-            cp bin/xfg-stark-cli.icns "$app_name/Contents/Resources/bin/" || echo "Failed to copy xfg-stark-cli icon"
-            echo "✅ xfg-stark-cli icon copied successfully"
-          else
-            echo "❌ xfg-stark-cli icon not found at bin/xfg-stark-cli.icns"
-            echo "Current directory contents:"
-            ls -la
-            echo "bin directory contents:"
-            ls -la bin/ 2>/dev/null || echo "bin directory does not exist"
-          fi
+          # Skipping xfg-stark-cli bundling for now - focusing on main app
           
           # Verify icons are in place
           echo "🔍 Verifying icons..."
@@ -314,26 +272,10 @@ jobs:
           echo "🧪 Testing application..."
           timeout 10s "./$app_name/Contents/MacOS/FuegoWallet" --version || echo "App test completed"
           
-          # Create ZIP package using CPack
-          echo "📦 Creating ZIP package..."
-          cpack
-          
-          # Verify ZIP was created successfully
-          if [ ! -f *.zip ]; then
-            echo "Error: ZIP file was not created!"
-            ls -la
-            exit 1
-          fi
-          
-          # Get the actual ZIP filename
-          zip_file=$(ls *.zip | head -1)
-          echo "Created ZIP: $zip_file"
-          
-          # The ZIP file already contains the app bundle, just rename it
-          mv "$zip_file" "$release_name".zip
-
+          # Just use the app bundle directly (no ZIP packaging)
+          echo "📦 App bundle ready: $app_name"
           echo "release_name=${release_name}" >> $GITHUB_OUTPUT
-          echo "artifact_path=build/release/${release_name}.zip" >> $GITHUB_OUTPUT
+          echo "artifact_path=build/release/$app_name" >> $GITHUB_OUTPUT
 
       - name: Upload To GH Artifacts
         uses: actions/upload-artifact@v4
