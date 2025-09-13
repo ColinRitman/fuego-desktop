@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Set project name before including other files
-set(CN_PROJECT_NAME "Fuego Wallet")
+set(CN_PROJECT_NAME "FuegoWallet")
 
 if(APPLE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum OS X deployment version")  
@@ -418,7 +418,7 @@ elseif (UNIX)
     file(GLOB_RECURSE OBJC_SOURCES src/*.mm)
     set(SOURCES ${SOURCES} ${OBJC_SOURCES})
     set(PLATFORM_DIR OSX)
-    set(MACOSX_BUNDLE_BUNDLE_NAME ${CN_PROJECT_NAME})
+    set(MACOSX_BUNDLE_BUNDLE_NAME "Fuego Wallet")
     set(MACOSX_BUNDLE_INFO_STRING ${CN_VERSION})
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${CN_VERSION})
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${CN_VERSION})
