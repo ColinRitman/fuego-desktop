@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         # Install dependencies
-        brew install libqrencode miniupnpc
+        brew install libqrencode miniupnpc qt@5
         
         # Install system Boost as fallback
         brew install boost
