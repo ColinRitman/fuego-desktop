@@ -52,7 +52,7 @@ jobs:
         brew update
         
         # Install dependencies with caching
-        brew install libqrencode miniupnpc qt@5 boost cmake
+        brew install libqrencode miniupnpc qt@5 boost
 
     - name: Fix compilation errors
       run: |
