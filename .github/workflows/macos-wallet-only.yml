@@ -52,7 +52,7 @@ jobs:
         brew update
         
         # Install dependencies with caching
-        brew install libqrencode miniupnpc qt@5 boost
+        brew install libqrencode miniupnpc qt@5 boost cmake
 
     - name: Fix compilation errors
       run: |
@@ -85,6 +85,8 @@ jobs:
               -DBOOST_ROOT=/opt/homebrew \
               -DBoost_INCLUDE_DIR=/opt/homebrew/include \
               -DBoost_LIBRARY_DIR=/opt/homebrew/lib \
+              -DBoost_NO_BOOST_CMAKE=ON \
+              -DBoost_NO_CMAKE_PACKAGE_REGISTRY=ON \
               ../..
         
         # Build
