@@ -281,6 +281,8 @@ jobs:
               <string>com.fuego.wallet</string>
               <key>CFBundleName</key>
               <string>Fuego Wallet</string>
+              <key>CFBundleDisplayName</key>
+              <string>Fuego Wallet</string>
               <key>CFBundleVersion</key>
               <string>1.0.0</string>
               <key>CFBundleShortVersionString</key>
@@ -301,9 +303,9 @@ jobs:
           </plist>
           EOF
           
-          # Simple ad-hoc code signing (no entitlements to avoid signature issues)
+          # Simple ad-hoc code signing with timestamp and kill options
           echo "🔐 Code signing the app bundle..."
-          codesign --force --deep --sign - "$app_name"
+          codesign --force --deep --sign - --timestamp --options kill "$app_name"
           
           # Verify the signature
           codesign --verify --verbose "$app_name"
