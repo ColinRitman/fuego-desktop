@@ -61,7 +61,17 @@ jobs:
               ../..
         
         # Build
-        make -j$(nproc)
+        cmake --build . --parallel $(nproc)
+        
+        # Verify the executable was created
+        if [ ! -f "FuegoWallet" ]; then
+          echo "❌ FuegoWallet executable not found!"
+          echo "Contents of build directory:"
+          ls -la
+          exit 1
+        else
+          echo "✅ FuegoWallet executable created successfully"
+        fi
 
     - name: Create minimal app bundle
       run: |
