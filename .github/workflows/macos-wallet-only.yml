@@ -26,14 +26,33 @@ jobs:
         echo "📋 Verifying cloned repository..."
         git -C cryptonote log --oneline -3
         echo "Current cryptonote commit: $(git -C cryptonote rev-parse HEAD)"
+        
+        # Verify the LoggingLevel fix is present
+        echo "🔍 Checking UpgradeDetector.h for LoggingLevel fix..."
+        if grep -q "Logging::ERROR" cryptonote/src/CryptoNoteCore/UpgradeDetector.h; then
+          echo "✅ LoggingLevel fix is present"
+        else
+          echo "❌ LoggingLevel fix is missing!"
+          echo "Content of UpgradeDetector.h:"
+          grep -n "Logging::" cryptonote/src/CryptoNoteCore/UpgradeDetector.h
+          exit 1
+        fi
+
+    - name: Cache Homebrew packages
+      uses: actions/cache@v3
+      with:
+        path: /opt/homebrew/Cellar
+        key: ${{ runner.os }}-homebrew-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-homebrew-
 
     - name: Install dependencies
       run: |
-        # Install dependencies
-        brew install libqrencode miniupnpc qt@5
+        # Update Homebrew
+        brew update
         
-        # Install system Boost as fallback
-        brew install boost
+        # Install dependencies with caching
+        brew install libqrencode miniupnpc qt@5 boost
 
     - name: Fix compilation errors
       run: |
@@ -42,6 +61,14 @@ jobs:
         
         # Fix parallel hashmap issues
         sed -i '' 's/raw_hash_set/flat_hash_set/g' cryptonote/external/parallel_hashmap/phmap_dump.h
+
+    - name: Cache build directory
+      uses: actions/cache@v3
+      with:
+        path: build/
+        key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt', 'cryptonote/**/*.cpp', 'cryptonote/**/*.h', 'src/**/*.cpp', 'src/**/*.h') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
 
     - name: Build Fuego Wallet
       run: |
