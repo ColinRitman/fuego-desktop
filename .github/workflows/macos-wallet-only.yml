@@ -63,17 +63,22 @@ jobs:
         # Build
         cmake --build . --parallel $(nproc)
         
-        # Verify the executable was created
-        if [ ! -f "FuegoWallet" ]; then
-          echo "❌ FuegoWallet executable not found!"
+        # Verify the app bundle was created
+        if [ ! -d "FuegoWallet.app" ]; then
+          echo "❌ FuegoWallet.app bundle not found!"
           echo "Contents of build directory:"
           ls -la
           exit 1
+        elif [ ! -f "FuegoWallet.app/Contents/MacOS/FuegoWallet" ]; then
+          echo "❌ FuegoWallet executable not found in app bundle!"
+          echo "Contents of FuegoWallet.app:"
+          find FuegoWallet.app -type f
+          exit 1
         else
-          echo "✅ FuegoWallet executable created successfully"
+          echo "✅ FuegoWallet.app bundle created successfully"
         fi
 
-    - name: Create minimal app bundle
+    - name: Bundle and sign app
       run: |
         cd build/release
         
@@ -81,13 +86,8 @@ jobs:
         app_name="Fuego Wallet.app"
         release_name="FuegoWallet-macOS-$(date +%Y%m%d-%H%M%S)"
         
-        # Create app bundle structure
-        mkdir -p "$app_name/Contents/MacOS"
-        mkdir -p "$app_name/Contents/Resources"
-        mkdir -p "$app_name/Contents/Frameworks"
-        
-        # Copy the main executable
-        cp FuegoWallet "$app_name/Contents/MacOS/"
+        # Rename the existing app bundle
+        mv FuegoWallet.app "$app_name"
         
         # Copy Qt frameworks
         echo "📦 Copying Qt frameworks..."
