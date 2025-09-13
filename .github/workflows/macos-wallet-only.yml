@@ -53,8 +53,10 @@ jobs:
         
         # Install dependencies with caching
         brew install libqrencode miniupnpc qt@5 boost
-        # Link Boost to make it available system-wide
+        # Link packages to make them available system-wide
         brew link boost --force
+        brew link qrencode --force
+        brew link miniupnpc --force
 
     - name: Fix compilation errors
       run: |
