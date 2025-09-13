@@ -117,13 +117,9 @@ jobs:
         # Rename the existing app bundle
         mv FuegoWallet.app "$app_name"
         
-        # Copy Qt frameworks
-        echo "📦 Copying Qt frameworks..."
-        cp -R /opt/homebrew/opt/qt@5/lib/QtCore.framework "$app_name/Contents/Frameworks/"
-        cp -R /opt/homebrew/opt/qt@5/lib/QtGui.framework "$app_name/Contents/Frameworks/"
-        cp -R /opt/homebrew/opt/qt@5/lib/QtWidgets.framework "$app_name/Contents/Frameworks/"
-        cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
-        cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
+        # Use macdeployqt to properly deploy Qt frameworks
+        echo "📦 Deploying Qt frameworks with macdeployqt..."
+        /opt/homebrew/opt/qt@5/bin/macdeployqt "$app_name" -verbose=2
         
         # Copy Boost libraries
         echo "📦 Copying Boost libraries..."
@@ -146,12 +142,7 @@ jobs:
         echo "Current library dependencies:"
         otool -L "$app_name/Contents/MacOS/FuegoWallet"
         
-        # Fix Qt framework paths
-        install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtNetwork.framework/Versions/5/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork "$app_name/Contents/MacOS/FuegoWallet"
-        install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCharts.framework/Versions/5/QtCharts @executable_path/../Frameworks/QtCharts.framework/Versions/5/QtCharts "$app_name/Contents/MacOS/FuegoWallet"
+        # macdeployqt already handled Qt framework paths, so we skip manual Qt path fixing
         
         # Fix Boost library paths
         install_name_tool -change /opt/homebrew/lib/libboost_program_options.dylib @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
