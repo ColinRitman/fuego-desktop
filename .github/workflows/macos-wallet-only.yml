@@ -81,10 +81,10 @@ jobs:
               -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
               -DCMAKE_OSX_ARCHITECTURES=arm64 \
               -DQt5_DIR=/opt/homebrew/opt/qt@5/lib/cmake/Qt5 \
-              -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@5 \
-              -DBOOST_ROOT=/opt/homebrew/opt/boost \
-              -DBoost_INCLUDE_DIR=/opt/homebrew/opt/boost/include \
-              -DBoost_LIBRARY_DIR=/opt/homebrew/opt/boost/lib \
+              -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/homebrew" \
+              -DBOOST_ROOT=/opt/homebrew \
+              -DBoost_INCLUDE_DIR=/opt/homebrew/include \
+              -DBoost_LIBRARY_DIR=/opt/homebrew/lib \
               ../..
         
         # Build
