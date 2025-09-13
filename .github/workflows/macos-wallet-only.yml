@@ -205,6 +205,12 @@ jobs:
         </plist>
         EOF
         
+        # Fix permissions before code signing
+        echo "🔧 Fixing permissions for code signing..."
+        find "$app_name" -type f -exec chmod 644 {} \;
+        find "$app_name" -type d -exec chmod 755 {} \;
+        chmod +x "$app_name/Contents/MacOS/FuegoWallet"
+        
         # Basic ad-hoc code signing
         echo "🔐 Code signing the app bundle..."
         codesign --force --deep --sign - "$app_name"
