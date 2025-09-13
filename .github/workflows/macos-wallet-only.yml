@@ -79,6 +79,7 @@ jobs:
         fi
 
     - name: Bundle and sign app
+      id: bundle_and_sign
       run: |
         cd build/release
         
@@ -113,6 +114,12 @@ jobs:
         
         # Fix library paths
         echo "🔧 Fixing library paths..."
+        
+        # First, let's see what library paths are currently set
+        echo "Current library dependencies:"
+        otool -L "$app_name/Contents/MacOS/FuegoWallet"
+        
+        # Fix Qt framework paths
         install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore "$app_name/Contents/MacOS/FuegoWallet"
         install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui "$app_name/Contents/MacOS/FuegoWallet"
         install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets "$app_name/Contents/MacOS/FuegoWallet"
@@ -131,6 +138,10 @@ jobs:
         
         # Fix other library paths
         install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
+        
+        # Verify the library paths were updated correctly
+        echo "Final library dependencies:"
+        otool -L "$app_name/Contents/MacOS/FuegoWallet"
         
         # Create Info.plist
         echo "📝 Creating Info.plist..."
@@ -185,7 +196,7 @@ jobs:
     - name: Upload Minimal App Bundle
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.build.outputs.release_name }}
-        path: ${{ steps.build.outputs.artifact_path }}
+        name: ${{ steps.bundle_and_sign.outputs.release_name }}
+        path: ${{ steps.bundle_and_sign.outputs.artifact_path }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
