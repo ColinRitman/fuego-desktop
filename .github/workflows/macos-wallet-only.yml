@@ -29,7 +29,7 @@ jobs:
         
         # Verify the LoggingLevel fix is present
         echo "🔍 Checking UpgradeDetector.h for LoggingLevel fix..."
-        if grep -q "Logging::ERROR" cryptonote/src/CryptoNoteCore/UpgradeDetector.h; then
+        if grep -q "Logging::ERROR\|static_cast<Logging::Level>(1)" cryptonote/src/CryptoNoteCore/UpgradeDetector.h; then
           echo "✅ LoggingLevel fix is present"
         else
           echo "❌ LoggingLevel fix is missing!"
