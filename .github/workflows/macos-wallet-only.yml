@@ -181,6 +181,13 @@ jobs:
           echo "No miniupnpc library found in executable dependencies"
         fi
         
+        # Fix rpath to point to Frameworks directory
+        echo "🔧 Fixing rpath..."
+        install_name_tool -add_rpath "@executable_path/../Frameworks" "$app_name/Contents/MacOS/FuegoWallet"
+        # Remove any incorrect rpaths
+        install_name_tool -delete_rpath "/opt/homebrew/Cellar/miniupnpc/2.3.3/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+        install_name_tool -delete_rpath "/opt/homebrew/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+        
         # Verify the library paths were updated correctly
         echo "Final library dependencies:"
         otool -L "$app_name/Contents/MacOS/FuegoWallet"
