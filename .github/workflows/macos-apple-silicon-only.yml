@@ -198,13 +198,19 @@ jobs:
             echo "❌ xfg-stark-cli icon is missing"
           fi
           
-          # Fix library paths
+          # Fix library paths dynamically based on actual paths
           echo "🔧 Fixing library paths..."
-          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtNetwork.framework/Versions/5/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCharts.framework/Versions/5/QtCharts @executable_path/../Frameworks/QtCharts.framework/Versions/5/QtCharts "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix Qt framework paths dynamically
+          for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+            QT_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep "${framework}.framework" | awk '{print $1}')
+            if [ ! -z "$QT_PATH" ]; then
+              echo "Changing $QT_PATH to @executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}"
+              install_name_tool -change "$QT_PATH" "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/MacOS/FuegoWallet"
+            else
+              echo "No ${framework}.framework found in executable dependencies"
+            fi
+          done
           
           # Debug: Check what library paths the executable currently has
           echo "🔍 Current library dependencies:"
