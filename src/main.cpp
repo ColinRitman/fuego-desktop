@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
   }
 
   // Create early debug log file
-  QString debugLogPath = dataDirPath + "/debug.log";
-  QFile debugLog(debugLogPath);
+  QString mainDebugLogPath = dataDirPath + "/debug.log";
+  QFile debugLog(mainDebugLogPath);
   if (debugLog.open(QIODevice::WriteOnly | QIODevice::Append))
   {
     QTextStream stream(&debugLog);
