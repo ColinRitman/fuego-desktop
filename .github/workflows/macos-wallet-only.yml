@@ -222,8 +222,15 @@ jobs:
         
         # Clean up any unsealed contents in bundle root
         echo "🧹 Cleaning up bundle root..."
+        # List what's in the bundle root
+        echo "Contents of bundle root:"
+        ls -la "$app_name"
         # Remove any files that might be in the bundle root (should only be Contents/)
         find "$app_name" -maxdepth 1 -type f -delete 2>/dev/null || true
+        # Also remove any hidden files
+        find "$app_name" -maxdepth 1 -name ".*" -type f -delete 2>/dev/null || true
+        echo "After cleanup:"
+        ls -la "$app_name"
         
         # Fix permissions before code signing
         echo "🔧 Fixing permissions for code signing..."
