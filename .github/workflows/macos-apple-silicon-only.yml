@@ -206,16 +206,21 @@ jobs:
           install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtNetwork.framework/Versions/5/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork "$app_name/Contents/MacOS/FuegoWallet"
           install_name_tool -change /opt/homebrew/opt/qt@5/lib/QtCharts.framework/Versions/5/QtCharts @executable_path/../Frameworks/QtCharts.framework/Versions/5/QtCharts "$app_name/Contents/MacOS/FuegoWallet"
           
-          # Fix Boost library paths (use the same directory we copied from)
+          # Debug: Check what library paths the executable currently has
+          echo "🔍 Current library dependencies:"
+          otool -L "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix Boost library paths dynamically
           echo "🔧 Fixing Boost library paths..."
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_program_options.dylib" @executable_path/../Frameworks/libboost_program_options.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_filesystem.dylib" @executable_path/../Frameworks/libboost_filesystem.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_chrono.dylib" @executable_path/../Frameworks/libboost_chrono.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_atomic.dylib" @executable_path/../Frameworks/libboost_atomic.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_thread.dylib" @executable_path/../Frameworks/libboost_thread.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_serialization.dylib" @executable_path/../Frameworks/libboost_serialization.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_date_time.dylib" @executable_path/../Frameworks/libboost_date_time.dylib "$app_name/Contents/MacOS/FuegoWallet"
-          install_name_tool -change "$BOOST_LIB_DIR/libboost_regex.dylib" @executable_path/../Frameworks/libboost_regex.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          for lib in program_options filesystem chrono atomic thread serialization date_time regex; do
+            BOOST_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep "libboost_${lib}.dylib" | awk '{print $1}')
+            if [ ! -z "$BOOST_PATH" ]; then
+              echo "Changing $BOOST_PATH to @executable_path/../Frameworks/libboost_${lib}.dylib"
+              install_name_tool -change "$BOOST_PATH" "@executable_path/../Frameworks/libboost_${lib}.dylib" "$app_name/Contents/MacOS/FuegoWallet"
+            else
+              echo "No libboost_${lib}.dylib found in executable dependencies"
+            fi
+          done
           
           # Fix other library paths
           # qrencode is statically linked, so no need to fix its path
@@ -225,6 +230,17 @@ jobs:
             echo "qrencode is statically linked, skipping install_name_tool"
           fi
           install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix rpath to point to Frameworks directory
+          echo "🔧 Fixing rpath..."
+          install_name_tool -add_rpath "@executable_path/../Frameworks" "$app_name/Contents/MacOS/FuegoWallet"
+          # Remove any incorrect rpaths
+          install_name_tool -delete_rpath "/opt/homebrew/Cellar/miniupnpc/2.3.3/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+          install_name_tool -delete_rpath "/opt/homebrew/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+          
+          # Verify the library paths were updated correctly
+          echo "Final library dependencies:"
+          otool -L "$app_name/Contents/MacOS/FuegoWallet"
           
           # Create Info.plist
           echo "📝 Creating Info.plist..."
