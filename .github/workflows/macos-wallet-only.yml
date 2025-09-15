@@ -61,11 +61,8 @@ jobs:
 
     - name: Fix compilation errors
       run: |
-        # Fix serialization issues
-        sed -i '' 's/value\.serialize(serializer);/serializer(value);/g' cryptonote/src/Serialization/SerializationOverloads.h
-        
-        # Fix parallel hashmap issues
-        sed -i '' 's/raw_hash_set/flat_hash_set/g' cryptonote/external/parallel_hashmap/phmap_dump.h
+        # All compilation fixes are now included in the fuego repository
+        echo "✅ All compilation fixes are included in the fuego repository"
 
     - name: Cache build directory
       uses: actions/cache@v3
@@ -223,6 +220,11 @@ jobs:
         </plist>
         EOF
         
+        # Clean up any unsealed contents in bundle root
+        echo "🧹 Cleaning up bundle root..."
+        # Remove any files that might be in the bundle root (should only be Contents/)
+        find "$app_name" -maxdepth 1 -type f -delete 2>/dev/null || true
+        
         # Fix permissions before code signing
         echo "🔧 Fixing permissions for code signing..."
         find "$app_name" -type f -exec chmod 644 {} \;
@@ -251,14 +253,19 @@ jobs:
           exit 1
         fi
         
+        # Create a tar.gz file to preserve the app bundle structure
+        echo "📦 Creating tar.gz archive to preserve app bundle structure..."
+        tar -czf "${release_name}.tar.gz" "$app_name"
+        
         echo "📦 Minimal app bundle ready: $app_name"
         echo "release_name=${release_name}" >> $GITHUB_OUTPUT
-        echo "artifact_path=build/release/$app_name" >> $GITHUB_OUTPUT
+        echo "artifact_path=build/release/${release_name}.tar.gz" >> $GITHUB_OUTPUT
 
     - name: Upload Minimal App Bundle
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.bundle_and_sign.outputs.release_name }}
         path: ${{ steps.bundle_and_sign.outputs.artifact_path }}
+        retention-days: 30
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
