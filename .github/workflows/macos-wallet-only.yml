@@ -226,7 +226,8 @@ jobs:
         echo "Contents of bundle root:"
         ls -la "$app_name"
         # Remove any nested app bundles or directories that shouldn't be in the root
-        find "$app_name" -maxdepth 1 -type d -name "*.app" -exec rm -rf {} \; 2>/dev/null || true
+        # But don't remove the main app bundle itself
+        find "$app_name" -maxdepth 1 -type d -name "FuegoWallet.app" -exec rm -rf {} \; 2>/dev/null || true
         # Remove any files that might be in the bundle root (should only be Contents/)
         find "$app_name" -maxdepth 1 -type f -delete 2>/dev/null || true
         # Also remove any hidden files
