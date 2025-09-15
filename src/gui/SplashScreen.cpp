@@ -38,7 +38,7 @@ SplashScreen::SplashScreen(QWidget* parent) : QWidget(parent)
   layout->addWidget(text);
   setLayout(layout);
 
-  setFixedSize(500, 325);
+  setFixedSize(860, 1024);
 
   setStyleSheet("background-color: #000;");
   setWindowIcon(QIcon(":/images/conceal-logo"));
