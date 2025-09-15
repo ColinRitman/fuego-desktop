@@ -15,6 +15,8 @@
 #include <QRegularExpression>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QDateTime>
+#include <QTextStream>
 
 #include "CommandLineParser.h"
 #include "CurrencyAdapter.h"
@@ -95,6 +97,16 @@ int main(int argc, char* argv[])
     QDir().mkpath(dataDirPath);
   }
 
+  // Create early debug log file
+  QString debugLogPath = dataDirPath + "/debug.log";
+  QFile debugLog(debugLogPath);
+  if (debugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&debugLog);
+    stream << QDateTime::currentDateTime().toString() << " - App started, data dir: " << dataDirPath << "\n";
+    stream << QDateTime::currentDateTime().toString() << " - About to initialize logger\n";
+    debugLog.close();
+  }
 
   LoggerAdapter::instance().init();
 
@@ -129,9 +141,33 @@ int main(int argc, char* argv[])
   QApplication::processEvents();
   qRegisterMetaType<CryptoNote::TransactionId>("CryptoNote::TransactionId");
   qRegisterMetaType<quintptr>("quintptr");
+  
+  // Add debug logging before NodeAdapter init
+  if (debugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&debugLog);
+    stream << QDateTime::currentDateTime().toString() << " - About to initialize NodeAdapter\n";
+    debugLog.close();
+  }
+  
   if (!NodeAdapter::instance().init())
   {
+    // Add debug logging if NodeAdapter init fails
+    if (debugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+    {
+      QTextStream stream(&debugLog);
+      stream << QDateTime::currentDateTime().toString() << " - NodeAdapter init failed\n";
+      debugLog.close();
+    }
     return 0;
+  }
+  
+  // Add debug logging after successful NodeAdapter init
+  if (debugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&debugLog);
+    stream << QDateTime::currentDateTime().toString() << " - NodeAdapter init successful\n";
+    debugLog.close();
   }
 
   splashScreen->finish(&MainWindow::instance());
