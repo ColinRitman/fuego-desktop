@@ -91,10 +91,34 @@ int main(int argc, char* argv[])
   Q_UNUSED(cmdLineParseResult)
 #endif
 
+  // Add debug logging before data directory creation
+  QString debugLogPath = QDir::homePath() + "/Library/Application Support/fuego/early_debug.log";
+  QDir().mkpath(QFileInfo(debugLogPath).absolutePath());
+  QFile earlyDebugLog(debugLogPath);
+  if (earlyDebugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&earlyDebugLog);
+    stream << QDateTime::currentDateTime().toString() << " - App started, about to get data dir\n";
+    earlyDebugLog.close();
+  }
+  
   QString dataDirPath = Settings::instance().getDataDir().absolutePath();
+  if (earlyDebugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&earlyDebugLog);
+    stream << QDateTime::currentDateTime().toString() << " - Data dir: " << dataDirPath << "\n";
+    earlyDebugLog.close();
+  }
+  
   if (!QDir().exists(dataDirPath))
   {
     QDir().mkpath(dataDirPath);
+    if (earlyDebugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+    {
+      QTextStream stream(&earlyDebugLog);
+      stream << QDateTime::currentDateTime().toString() << " - Created data directory: " << dataDirPath << "\n";
+      earlyDebugLog.close();
+    }
   }
 
   // Create early debug log file
@@ -108,7 +132,34 @@ int main(int argc, char* argv[])
     debugLog.close();
   }
 
+  // Add debug logging before logger initialization
+  if (earlyDebugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&earlyDebugLog);
+    stream << QDateTime::currentDateTime().toString() << " - About to initialize logger\n";
+    earlyDebugLog.close();
+  }
+  
   LoggerAdapter::instance().init();
+  
+  // Add debug logging after logger initialization
+  if (earlyDebugLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    QTextStream stream(&earlyDebugLog);
+    stream << QDateTime::currentDateTime().toString() << " - Logger initialized successfully\n";
+    
+    // Test if the main log file was created
+    QString mainLogPath = dataDirPath + "/Fuegowallet.log";
+    if (QFile::exists(mainLogPath))
+    {
+      stream << QDateTime::currentDateTime().toString() << " - Main log file exists: " << mainLogPath << "\n";
+    }
+    else
+    {
+      stream << QDateTime::currentDateTime().toString() << " - Main log file NOT found: " << mainLogPath << "\n";
+    }
+    earlyDebugLog.close();
+  }
 
   QLockFile lockFile(Settings::instance().getDataDir().absoluteFilePath(
       QApplication::applicationName() + ".lock"));
