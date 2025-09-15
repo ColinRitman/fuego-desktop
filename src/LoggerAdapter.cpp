@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
+#include <Logging/LoggerRef.h>
 
 namespace WalletGui {
 
@@ -39,7 +40,8 @@ void LoggerAdapter::init() {
   
   // Test if logging is working by creating a test log entry
   std::string testMessage = "LoggerAdapter initialized successfully - " + std::to_string(time(nullptr));
-  m_logManager.getLogger("test").info(testMessage);
+  Logging::LoggerRef logger(m_logManager, "test");
+  logger(Logging::INFO) << testMessage;
   
   // Also create a simple test log file to verify file creation works
   QString logFilePath = Settings::instance().getDataDir().absoluteFilePath("Fuegowallet.log");
