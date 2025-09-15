@@ -272,10 +272,13 @@ jobs:
           echo "🧪 Testing application..."
           timeout 10s "./$app_name/Contents/MacOS/FuegoWallet" --version || echo "App test completed"
           
-          # Just use the app bundle directly (no ZIP packaging)
+          # Create a tar.gz file to preserve the app bundle structure
+          echo "📦 Creating tar.gz archive to preserve app bundle structure..."
+          tar -czf "${release_name}.tar.gz" "$app_name"
+          
           echo "📦 App bundle ready: $app_name"
           echo "release_name=${release_name}" >> $GITHUB_OUTPUT
-          echo "artifact_path=build/release/$app_name" >> $GITHUB_OUTPUT
+          echo "artifact_path=build/release/${release_name}.tar.gz" >> $GITHUB_OUTPUT
 
       - name: Upload To GH Artifacts
         uses: actions/upload-artifact@v4
