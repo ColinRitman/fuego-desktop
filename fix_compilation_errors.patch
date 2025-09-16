@@ -1,0 +1,44 @@
+--- a/cryptonote/src/Serialization/SerializationOverloads.h
++++ b/cryptonote/src/Serialization/SerializationOverloads.h
+@@ -60,7 +60,7 @@ namespace CryptoNote {
+   template<typename T>
+   void serialize(std::vector<T> &value, ISerializer &serializer, Common::StringView name) {
+     if (serializer.type() == ISerializer::INPUT) {
+-      value.serialize(serializer);
++      serializer(value, name);
+     } else {
+       serializer(value, name);
+     }
+@@ -75,7 +75,7 @@ namespace CryptoNote {
+   template<typename T>
+   void serialize(std::vector<T> &value, ISerializer &serializer) {
+     if (serializer.type() == ISerializer::INPUT) {
+-      value.serialize(serializer);
++      serializer(value);
+     } else {
+       serializer(value);
+     }
+@@ -295,7 +295,7 @@ namespace CryptoNote {
+   template<typename T1, typename T2>
+   void serialize(std::pair<T1, T2> &value, ISerializer &s) {
+     s(value.first, "first");
+     s(value.second, "second");
+   }
+@@ -310,7 +310,7 @@ namespace CryptoNote {
+   template<typename Iterator>
+   void writeSequence(Iterator begin, Iterator end, Common::StringView name, ISerializer &s) {
+     size_t size = std::distance(begin, end);
+     s(size, "size");
+@@ -320,7 +320,7 @@ namespace CryptoNote {
+   template<typename Iterator>
+   void readSequence(Iterator outputIterator, Common::StringView name, ISerializer &s) {
+     size_t size;
+     s(size, "size");
+@@ -330,7 +330,7 @@ namespace CryptoNote {
+   }
+ 
+   void serializeBlockHeight(ISerializer &s, uint32_t &blockHeight, Common::StringView name);
+   void serializeGlobalOutputIndex(ISerializer &s, uint32_t &globalOutputIndex, Common::StringView name);
+ 
+-} // namespace CryptoNote
++} // namespace CryptoNote
