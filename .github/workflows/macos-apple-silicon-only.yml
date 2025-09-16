@@ -14,10 +14,17 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+        fetch-depth: 0
         
     - name: Initialize submodules
       run: |
-        git submodule update --init --recursive
+        git submodule sync --recursive
+        git submodule update --init --recursive --force
+        
+    - name: Verify submodules
+      run: |
+        ls -la cryptonote/src/version.h.in
+        ls -la cryptonote/
         
     - name: Install dependencies
       run: |
