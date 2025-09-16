@@ -1,4 +1,4 @@
- name: macOS Apple Silicon Only
+name: macOS Apple Silicon Only
 
 on:
   push:
@@ -15,49 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies and rebuild Boost with libc++
+      - name: Install dependencies
         run: |
           # Install dependencies
-          brew install libqrencode miniupnpc boost
+          brew install libqrencode miniupnpc boost qt@5
           
-          # ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths
-          echo "=== ULTIMATE FINAL SOLUTION: Build custom Boost and override compiler paths ==="
-          
-          # Download and build Boost from source with libc++
-          cd /tmp
-          wget https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.gz/download -O boost_1_82_0.tar.gz
-          tar -xzf boost_1_82_0.tar.gz
-          cd boost_1_82_0
-          
-          # Configure Boost to use libc++
-          ./bootstrap.sh --with-toolset=clang
-          ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" --prefix=/opt/homebrew/opt/boost-custom --with-filesystem --with-thread --with-date_time --with-chrono --with-regex --with-serialization --with-program_options install
-          
-          # Set environment variables to use our custom Boost
-          echo "BOOST_ROOT=/opt/homebrew/opt/boost-custom" >> $GITHUB_ENV
-          echo "BOOST_INCLUDEDIR=/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARYDIR=/opt/homebrew/opt/boost-custom/lib" >> $GITHUB_ENV
-          echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/boost-custom:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
-          echo "Boost_DIR=/opt/homebrew/opt/boost-custom/lib/cmake/Boost-1.82.0" >> $GITHUB_ENV
-          
-          # Override compiler include paths to force our custom Boost
-          echo "CPPFLAGS=-I/opt/homebrew/opt/boost-custom/include" >> $GITHUB_ENV
-          echo "CXXFLAGS=-I/opt/homebrew/opt/boost-custom/include -stdlib=libc++" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/opt/homebrew/opt/boost-custom/lib -stdlib=libc++" >> $GITHUB_ENV
-          
-          # Verify our custom Boost is present
-          echo "Custom Boost headers:"
-          ls -la /opt/homebrew/opt/boost-custom/include/boost/math/special_functions/round.hpp || echo "Custom Boost headers not found"
-          
-          # Verify Boost libraries were built
-          echo "Custom Boost libraries:"
-          ls -la /opt/homebrew/opt/boost-custom/lib/libboost_*.dylib || echo "Custom Boost libraries not found"
-          
-          # Also verify system Boost libraries as fallback
+          # Verify Boost libraries are available
           echo "System Boost libraries:"
           ls -la /opt/homebrew/lib/libboost_*.dylib || echo "System Boost libraries not found"
-          
-          echo "ULTIMATE FINAL SOLUTION: Built custom Boost and set compiler overrides"
 
       - name: Install Qt
         run: |
@@ -134,8 +99,8 @@ jobs:
           mkdir -p build/release
           cd build/release
           
-          # ULTIMATE FINAL SOLUTION: Force compiler to use our custom Boost with explicit flags
-          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_CXX_COMPILER_FLAGS="$CXXFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_INCLUDEDIR="$BOOST_INCLUDEDIR" -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR"
+          # Build with system dependencies
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
           make -j4
           
           # Remote node fix is already applied in the source code
@@ -190,15 +155,9 @@ jobs:
             fi
           done
           
-          # Copy Boost libraries (try custom first, fallback to system)
+          # Copy Boost libraries from system
           echo "📦 Copying Boost libraries..."
-          BOOST_LIB_DIR="/opt/homebrew/opt/boost-custom/lib"
-          if [ ! -d "$BOOST_LIB_DIR" ] || [ ! -f "$BOOST_LIB_DIR/libboost_program_options.dylib" ]; then
-            echo "Custom Boost not found, using system Boost"
-            BOOST_LIB_DIR="/opt/homebrew/lib"
-          else
-            echo "Using custom Boost from $BOOST_LIB_DIR"
-          fi
+          BOOST_LIB_DIR="/opt/homebrew/lib"
           
           cp "$BOOST_LIB_DIR/libboost_program_options.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_program_options.dylib"
           cp "$BOOST_LIB_DIR/libboost_filesystem.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_filesystem.dylib"
