@@ -346,6 +346,10 @@ namespace WalletGui
     {
       remotenode = m_settings.value(OPTION_REMOTE_NODE).toString();
     }
+    else
+    {
+      remotenode = "fuego.spaceportx.net:18180";
+    }
     return remotenode;
   }
 
