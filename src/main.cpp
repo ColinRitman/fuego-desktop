@@ -89,14 +89,13 @@ int main(int argc, char* argv[])
   Q_UNUSED(cmdLineParseResult)
 #endif
 
-  QString dataDirPath = Settings::instance().getDataDir().absolutePath();
+  LoggerAdapter::instance().init();
+
+  QString dataDirPath = Settings::instance().getDataDir().absolutePath();                                                        
   if (!QDir().exists(dataDirPath))
   {
     QDir().mkpath(dataDirPath);
   }
-
-
-  LoggerAdapter::instance().init();
 
   QLockFile lockFile(Settings::instance().getDataDir().absoluteFilePath(
       QApplication::applicationName() + ".lock"));
