@@ -152,7 +152,28 @@ jobs:
           cp -R /opt/homebrew/opt/qt@5/lib/QtWidgets.framework "$app_name/Contents/Frameworks/"
           cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
           cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
-          
+          cp -R /opt/homebrew/opt/qt@5/lib/QtPrintSupport.framework "$app_name/Contents/Frameworks/"
+
+          # Fix internal Qt framework dependencies
+          echo "🔧 Fixing internal Qt framework dependencies..."
+          for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+            if [ -d "$app_name/Contents/Frameworks/${framework}.framework" ]; then
+              # Fix the framework's own install name
+              install_name_tool -id "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+              
+              # Fix dependencies within this framework
+              for dep_framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+                if [ "$framework" != "$dep_framework" ]; then
+                  DEP_PATH=$(otool -L "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}" | grep "${dep_framework}.framework" | awk '{print $1}')
+                  if [ ! -z "$DEP_PATH" ]; then
+                    echo "Changing $DEP_PATH in ${framework} to @executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}"
+                    install_name_tool -change "$DEP_PATH" "@executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+                  fi
+                fi
+              done
+            fi
+          done
+
           # Copy Boost libraries (try custom first, fallback to system)
           echo "📦 Copying Boost libraries..."
           BOOST_LIB_DIR="/opt/homebrew/opt/boost-custom/lib"
