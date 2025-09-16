@@ -158,6 +158,7 @@ jobs:
           echo "🔧 Fixing internal Qt framework dependencies..."
           for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
             if [ -d "$app_name/Contents/Frameworks/${framework}.framework" ]; then
+              echo "Processing ${framework}.framework..."
               # Fix the framework's own install name
               install_name_tool -id "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
               
@@ -168,9 +169,13 @@ jobs:
                   if [ ! -z "$DEP_PATH" ]; then
                     echo "Changing $DEP_PATH in ${framework} to @executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}"
                     install_name_tool -change "$DEP_PATH" "@executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+                  else
+                    echo "No ${dep_framework} dependency found in ${framework}"
                   fi
                 fi
               done
+            else
+              echo "❌ ${framework}.framework not found in Frameworks directory"
             fi
           done
 
