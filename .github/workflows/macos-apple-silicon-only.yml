@@ -15,6 +15,10 @@ jobs:
       with:
         submodules: recursive
         
+    - name: Initialize submodules
+      run: |
+        git submodule update --init --recursive
+        
     - name: Install dependencies
       run: |
         brew install libqrencode miniupnpc boost qt@5
