@@ -1,0 +1,47 @@
+[  0%] Built target cryptonote_autogen_timestamp_deps
+[  1%] Built target cryptonote_autogen
+[  1%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp.o
+[  1%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/BinaryOutputStreamSerializer.cpp.o
+[  1%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/BinaryInputStreamSerializer.cpp.o
+[  2%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/JsonInputValueSerializer.cpp.o
+warning: warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/Serialization/BinaryInputStreamSerializer.cpp:53:27: warning: overflow in expression; result is 1895825408 with type 'int' [-Winteger-overflow]
+  if (size > 10000 * 1024 * 1024) {
+                          ^
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/Serialization/BinaryInputStreamSerializer.cpp:107:27: warning: overflow in expression; result is 1895825408 with type 'int' [-Winteger-overflow]
+  if (size > 10000 * 1024 * 1024) {
+                          ^
+1 warning generated.
+[  2%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/JsonOutputStreamSerializer.cpp.o
+3 warnings generated.
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[  3%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/KVBinaryInputStreamSerializer.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[  3%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/KVBinaryOutputStreamSerializer.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/Serialization/KVBinaryInputStreamSerializer.cpp:84:27: warning: overflow in expression; result is 1895825408 with type 'int' [-Winteger-overflow]
+  if (size > 10000 * 1024 * 1024) {
+                          ^
+2 warnings generated.
+In file included from /Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp:27:
+In file included from /Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/System/ContextGroup.h:20:
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/System/Dispatcher.h:26:10: fatal error: 'bits/reg.h' file not found
+#include <bits/reg.h>
+         ^~~~~~~~~~~~
+[  4%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Serialization/SerializationOverloads.cpp.o
+1 warning generated.
+1 warning and 1 error generated.
+make[2]: *** [CMakeFiles/cryptonote.dir/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+[  4%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Transfers/BlockchainSynchronizer.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+1 warning generated.
+1 warning generated.
+make[1]: *** [CMakeFiles/cryptonote.dir/all] Error 2
+make: *** [all] Error 2

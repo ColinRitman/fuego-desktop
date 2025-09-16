@@ -1,0 +1,194 @@
+[  0%] Built target cryptonote_autogen_timestamp_deps
+[  1%] Automatic MOC for target cryptonote
+[  1%] Built target cryptonote_autogen
+[  1%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/connecthostport.c.o
+[  1%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote_autogen/mocs_compilation.cpp.o
+[  2%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/igd_desc_parse.c.o
+[  2%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/minisoap.c.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[  3%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/miniupnpc.c.o
+[  3%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/miniwget.c.o
+[  3%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/portlistingparse.c.o
+[  4%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/minixml.c.o
+[  4%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/receivedata.c.o
+[  5%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/upnpreplyparse.c.o
+[  5%] Building C object CMakeFiles/cryptonote.dir/cryptonote/external/miniupnpc/upnpcommands.c.o
+[  6%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/Base58.cpp.o
+[  6%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/Base64.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[  7%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/CommandLine.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[  7%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/Util.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[  7%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StringTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+1 warning generated.
+[  8%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/JsonValue.cpp.o
+[  8%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/ConsoleTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[  9%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/MemoryInputStream.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[  9%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/PathTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 10%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/DnsTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 10%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StdInputStream.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 10%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StdOutputStream.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 11%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StreamTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 11%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StringOutputStream.cpp.o
+1 warning generated.
+[ 12%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/StringView.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[ 12%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/Common/VectorOutputStream.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 13%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/chacha8.c.o
+1 warning generated.
+[ 13%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/crypto-ops-data.c.o
+1 warning generated.
+[ 14%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/crypto-ops.c.o
+[ 14%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/crypto.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[ 14%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/hash.c.o
+1 warning generated.
+[ 15%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/keccak.c.o
+[ 15%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/random.c.o
+[ 16%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/tree-hash.c.o
+[ 16%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/blake256.c.o
+[ 16%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/groestl.c.o
+[ 17%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/hash-extra-blake.c.o
+[ 17%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/hash-extra-groestl.c.o
+[ 18%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/hash-extra-jh.c.o
+[ 18%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/hash-extra-skein.c.o
+[ 19%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/jh.c.o
+1 warning generated.
+[ 19%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/oaes_lib.c.o
+[ 19%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/skein.c.o
+[ 20%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/slow-hash.c.o
+[ 20%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/slow-hash.cpp.o
+[ 21%] Building C object CMakeFiles/cryptonote.dir/cryptonote/src/crypto/aesb.c.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[ 21%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/BlockchainIndices.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+[ 22%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/BlockchainMessages.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 22%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/BlockIndex.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 22%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CoreConfig.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 23%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CryptoNoteBasic.cpp.o
+1 warning generated.
+[ 23%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CryptoNoteTools.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 24%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Currency.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 24%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/DepositIndex.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 25%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/InvestmentIndex.cpp.o
+[ 25%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/MinerConfig.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 25%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Transaction.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 26%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Account.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 26%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Blockchain.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 27%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Checkpoints.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 27%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CryptoNoteBasicImpl.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 28%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Core.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 28%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CryptoNoteFormatUtils.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 28%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/CryptoNoteSerialization.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+In file included from /Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/CryptoNoteCore/Core.cpp:18:
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/CryptoNoteCore/Core.h:173:10: warning: 'handle_incoming_block' overrides a member function but is not marked 'override' [-Winconsistent-missing-override]
+    bool handle_incoming_block(const Block &b, block_verification_context &bvc, bool control_miner, bool relay_block);
+         ^
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/CryptoNoteCore/ICore.h:73:16: note: overridden virtual function is here
+  virtual bool handle_incoming_block(const Block& b, block_verification_context& bvc, bool control_miner, bool relay_block) = 0;
+               ^
+1 warning generated.
+[ 29%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Difficulty.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 29%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/IBlock.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 30%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/Miner.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 30%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/TransactionExtra.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+2 warnings generated.
+[ 31%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/TransactionPool.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 31%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/TransactionPrefixImpl.cpp.o
+1 warning generated.
+[ 31%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/CryptoNoteCore/TransactionUtils.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 32%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/InProcessNode/InProcessNode.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 32%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/InProcessNode/InProcessNodeErrors.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+1 warning generated.
+[ 33%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp.o
+[ 33%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/NodeRpcProxy/NodeErrors.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+1 warning generated.
+[ 34%] Building CXX object CMakeFiles/cryptonote.dir/cryptonote/src/P2p/NetNodeConfig.cpp.o
+warning: unknown warning option '-Wno-deprecated-builtins' [-Wunknown-warning-option]
+In file included from /Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp:39:
+In file included from /Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/Rpc/HttpClient.h:25:
+/Users/aejt/fuegowalletproof/fuego-wallet/cryptonote/src/System/TcpConnection.h:12:10: fatal error: 'Dispatcher.h' file not found
+#include "Dispatcher.h"
+         ^~~~~~~~~~~~~~
+1 warning and 1 error generated.
+make[2]: *** [CMakeFiles/cryptonote.dir/cryptonote/src/NodeRpcProxy/NodeRpcProxy.cpp.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+1 warning generated.
+1 warning generated.
+1 warning generated.
+make[1]: *** [CMakeFiles/cryptonote.dir/all] Error 2
+make: *** [all] Error 2

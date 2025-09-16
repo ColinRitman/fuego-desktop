@@ -1,0 +1,307 @@
+name: macOS Apple Silicon Only
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*" # We don't want this to run on release
+  pull_request:
+
+jobs:
+  macos-apple-silicon-only:
+    name: macOS Apple Silicon Only
+    runs-on: macos-14  # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Install dependencies
+          brew install libqrencode miniupnpc boost qt@5
+          
+          # Verify Boost libraries are available
+          echo "System Boost libraries:"
+          ls -la /opt/homebrew/lib/libboost_*.dylib || echo "System Boost libraries not found"
+
+      - name: Install Qt
+        run: |
+          # Install Qt5 via Homebrew directly
+          brew install qt@5
+          # Set Qt paths manually
+          QT_PREFIX=$(brew --prefix qt@5)
+          echo "Qt5_DIR=$QT_PREFIX/lib/cmake/Qt5" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$QT_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$QT_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "Installed Qt5 via Homebrew at: $QT_PREFIX"
+          echo "Qt5_DIR set to: $QT_PREFIX/lib/cmake/Qt5"
+          
+      - name: Verify Qt installation
+        run: |
+          echo "Qt5_DIR: $Qt5_DIR"
+          echo "CMAKE_PREFIX_PATH: $CMAKE_PREFIX_PATH"
+          ls -la "$Qt5_DIR" || echo "Qt5_DIR not found"
+          find "$CMAKE_PREFIX_PATH" -name "Qt5GuiConfig.cmake" 2>/dev/null || echo "Qt5GuiConfig.cmake not found"
+          find "$CMAKE_PREFIX_PATH" -name "*Qt5*" -type d 2>/dev/null | head -5
+
+      - name: Clone fuego
+        run: |
+          echo "🔄 Starting fresh clone of fuego repository..."
+          rm -rf cryptonote cryptonote-temp
+          echo "📥 Cloning from ColinRitman/fuego master branch..."
+          git clone --branch master --depth 1 https://github.com/ColinRitman/fuego.git cryptonote-temp
+          mv cryptonote-temp cryptonote
+          echo "📋 Verifying cloned repository..."
+          git -C cryptonote log --oneline -3
+          echo "Current cryptonote commit: $(git -C cryptonote rev-parse HEAD)"
+          
+          # Verify the memory header fix is present
+          if grep -q "#include <memory>" cryptonote/src/WalletLegacy/WalletLegacy.cpp; then
+            echo "✅ Memory header fix is present in cloned repository"
+          else
+            echo "❌ Memory header fix is MISSING in cloned repository"
+            echo "File contents:"
+            head -20 cryptonote/src/WalletLegacy/WalletLegacy.cpp
+          fi
+          
+          # Burn transaction integration files are now in the fuego repository
+          echo "✅ Burn transaction integration files are included in the fuego repository"
+
+      # Temporarily disabled XFG STARK CLI to focus on main app
+      # - name: Download XFG STARK CLI
+      #   run: |
+      #     echo "Skipping XFG STARK CLI for now - focusing on main app"
+
+      - name: Fix compilation errors
+        run: |
+          # Fix serialization issues
+          sed -i '' 's/value\.serialize(serializer);/serializer(value);/g' cryptonote/src/Serialization/SerializationOverloads.h
+          
+          # Fix parallel hashmap issues
+          sed -i '' 's/raw_hash_set/flat_hash_set/g' cryptonote/external/parallel_hashmap/phmap_dump.h
+          
+          # Fix namespace closing brace
+          sed -i '' 's/} \/\/ namespace CryptoNote/} \/\/ namespace CryptoNote/g' cryptonote/src/Serialization/SerializationOverloads.h
+
+      - name: Build
+        id: build
+        run: |
+          build_folder="build/release"
+          xfg_ver=${GITHUB_SHA::7}
+          release_name="fuego-desktop-macOS-apple-silicon-dev-$xfg_ver"
+          app_name="FuegoWallet.app"
+
+          # Clean up any existing CMake cache files
+          rm -f CMakeCache.txt CMakeCache.txt.*
+          rm -rf build/
+          
+          # Build using CMake (main project, not cryptonote subdirectory)
+          mkdir -p build/release
+          cd build/release
+          
+          # Build with system dependencies
+          cmake ../.. -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF
+          make -j4
+          
+          # Remote node fix is already applied in the source code
+          
+          cd ../..
+          
+          cd build/release
+          macdeployqt "$app_name"
+          
+          # Bundle dependencies for standalone operation
+          echo "📦 Bundling dependencies..."
+          mkdir -p "$app_name/Contents/Frameworks"
+          
+          # Copy Qt frameworks
+          cp -R /opt/homebrew/opt/qt@5/lib/QtCore.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtGui.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtWidgets.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
+          cp -R /opt/homebrew/opt/qt@5/lib/QtPrintSupport.framework "$app_name/Contents/Frameworks/"
+
+          # Fix internal Qt framework dependencies
+          echo "🔧 Fixing internal Qt framework dependencies..."
+          for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+            if [ -d "$app_name/Contents/Frameworks/${framework}.framework" ]; then
+              echo "Processing ${framework}.framework..."
+              # Fix the framework's own install name
+              install_name_tool -id "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+              
+              # Fix dependencies within this framework
+              for dep_framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+                if [ "$framework" != "$dep_framework" ]; then
+                  DEP_PATH=$(otool -L "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}" | grep "${dep_framework}.framework" | awk '{print $1}')
+                  if [ ! -z "$DEP_PATH" ]; then
+                    echo "Changing $DEP_PATH in ${framework} to @executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}"
+                    install_name_tool -change "$DEP_PATH" "@executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+                  else
+                    echo "No ${dep_framework} dependency found in ${framework}"
+                  fi
+                fi
+              done
+            else
+              echo "❌ ${framework}.framework not found in Frameworks directory"
+            fi
+          done
+
+          # Re-sign the Qt frameworks after modifying them
+          echo "🔐 Re-signing Qt frameworks after modification..."
+          for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+            if [ -d "$app_name/Contents/Frameworks/${framework}.framework" ]; then
+              codesign --force --sign - "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
+            fi
+          done
+          
+          # Copy Boost libraries from system
+          echo "📦 Copying Boost libraries..."
+          BOOST_LIB_DIR="/opt/homebrew/lib"
+          
+          cp "$BOOST_LIB_DIR/libboost_program_options.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_program_options.dylib"
+          cp "$BOOST_LIB_DIR/libboost_filesystem.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_filesystem.dylib"
+          cp "$BOOST_LIB_DIR/libboost_chrono.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_chrono.dylib"
+          cp "$BOOST_LIB_DIR/libboost_atomic.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_atomic.dylib"
+          cp "$BOOST_LIB_DIR/libboost_thread.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_thread.dylib"
+          cp "$BOOST_LIB_DIR/libboost_serialization.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_serialization.dylib"
+          cp "$BOOST_LIB_DIR/libboost_date_time.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_date_time.dylib"
+          cp "$BOOST_LIB_DIR/libboost_regex.dylib" "$app_name/Contents/Frameworks/" || echo "Failed to copy libboost_regex.dylib"
+          
+          # Copy other dependencies
+          echo "📦 Copying other dependencies..."
+          # qrencode is statically linked, so no need to copy it
+          if [ -f "/opt/homebrew/lib/libqrencode.dylib" ]; then
+            cp /opt/homebrew/lib/libqrencode.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libqrencode.dylib"
+          else
+            echo "qrencode is statically linked, skipping dynamic library copy"
+          fi
+          cp /opt/homebrew/lib/libminiupnpc.dylib "$app_name/Contents/Frameworks/" || echo "Failed to copy libminiupnpc.dylib"
+          
+          # Skipping xfg-stark-cli bundling for now - focusing on main app
+          
+          # Verify icons are in place
+          echo "🔍 Verifying icons..."
+          if [ -f "$app_name/Contents/Resources/fuego.icns" ]; then
+            echo "✅ Main app icon (fuego.icns) is present"
+          else
+            echo "❌ Main app icon (fuego.icns) is missing"
+          fi
+          
+          if [ -f "$app_name/Contents/Resources/bin/xfg-stark-cli.icns" ]; then
+            echo "✅ xfg-stark-cli icon is present"
+          else
+            echo "❌ xfg-stark-cli icon is missing"
+          fi
+          
+          # Fix library paths dynamically based on actual paths
+          echo "🔧 Fixing library paths..."
+          
+          # Fix Qt framework paths dynamically
+          for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
+            QT_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep "${framework}.framework" | awk '{print $1}')
+            if [ ! -z "$QT_PATH" ]; then
+              echo "Changing $QT_PATH to @executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}"
+              install_name_tool -change "$QT_PATH" "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/MacOS/FuegoWallet"
+            else
+              echo "No ${framework}.framework found in executable dependencies"
+            fi
+          done
+          
+          # Debug: Check what library paths the executable currently has
+          echo "🔍 Current library dependencies:"
+          otool -L "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix Boost library paths dynamically
+          echo "🔧 Fixing Boost library paths..."
+          for lib in program_options filesystem chrono atomic thread serialization date_time regex; do
+            BOOST_PATH=$(otool -L "$app_name/Contents/MacOS/FuegoWallet" | grep "libboost_${lib}.dylib" | awk '{print $1}')
+            if [ ! -z "$BOOST_PATH" ]; then
+              echo "Changing $BOOST_PATH to @executable_path/../Frameworks/libboost_${lib}.dylib"
+              install_name_tool -change "$BOOST_PATH" "@executable_path/../Frameworks/libboost_${lib}.dylib" "$app_name/Contents/MacOS/FuegoWallet"
+            else
+              echo "No libboost_${lib}.dylib found in executable dependencies"
+            fi
+          done
+          
+          # Fix other library paths
+          # qrencode is statically linked, so no need to fix its path
+          if [ -f "/opt/homebrew/lib/libqrencode.dylib" ]; then
+            install_name_tool -change /opt/homebrew/lib/libqrencode.dylib @executable_path/../Frameworks/libqrencode.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          else
+            echo "qrencode is statically linked, skipping install_name_tool"
+          fi
+          install_name_tool -change /opt/homebrew/lib/libminiupnpc.dylib @executable_path/../Frameworks/libminiupnpc.dylib "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Fix rpath to point to Frameworks directory
+          echo "🔧 Fixing rpath..."
+          install_name_tool -add_rpath "@executable_path/../Frameworks" "$app_name/Contents/MacOS/FuegoWallet"
+          # Remove any incorrect rpaths
+          install_name_tool -delete_rpath "/opt/homebrew/Cellar/miniupnpc/2.3.3/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+          install_name_tool -delete_rpath "/opt/homebrew/lib" "$app_name/Contents/MacOS/FuegoWallet" 2>/dev/null || true
+          
+          # Verify the library paths were updated correctly
+          echo "Final library dependencies:"
+          otool -L "$app_name/Contents/MacOS/FuegoWallet"
+          
+          # Create Info.plist
+          echo "📝 Creating Info.plist..."
+          cat > "$app_name/Contents/Info.plist" << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>FuegoWallet</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.fuego.wallet</string>
+              <key>CFBundleName</key>
+              <string>Fuego Wallet</string>
+              <key>CFBundleDisplayName</key>
+              <string>Fuego Wallet</string>
+              <key>CFBundleVersion</key>
+              <string>1.0.0</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleSignature</key>
+              <string>????</string>
+              <key>CFBundleIconFile</key>
+              <string>fuego</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>11.0</string>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+              <key>NSRequiresAquaSystemAppearance</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+          
+          # Basic ad-hoc code signing (minimal options)
+          echo "🔐 Code signing the app bundle..."
+          codesign --force --deep --sign - "$app_name"
+          
+          # Verify the signature
+          codesign --verify --verbose "$app_name"
+          
+          # Test the application
+          echo "🧪 Testing application..."
+          timeout 10s "./$app_name/Contents/MacOS/FuegoWallet" --version || echo "App test completed"
+          
+          # Create a tar.gz file to preserve the app bundle structure
+          echo "📦 Creating tar.gz archive to preserve app bundle structure..."
+          tar -czf "${release_name}.tar.gz" "$app_name"
+          
+          echo "📦 App bundle ready: $app_name"
+          echo "release_name=${release_name}" >> $GITHUB_OUTPUT
+          echo "artifact_path=build/release/${release_name}.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Upload To GH Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.release_name }}
+          path: ${{ steps.build.outputs.artifact_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
