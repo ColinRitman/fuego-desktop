@@ -152,25 +152,12 @@ jobs:
           cp -R /opt/homebrew/opt/qt@5/lib/QtWidgets.framework "$app_name/Contents/Frameworks/"
           cp -R /opt/homebrew/opt/qt@5/lib/QtNetwork.framework "$app_name/Contents/Frameworks/"
           cp -R /opt/homebrew/opt/qt@5/lib/QtCharts.framework "$app_name/Contents/Frameworks/"
-          cp -R /opt/homebrew/opt/qt@5/lib/QtPrintSupport.framework "$app_name/Contents/Frameworks/"
-
-          # Fix internal Qt framework dependencies
-          echo "🔧 Fixing internal Qt framework dependencies..."
+          
+          # Re-sign the Qt frameworks after modifying them
+          echo "🔐 Re-signing Qt frameworks after modification..."
           for framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
             if [ -d "$app_name/Contents/Frameworks/${framework}.framework" ]; then
-              # Fix the framework's own install name
-              install_name_tool -id "@executable_path/../Frameworks/${framework}.framework/Versions/5/${framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
-              
-              # Fix dependencies within this framework
-              for dep_framework in QtCore QtGui QtWidgets QtNetwork QtCharts QtPrintSupport; do
-                if [ "$framework" != "$dep_framework" ]; then
-                  DEP_PATH=$(otool -L "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}" | grep "${dep_framework}.framework" | awk '{print $1}')
-                  if [ ! -z "$DEP_PATH" ]; then
-                    echo "Changing $DEP_PATH in ${framework} to @executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}"
-                    install_name_tool -change "$DEP_PATH" "@executable_path/../Frameworks/${dep_framework}.framework/Versions/5/${dep_framework}" "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
-                  fi
-                fi
-              done
+              codesign --force --sign - "$app_name/Contents/Frameworks/${framework}.framework/Versions/5/${framework}"
             fi
           done
 
