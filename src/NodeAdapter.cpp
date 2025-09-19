@@ -86,9 +86,9 @@ public:
       return;
     }
 
-    delete *_node;
-    *_node = nullptr;
-    Q_EMIT nodeDeinitCompletedSignal();
+    // NodeAdapter is responsible for the lifetime of m_node.
+    // The node's deletion should happen in NodeAdapter::deinit().
+    // Q_EMIT nodeDeinitCompletedSignal(); // This signal is for deinitialization completion, not initialization.
   }
 
   void stop(Node **_node)
@@ -171,6 +171,7 @@ bool NodeAdapter::init()
   {
     QUrl localNodeUrl = QUrl::fromUserInput(QString("127.0.0.1:%1").arg(CryptoNote::RPC_DEFAULT_PORT));
     m_node = createRpcNode(CurrencyAdapter::instance().getCurrency(), LoggerAdapter::instance().getLoggerManager(), *this, localNodeUrl.host().toStdString(), localNodeUrl.port());
+    Q_CHECK_PTR(m_node); // Ensure m_node is valid after creation
 
     QTimer initTimer;
     initTimer.setInterval(3000);
@@ -207,8 +208,9 @@ bool NodeAdapter::init()
       Q_EMIT nodeInitCompletedSignal();
       return true;
     }
-    delete m_node;
+    Node* oldNode = m_node;
     m_node = nullptr;
+    delete oldNode;
     return initInProcessNode();
   }
   else
@@ -220,6 +222,7 @@ bool NodeAdapter::init()
                            *this,
                            remoteNodeUrl.host().toStdString(),
                            remoteNodeUrl.port());
+    Q_CHECK_PTR(m_node); // Ensure m_node is valid after creation
     QTimer initTimer;
     initTimer.setInterval(3000);
     initTimer.setSingleShot(true);
